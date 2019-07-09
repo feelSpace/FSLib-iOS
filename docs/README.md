@@ -533,14 +533,14 @@ With the method `vibrateAtMagneticBearing()`, the orientation of the vibration i
 
 ```swift
 // Start a continuous vibration signal toward East
-commandManager.vibrateAtMagneticBearing(direction: 90, pattern: .continuous)
+commandManager.vibrateAtMagneticBearing(direction: 90, signal: .continuous)
 ```
 
 For the method `vibrateAtAngle()`, the orientation of the vibration is defined as an angle from the front vibromotor of the belt. For instance, an angle of 270° makes the belt vibrates on the left.
 
 ```swift
 // Start a continuous vibration signal on the left
-commandManager.vibrateAtAngle(direction: 90, pattern: .continuous)
+commandManager.vibrateAtAngle(direction: 90, signal: .continuous)
 ```
 
 ### Special vibration signals
