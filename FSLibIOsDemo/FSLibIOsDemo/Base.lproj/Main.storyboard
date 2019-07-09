@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="FSLibIOsDemo" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
+                        <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="107-Sb-7DX">
+                                <rect key="frame" x="16" y="20" width="343" height="696"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eTg-nB-Vdo">
+                                        <rect key="frame" x="0.0" y="0.0" width="343" height="30"/>
+                                        <state key="normal" title="Search and connect belt"/>
+                                        <connections>
+                                            <action selector="searchBeltButtonClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="cVn-Rb-ghC"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TdU-dV-uWC">
+                                        <rect key="frame" x="0.0" y="35" width="343" height="30"/>
+                                        <state key="normal" title="Disconnect"/>
+                                        <connections>
+                                            <action selector="disconnectButtonClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Vyg-fx-f1e"/>
+                                        </connections>
+                                    </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Status" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="A8f-TC-4Ox">
+                                        <rect key="frame" x="0.0" y="70" width="343" height="30"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="30" id="ol6-WJ-EzI"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="17m-WW-0W4">
+                                        <rect key="frame" x="0.0" y="105" width="343" height="30"/>
+                                        <state key="normal" title="Switch to app mode"/>
+                                        <connections>
+                                            <action selector="switchToAppModeButtonClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="HQX-MN-equ"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Xyg-Hd-Lrb">
+                                        <rect key="frame" x="0.0" y="140" width="343" height="30"/>
+                                        <state key="normal" title="Switch to wait mode"/>
+                                        <connections>
+                                            <action selector="switchToWaitModeButtonClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="o0E-Lb-P3x"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="q0K-SA-cx4">
+                                        <rect key="frame" x="0.0" y="175" width="343" height="30"/>
+                                        <state key="normal" title="Start warning signal"/>
+                                        <connections>
+                                            <action selector="startWarningSignalButtonClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="zGk-mX-oIa"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8yb-oJ-tlO">
+                                        <rect key="frame" x="0.0" y="210" width="343" height="30"/>
+                                        <state key="normal" title="Start battery signal"/>
+                                        <connections>
+                                            <action selector="startBatterySignal:" destination="BYZ-38-t0r" eventType="touchUpInside" id="3Eo-Su-LTI"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oyW-lY-tTM">
+                                        <rect key="frame" x="0.0" y="245" width="343" height="30"/>
+                                        <state key="normal" title="Default intensity +"/>
+                                        <connections>
+                                            <action selector="augmentIntensityButtonClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="KER-vw-ji3"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jde-qP-a1h">
+                                        <rect key="frame" x="0.0" y="280" width="343" height="30"/>
+                                        <state key="normal" title="Default intensity -"/>
+                                        <connections>
+                                            <action selector="reduceIntensityButtonClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="KOk-6V-AAN"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DQS-cr-CRp">
+                                        <rect key="frame" x="0.0" y="315" width="343" height="30"/>
+                                        <state key="normal" title="Start vibration (+90°)"/>
+                                        <connections>
+                                            <action selector="startVibrationButtonClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="IG3-4j-WKP"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="acH-dw-G9e">
+                                        <rect key="frame" x="0.0" y="350" width="343" height="30"/>
+                                        <state key="normal" title="Stop vibration"/>
+                                        <connections>
+                                            <action selector="stopVibrationButtonClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="PLA-jG-BAv"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="c9W-ih-IJk">
+                                        <rect key="frame" x="0.0" y="385" width="343" height="30"/>
+                                        <state key="normal" title="Custom vibration, left 5 vibrations"/>
+                                        <connections>
+                                            <action selector="customVibration01:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Va6-f9-8Ij"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CCO-u0-sDI">
+                                        <rect key="frame" x="0.0" y="420" width="343" height="30"/>
+                                        <state key="normal" title="Custom vibration, East 3 seconds"/>
+                                        <connections>
+                                            <action selector="customVibration02:" destination="BYZ-38-t0r" eventType="touchUpInside" id="8el-1I-Ik6"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8Oi-Vy-4gw">
+                                        <rect key="frame" x="0.0" y="455" width="343" height="30"/>
+                                        <state key="normal" title="Custom vibration, pulse front and back"/>
+                                        <connections>
+                                            <action selector="customVibration03:" destination="BYZ-38-t0r" eventType="touchUpInside" id="8zH-1P-9r8"/>
+                                        </connections>
+                                    </button>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsVerticalScrollIndicator="NO" editable="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="NC1-Th-zmq">
+                                        <rect key="frame" x="0.0" y="490" width="343" height="206"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="206" id="gDq-KP-c89"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                    </textView>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="107-Sb-7DX" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="EXU-sw-TVF"/>
+                            <constraint firstItem="107-Sb-7DX" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="RfT-zb-d7Z"/>
+                            <constraint firstItem="107-Sb-7DX" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="g6p-tU-qKg"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="outputTextView" destination="NC1-Th-zmq" id="gta-qf-q3t"/>
+                        <outlet property="searchBeltButton" destination="eTg-nB-Vdo" id="JhS-oj-lh8"/>
+                        <outlet property="statusLabel" destination="A8f-TC-4Ox" id="EQY-Zb-P4r"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="32.799999999999997" y="37.331334332833585"/>
+        </scene>
+    </scenes>
+</document>

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="FSLibIOsNaviDemo" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
+                        <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="e6b-Ff-0nB">
+                                <rect key="frame" x="10" y="30" width="355" height="542.5"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dcj-R5-WOh">
+                                        <rect key="frame" x="0.0" y="0.0" width="355" height="30"/>
+                                        <state key="normal" title="Search and connect"/>
+                                        <connections>
+                                            <action selector="searchAndConnectClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="fwb-Zf-B6q"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bgv-Fp-7Dd">
+                                        <rect key="frame" x="0.0" y="35" width="355" height="30"/>
+                                        <state key="normal" title="Disconnect"/>
+                                        <connections>
+                                            <action selector="disconnectClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="JR2-fn-PnH"/>
+                                        </connections>
+                                    </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Connection state" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="t8Q-GL-zoT">
+                                        <rect key="frame" x="0.0" y="70" width="355" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Belt mode" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HUv-57-6ov">
+                                        <rect key="frame" x="0.0" y="95.5" width="355" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EpZ-yl-K8o">
+                                        <rect key="frame" x="0.0" y="121" width="355" height="30"/>
+                                        <state key="normal" title="Start navigation"/>
+                                        <connections>
+                                            <action selector="startNavigationClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="sdd-fc-VDl"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Cp-FC-RZh">
+                                        <rect key="frame" x="0.0" y="156" width="355" height="30"/>
+                                        <state key="normal" title="Stop navigation"/>
+                                        <connections>
+                                            <action selector="stopNavigationClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Zh8-QU-ASU"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UTt-8X-VCE">
+                                        <rect key="frame" x="0.0" y="191" width="355" height="30"/>
+                                        <state key="normal" title="Pause navigation"/>
+                                        <connections>
+                                            <action selector="pauseNavigationClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="xjK-cc-gIQ"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4fU-bX-T9B">
+                                        <rect key="frame" x="0.0" y="226" width="355" height="30"/>
+                                        <state key="normal" title="Navigation East"/>
+                                        <connections>
+                                            <action selector="navigationEastClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="i3Q-Jg-dU6"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0GG-sR-nc5">
+                                        <rect key="frame" x="0.0" y="261" width="355" height="30"/>
+                                        <state key="normal" title="Navigation North-East"/>
+                                        <connections>
+                                            <action selector="navigationNorthEastClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="aWw-vc-doO"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VIA-PD-Ijb">
+                                        <rect key="frame" x="0.0" y="296" width="355" height="30"/>
+                                        <state key="normal" title="Approaching destination North"/>
+                                        <connections>
+                                            <action selector="approachingDestinationNorthClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="oFZ-xQ-W24"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dNH-64-ez3">
+                                        <rect key="frame" x="0.0" y="331" width="355" height="30"/>
+                                        <state key="normal" title="Destination reached"/>
+                                        <connections>
+                                            <action selector="destinationReachedClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="q04-Bg-zcq"/>
+                                        </connections>
+                                    </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Navigation direction" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NvZ-h3-SOc">
+                                        <rect key="frame" x="0.0" y="366" width="355" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Navigation signal type" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xGd-Rt-i5y">
+                                        <rect key="frame" x="0.0" y="391.5" width="355" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fzf-Zd-TFp">
+                                        <rect key="frame" x="0.0" y="417" width="355" height="30"/>
+                                        <state key="normal" title="Notify destination reached"/>
+                                        <connections>
+                                            <action selector="notifyDestinationReachedClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="fwW-Ta-xds"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wK8-Lt-CJT">
+                                        <rect key="frame" x="0.0" y="452" width="355" height="30"/>
+                                        <state key="normal" title="Notify warning"/>
+                                        <connections>
+                                            <action selector="notifyWarningClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="GHY-Hm-vZa"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FdN-5j-6HP">
+                                        <rect key="frame" x="0.0" y="487" width="355" height="30"/>
+                                        <state key="normal" title="Notify direction South"/>
+                                        <connections>
+                                            <action selector="notifyDirectionSouthClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="RCf-DR-y6V"/>
+                                        </connections>
+                                    </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Belt heading" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K0h-2J-epm">
+                                        <rect key="frame" x="0.0" y="522" width="355" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="e6b-Ff-0nB" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" constant="30" id="0GX-KM-mb9"/>
+                            <constraint firstAttribute="trailing" secondItem="e6b-Ff-0nB" secondAttribute="trailing" constant="10" id="7gJ-1O-umk"/>
+                            <constraint firstItem="e6b-Ff-0nB" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="10" id="AWg-Uh-wfT"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="beltHeadingLabel" destination="K0h-2J-epm" id="5hR-Sa-rGW"/>
+                        <outlet property="beltModeLabel" destination="HUv-57-6ov" id="kMr-gA-HUh"/>
+                        <outlet property="connectionStateLabel" destination="t8Q-GL-zoT" id="9Xy-YU-Q40"/>
+                        <outlet property="navigationDirectionLabel" destination="NvZ-h3-SOc" id="ybD-oo-uFe"/>
+                        <outlet property="navigationSignalTypeLabel" destination="xGd-Rt-i5y" id="tDm-3m-cac"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="48.799999999999997" y="37.331334332833585"/>
+        </scene>
+    </scenes>
+</document>

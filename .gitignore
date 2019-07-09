@@ -69,6 +69,3 @@ fastlane/test_output
 # Mac OS
 .DS_Store
 
-# Readthedocs and Sphinx
-_build/
-
