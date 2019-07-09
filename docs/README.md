@@ -1,5 +1,6 @@
-# Smart-FSLib-iOS
-FSLib for iOS.
+# FSLib-iOS Documentation
+
+FSLib-iOS is an iOS library to control the feelSpace naviBelt from your application.
 
 # Content
 
@@ -27,19 +28,13 @@ FSLib for iOS.
   * [Control of the vibration](#control-of-the-vibration)
     * [Vibration intensity](#vibration-intensity)
     * [Simple vibration signals](#simple-vibration-signals)
-    * [Special vibration signals](#special-vibration-signal)
+    * [Special vibration signals](#special-vibration-signals)
     * [Vibration-channel configuration](#vibration-channel-configuration)
     * [Stop vibration](#stop-vibration)
 
 ## Copyright and license notice
 
 Copyright feelSpace GmbH, 2017-2019.
-
-This agreement applies to the software modules, the source code and the documentation that are hereinafter referred to as “FSLib”, “FSLib API” or “FSLib SDK”. Only individuals, research groups or business entities agreed with in writing by feelSpace GmbH may use the FSLib SDK.
-
-The FSLib SDK is distributed by feelSpace with no warranty, expressed or implied. Do not redistribute, sell, or publish for any purpose, any portion of the FSLib SDK (including the documentation) without the prior explicit written consent of feelSpace GmbH.
-
-All rights reserved by feelSpace GmbH.
 
 **Note on using feelSpace Trademarks and Copyrights:**
 
@@ -53,7 +48,7 @@ All rights reserved by feelSpace GmbH.
 
 The front panel of the belt’s control box has four buttons (see image below).
 
-![Belt buttons](docs/resources/control_box_buttons.svg)
+![Belt buttons](img/control_box_buttons.svg)
 
 The belt has seven “modes” of operation that are controlled by button press or changed by a connected device.
 
@@ -69,7 +64,7 @@ The belt has seven “modes” of operation that are controlled by button press 
 
 ## Bluetooth communication
 
-The belt contains a Bluetooth module compliant with Bluetooth v4.1 (i.e. Bluetooth low-energy, Bluetooth Smart). The communication is based on custom GATT services. To identify the belt, it is advertised with a name starting with “naviGuertel” (available in scan response packet). The advertisement packet also contains the service UUID: `65333333-A115-11E2-9E9A-0800200CA100`. The FSLib will automatically find belts with those characteristics.
+The belt contains a Bluetooth low-energy module. The communication is based on custom GATT services. To identify the belt, it is advertised with a name starting with “naviGuertel” (available in scan response packet). The advertisement packet also contains the service UUID: `65333333-A115-11E2-9E9A-0800200CA100`. The FSLib will automatically find belts with those characteristics.
 
 A smartphone must support Bluetooth low-energy, version 4.0 or higher, to connect to the belt. iPhones support Bluetooth low-energy since the iPhone 4S version, released in October 2011. iPhones that were released before the 4S version do not support Bluetooth low-energy and will not be able to connect to the belt.
 
