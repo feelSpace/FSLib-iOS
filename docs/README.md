@@ -12,7 +12,17 @@ FSLib-iOS is an iOS library to control the feelSpace naviBelt from your applicat
   * [Structure of the repository](#structure-of-the-repository)
   * [Structure of the FSLib framework](#structure-of-the-fslib-framework)
   * [Integration of the FSLib in a XCode project](#integration-of-the-fslib-in-a-xcode-project)
-* [API](#api)
+* [Navigation API](#navigation-api)
+  * [Introduction](#introduction)
+  * [Connection and disconnection of a belt](#connection-and-disconnection-of-a-belt)
+  * [Vibration for the navigation](#vibration-for-the-navigation)
+  * [Vibration for navigation events](#vibration-for-navigation-events)
+  * [Home-button press event](#home-button-press-event)
+  * [Belt orientation](#belt-orientation)
+  * [Belt battery level](#belt-battery-level)
+  * [Belt heading offset](#belt-heading-offset)
+* [General purpose API](#general-purpose-api)
+  * [Overview](#overview)
   * [Connection management](#connection-management)
     * [Connection manager and delegate](#connection-manager-and-delegate)
     * [Scanning for a belt](#scanning-for-a-belt)
@@ -94,7 +104,47 @@ In the `FSLibIOs` framework, four files are exposed for the integration of FSLib
 * `FSCommandManager.swift`: The class used to send command to the belt.
 * `FSCommandDelegate.swift`: The protocol containing callbacks of the command manager and callback for belt events.
 
-# API
+# Navigation API
+
+## Introduction
+
+*TODO*
+Principle and limits. Files. Demo.
+
+## Connection and disconnection of a belt
+
+*TODO*
+
+## Vibration for the navigation
+
+*TODO*
+
+## Vibration for navigation events
+
+*TODO*
+
+## Home-button press event
+
+*TODO*
+
+## Belt orientation
+
+*TODO*
+
+## Belt battery level
+
+*TODO*
+
+## Belt heading offset
+
+*TODO*
+
+# General purpose API
+
+## Overview
+
+*TODO*
+Principle and limits. Files. Demo.
 
 ## Connection management
 
