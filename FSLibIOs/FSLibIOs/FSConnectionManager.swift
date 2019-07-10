@@ -311,9 +311,8 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
     // Callback of the connection timeout timer
     @objc internal func connectionTimeout() {
         switch state {
-        case .notConnected, .connected:
+        case .notConnected, .scanning, .connected:
             // Obsolete timer, do nothing
-            pendingConnection = false
             connectionTimer?.invalidate()
             connectionTimer = nil
             break

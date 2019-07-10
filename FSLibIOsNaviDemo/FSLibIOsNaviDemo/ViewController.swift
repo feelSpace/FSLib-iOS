@@ -10,7 +10,7 @@ import UIKit
 import CoreBluetooth
 import FSLibIOs
 
-class ViewController: UIViewController, FSNavigationSignalDelegate {
+class ViewController: UIViewController, FSNavigationDelegate {
 
     //MARK: UI components references
     
@@ -23,26 +23,25 @@ class ViewController: UIViewController, FSNavigationSignalDelegate {
     //MARK: Private properties
     
     // Controller for belt signals
-    var navigationSignalController: FSNavigationSignalController =
-        FSNavigationSignalController()
+    var beltNavigationController = FSNavigationController.instance
     
     //MARK: Private methods
     
     /** Updates the labels. */
     internal func updateUILabels() {
         // Connection state
-        switch navigationSignalController.connectionState {
+        switch beltNavigationController.connectionState {
         case .notConnected:
             connectionStateLabel.text = "Connection state: Not connected"
         case .scanning:
             connectionStateLabel.text = "Connection state: Scanning"
-        case .connecting:
+        case .connecting, .discoveringServices, .handshake:
             connectionStateLabel.text = "Connection state: Connecting"
         case .connected:
             connectionStateLabel.text = "Connection state: Connected"
         }
         // Belt mode
-        switch navigationSignalController.beltMode {
+        switch beltNavigationController.beltMode {
         case .unknown:
             beltModeLabel.text = "Belt mode: Unknown"
         case .wait:
@@ -53,14 +52,18 @@ class ViewController: UIViewController, FSNavigationSignalDelegate {
             beltModeLabel.text = "Belt mode: Crossing"
         case .pause:
             beltModeLabel.text = "Belt mode: Pause"
-        case .navigation:
+        case .app:
             beltModeLabel.text = "Belt mode: Navigation"
+        case .standby:
+            beltModeLabel.text = "Belt mode: Standby"
+        case .calibration:
+            beltModeLabel.text = "Belt mode: Calibration"
         }
         // Navigation direction and signal type
-        if let direction = navigationSignalController.activeNavigationDirection
+        if let direction = beltNavigationController.activeNavigationDirection
         {
             navigationDirectionLabel.text = "Navigation direction: \(direction)"
-            switch navigationSignalController.activeNavigationSignalType {
+            switch beltNavigationController.activeNavigationSignalType {
             case .navigating:
                 navigationSignalTypeLabel.text =
                 "Signal type: Navigating"
@@ -76,7 +79,7 @@ class ViewController: UIViewController, FSNavigationSignalDelegate {
             navigationSignalTypeLabel.text = "Navigation signal type: -"
         }
         // Belt heading
-        if (navigationSignalController.connectionState != .connected) {
+        if (beltNavigationController.connectionState != .connected) {
             beltHeadingLabel.text = "Belt heading: -"
             // Note: Heading value updated in notification callback
         }
@@ -110,7 +113,7 @@ class ViewController: UIViewController, FSNavigationSignalDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Register as delegate
-        navigationSignalController.delegate = self
+        beltNavigationController.delegate = self
         // Update UI
         updateUILabels()
     }
@@ -123,87 +126,87 @@ class ViewController: UIViewController, FSNavigationSignalDelegate {
     
     @IBAction func searchAndConnectClick(_ sender: UIButton) {
         print("Search and connect belt.")
-        navigationSignalController.searchAndConnectBelt()
+        beltNavigationController.searchAndConnectBelt()
     }
     
     @IBAction func disconnectClick(_ sender: UIButton) {
         print("Disconnect belt.")
-        navigationSignalController.disconnectBelt()
+        beltNavigationController.disconnectBelt()
     }
     
     @IBAction func startNavigationClick(_ sender: UIButton) {
         print("Start navigation.")
-        navigationSignalController.startNavigation()
+        beltNavigationController.startNavigation()
         updateUILabels()
     }
     
     @IBAction func stopNavigationClick(_ sender: UIButton) {
         print("Stop navigation.")
-        navigationSignalController.stopNavigation()
+        beltNavigationController.stopNavigation()
         updateUILabels()
     }
     
     @IBAction func pauseNavigationClick(_ sender: UIButton) {
         print("Pause navigation.")
-        navigationSignalController.pauseNavigation()
+        beltNavigationController.pauseNavigation()
         updateUILabels()
     }
     
     @IBAction func navigationEastClick(_ sender: UIButton) {
         print("Navigation East.")
-        navigationSignalController.setNavigationDirection(
+        beltNavigationController.setNavigationDirection(
             90, signalType: .navigating)
         updateUILabels()
     }
     
     @IBAction func navigationNorthEastClick(_ sender: UIButton) {
         print("Navigation North-East.")
-        navigationSignalController.setNavigationDirection(
+        beltNavigationController.setNavigationDirection(
             45, signalType: .navigating)
         updateUILabels()
     }
     
     @IBAction func approachingDestinationNorthClick(_ sender: UIButton) {
         print("Approaching destination North.")
-        navigationSignalController.setNavigationDirection(
+        beltNavigationController.setNavigationDirection(
             0, signalType: .approachingDestination)
         updateUILabels()
     }
     
     @IBAction func destinationReachedClick(_ sender: UIButton) {
         print("Destination reached.")
-        navigationSignalController.setNavigationDirection(
+        beltNavigationController.setNavigationDirection(
             0, signalType: .destinationReached)
         updateUILabels()
     }
     
     @IBAction func notifyDestinationReachedClick(_ sender: UIButton) {
         print("Notify destination reached.")
-        navigationSignalController.notifyDestinationReached(
+        beltNavigationController.notifyDestinationReached(
             shouldStopNavigation: true)
     }
     
     @IBAction func notifyWarningClick(_ sender: UIButton) {
         print("Notify warning.")
-        navigationSignalController.notifyWarning()
+        beltNavigationController.notifyWarning()
     }
     
     @IBAction func notifyDirectionSouthClick(_ sender: UIButton) {
         print("Notify direction South.")
-        navigationSignalController.notifyDirection(180)
+        beltNavigationController.notifyDirection(180)
     }
 
     //MARK: Delegate methods
     
     /** Callback that informs about connection state changes. */
-    func onScanConnectionStateChanged(previousState: FSScanConnectionState,
-                                      newState: FSScanConnectionState) {
+    func onConnectionStateChanged(previousState: FSConnectionState,
+                                      newState: FSConnectionState) {
         print("Connection state changed.")
         updateUILabels()
     }
     
     /** Callback that informs about a mode change. */
-    func onBeltSignalModeChanged(beltMode: FSBeltSignalMode,
+    func onBeltModeChanged(beltMode: FSBeltMode,
                                  buttonPressed: Bool) {
         print("Belt mode changed.")
         updateUILabels()
@@ -215,9 +218,9 @@ class ViewController: UIViewController, FSNavigationSignalDelegate {
         showToast(message:
             "Home request received. Start navigation signal to West.")
         // Start navigation to West
-        navigationSignalController.setNavigationDirection(
+        beltNavigationController.setNavigationDirection(
             -90, signalType: .navigating)
-        navigationSignalController.startNavigation()
+        beltNavigationController.startNavigation()
     }
     
     /** Notifies that the belt orientation has been updated. */

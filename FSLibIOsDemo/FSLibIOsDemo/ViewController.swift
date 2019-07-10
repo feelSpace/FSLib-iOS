@@ -58,6 +58,8 @@ FSConnectionDelegate, FSCommandDelegate {
             outputTextView.text.append("\n")
             let level = (commandManager?.beltBatteryStatus.batteryLevel)!
             outputTextView.text.append("Battery level: \(level)%\n");
+        case .scanning:
+            statusLabel.text = "Scanning"
         }
     }
     

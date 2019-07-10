@@ -9,11 +9,11 @@
 #import <UIKit/UIKit.h>
 #import <FSLibIOs/FSLibIOs-Swift.h>
 
-@interface ViewController : UIViewController <FSNavigationSignalDelegate> {
+@interface ViewController : UIViewController <FSNavigationDelegate> {
     // Interface to the belt
-    FSNavigationSignalController *beltController;
+    FSNavigationController *beltController;
 }
-@property(nonatomic, retain) FSNavigationSignalController *beltController;
+@property(nonatomic, retain) FSNavigationController *beltController;
 - (void)updateUILabels;
 
 // UI actions

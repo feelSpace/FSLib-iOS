@@ -3,7 +3,7 @@
 //  FSLibIOs
 //
 //  Created by David on 21/05/17.
-//  Copyright © 2017 feelSpace. All rights reserved.
+//  Copyright © 2017-2019 feelSpace. All rights reserved.
 //
 
 import Foundation
@@ -120,7 +120,7 @@ public extension FSCommandDelegate {
 /**
  Values representing the mode ofthe belt.
  */
-public enum FSBeltMode: UInt8 {
+@objc public enum FSBeltMode: UInt8 {
     /** The mode is not yet known. */
     case unknown = 0xFF
     /** The belt is in standby (and will disconnect). */

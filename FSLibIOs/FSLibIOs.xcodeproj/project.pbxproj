@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		632CAFC61F66E4BA0085C7BA /* FSNavigationSignalDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632CAFC51F66E4BA0085C7BA /* FSNavigationSignalDelegate.swift */; };
+		632CAFC61F66E4BA0085C7BA /* FSNavigationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632CAFC51F66E4BA0085C7BA /* FSNavigationDelegate.swift */; };
 		6334C5EA205821E00084A478 /* FSBleOperationSetNotifyValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6334C5E9205821E00084A478 /* FSBleOperationSetNotifyValue.swift */; };
 		6363F89B1F6044D000DBD8FE /* FSBleOperationQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6363F89A1F6044D000DBD8FE /* FSBleOperationQueue.swift */; };
 		6363F89D1F60472D00DBD8FE /* FSBleOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6363F89C1F60472D00DBD8FE /* FSBleOperation.swift */; };
@@ -21,7 +21,7 @@
 		63E3575A1ED1DEFF00627CD5 /* FSCommandDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E357591ED1DEFF00627CD5 /* FSCommandDelegate.swift */; };
 		63E3575C1ED1EC7600627CD5 /* FSConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E3575B1ED1EC7600627CD5 /* FSConnectionManager.swift */; };
 		63E3575E1ED20DDE00627CD5 /* FSCommandManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E3575D1ED20DDE00627CD5 /* FSCommandManager.swift */; };
-		63E430951F66C66C00796671 /* FSNavigationSignalController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E430941F66C66C00796671 /* FSNavigationSignalController.swift */; };
+		63E430951F66C66C00796671 /* FSNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E430941F66C66C00796671 /* FSNavigationController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,7 +35,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		632CAFC51F66E4BA0085C7BA /* FSNavigationSignalDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FSNavigationSignalDelegate.swift; sourceTree = "<group>"; };
+		632CAFC51F66E4BA0085C7BA /* FSNavigationDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FSNavigationDelegate.swift; sourceTree = "<group>"; };
 		6334C5E9205821E00084A478 /* FSBleOperationSetNotifyValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FSBleOperationSetNotifyValue.swift; sourceTree = "<group>"; };
 		6363F89A1F6044D000DBD8FE /* FSBleOperationQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FSBleOperationQueue.swift; sourceTree = "<group>"; };
 		6363F89C1F60472D00DBD8FE /* FSBleOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FSBleOperation.swift; sourceTree = "<group>"; };
@@ -52,7 +52,7 @@
 		63E357591ED1DEFF00627CD5 /* FSCommandDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FSCommandDelegate.swift; sourceTree = "<group>"; };
 		63E3575B1ED1EC7600627CD5 /* FSConnectionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FSConnectionManager.swift; sourceTree = "<group>"; };
 		63E3575D1ED20DDE00627CD5 /* FSCommandManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FSCommandManager.swift; sourceTree = "<group>"; };
-		63E430941F66C66C00796671 /* FSNavigationSignalController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FSNavigationSignalController.swift; sourceTree = "<group>"; };
+		63E430941F66C66C00796671 /* FSNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FSNavigationController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,8 +106,8 @@
 				63DBE99B1F6148420079F61E /* FSBleOperationReadCharacteristic.swift */,
 				63DBE99D1F6148640079F61E /* FSBleOperationWriteCharacteristic.swift */,
 				63860D8A1F62CD9200871439 /* FSCommandDataPacket.swift */,
-				63E430941F66C66C00796671 /* FSNavigationSignalController.swift */,
-				632CAFC51F66E4BA0085C7BA /* FSNavigationSignalDelegate.swift */,
+				63E430941F66C66C00796671 /* FSNavigationController.swift */,
+				632CAFC51F66E4BA0085C7BA /* FSNavigationDelegate.swift */,
 				6334C5E9205821E00084A478 /* FSBleOperationSetNotifyValue.swift */,
 			);
 			path = FSLibIOs;
@@ -243,8 +243,8 @@
 				63860D8B1F62CD9200871439 /* FSCommandDataPacket.swift in Sources */,
 				63DBE99E1F6148640079F61E /* FSBleOperationWriteCharacteristic.swift in Sources */,
 				63E357581ED1DEDB00627CD5 /* FSConnectionDelegate.swift in Sources */,
-				63E430951F66C66C00796671 /* FSNavigationSignalController.swift in Sources */,
-				632CAFC61F66E4BA0085C7BA /* FSNavigationSignalDelegate.swift in Sources */,
+				63E430951F66C66C00796671 /* FSNavigationController.swift in Sources */,
+				632CAFC61F66E4BA0085C7BA /* FSNavigationDelegate.swift in Sources */,
 				6363F89B1F6044D000DBD8FE /* FSBleOperationQueue.swift in Sources */,
 				63DBE99C1F6148420079F61E /* FSBleOperationReadCharacteristic.swift in Sources */,
 				63E3575A1ED1DEFF00627CD5 /* FSCommandDelegate.swift in Sources */,

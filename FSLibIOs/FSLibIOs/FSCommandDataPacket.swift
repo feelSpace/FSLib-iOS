@@ -3,7 +3,7 @@
 //  FSLibIOs
 //
 //  Created by David on 08/09/17.
-//  Copyright © 2017 feelSpace. All rights reserved.
+//  Copyright © 2017-2019 feelSpace. All rights reserved.
 //
 
 import Foundation
@@ -101,12 +101,12 @@ class FSCommandDataPacket {
      Generates a data packet for a vibration signal.
      */
     static func getVibrationSignalDataPacket(
-        pattern: FSVibrationSignal,
+        signal: FSVibrationSignal,
         direction: Float, isBearing: Bool,
         intensity: Int = -1, channelIndex: Int = 1,
         stopOtherChannels: Bool = false) -> Data {
         
-        switch pattern {
+        switch signal {
             
         case .continuous:
             return getVibrationChannelConfigurationDataPacket(

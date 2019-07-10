@@ -28,7 +28,8 @@
     [super viewDidLoad];
     
     // Initialize belt controller
-    beltController = [[FSNavigationSignalController alloc] init];
+    beltController = [FSNavigationController getInstance];
+    //beltController = [[FSNavigationController alloc] init];
     [beltController setDelegate:self];
     
     // Update UI
@@ -46,36 +47,51 @@
     
     // Update connection state label
     switch (beltController.connectionState) {
-        case FSScanConnectionStateScanning:
+        case FSConnectionStateScanning:
             connectionStateLabel.text = @"Connection state: Scanning";
             break;
-        case FSScanConnectionStateConnected:
+        case FSConnectionStateConnected:
             connectionStateLabel.text = @"Connection state: Connected";
             break;
-        case FSScanConnectionStateConnecting:
+        case FSConnectionStateConnecting:
             connectionStateLabel.text = @"Connection state: Connecting";
             break;
-        case FSScanConnectionStateNotConnected:
+        case FSConnectionStateNotConnected:
             connectionStateLabel.text = @"Connection state: Disconnected";
+            break;
+        case FSConnectionStateDiscoveringServices:
+            connectionStateLabel.text = @"Connection state: Discovering services";
+            break;
+        case FSConnectionStateHandshake:
+            connectionStateLabel.text = @"Connection state: Handshake";
             break;
     }
     
     // Belt mode label
     switch (beltController.beltMode) {
-        case FSBeltSignalModeWait:
+        case FSBeltModeWait:
             beltModeLabel.text = @"Belt mode: Wait";
             break;
-        case FSBeltSignalModePause:
+        case FSBeltModePause:
             beltModeLabel.text = @"Belt mode: Pause";
             break;
-        case FSBeltSignalModeCompass:
+        case FSBeltModeCompass:
             beltModeLabel.text = @"Belt mode: Compass";
             break;
-        case FSBeltSignalModeUnknown:
+        case FSBeltModeUnknown:
             beltModeLabel.text = @"Belt mode: Unknown";
             break;
-        case FSBeltSignalModeNavigation:
+        case FSBeltModeApp:
             beltModeLabel.text = @"Belt mode: Navigation";
+            break;
+        case FSBeltModeStandby:
+            beltModeLabel.text = @"Belt mode: Standby";
+            break;
+        case FSBeltModeCalibration:
+            beltModeLabel.text = @"Belt mode: Calibration";
+            break;
+        case FSBeltModeCrossing:
+            beltModeLabel.text = @"Belt mode: Crossing";
             break;
     }
     
@@ -182,12 +198,12 @@
     [self updateUILabels];
 }
 
-- (void)onBeltSignalModeChangedWithBeltMode:(enum FSBeltSignalMode)beltMode buttonPressed:(BOOL)buttonPressed {
+- (void)onBeltModeChangedWithBeltMode:(enum FSBeltMode)beltMode buttonPressed:(BOOL)buttonPressed {
     printf("Belt mode changed.\n");
     [self updateUILabels];
 }
 
-- (void)onScanConnectionStateChangedWithPreviousState:(enum FSScanConnectionState)previousState newState:(enum FSScanConnectionState)newState {
+- (void)onConnectionStateChangedWithPreviousState:(enum FSConnectionState)previousState newState:(enum FSConnectionState)newState {
     printf("Connection state changed.\n");
     [self updateUILabels];
 }

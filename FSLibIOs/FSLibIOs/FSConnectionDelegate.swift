@@ -3,7 +3,7 @@
 //  FSLibIOs
 //
 //  Created by David on 21/05/17.
-//  Copyright © 2017 feelSpace. All rights reserved.
+//  Copyright © 2017-2019 feelSpace. All rights reserved.
 //
 
 import Foundation
@@ -71,9 +71,11 @@ public enum FSScanTerminationCause {
  The states `CONNECTING`, `DISCOVER_SERVICES`, and `HANDSHAKE` can be considered
  identical for the app.
  */
-public enum FSConnectionState {
+@objc public enum FSConnectionState: Int {
     /** The belt is not conected. */
     case notConnected
+    /** Scanning for a belt. */
+    case scanning // TODO: This has to be used instead of onBeltScanFinished
     /** Connecting to the belt. */
     case connecting
     /** Discovery of the services and characteristics. */
@@ -88,6 +90,14 @@ public enum FSConnectionState {
  Values representing the causes of state changes.
  */
 public enum FSConnectionEvent {
+    /** The scan procedure has been started */
+    case scanStarted
+    /** The scan procedure timed out. */
+    case scanTimeout
+    /** The scan procedure failed. */
+    case scanFailed
+    /** The scan procedure has been canceled */
+    case scanCanceled
     /** Connection started. */
     case connectionStarted
     /** Connection established but service not yet discovered. */

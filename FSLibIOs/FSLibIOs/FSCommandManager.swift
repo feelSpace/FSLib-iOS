@@ -3,7 +3,7 @@
 //  FSLibIOs
 //
 //  Created by David on 21/05/17.
-//  Copyright © 2017 feelSpace. All rights reserved.
+//  Copyright © 2017-2019 feelSpace. All rights reserved.
 //
 
 import Foundation
@@ -314,14 +314,14 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
      clockwise.
         - intensity: The intensity of the vibration from 0 to 100 or -1 to
      use the default intensity of the belt.
-        - pattern: The vibration pattern.
+        - signal: The type of vibration signal.
         - channelIndex The channel of the vibration (to manage multiple 
      vibrations).
         - stopOtherChannels `true` to stop vibration on other channels.
      - Returns: `true` if the command has been sent.
      */
     public func vibrateAtMagneticBearing(direction: Float, intensity: Int = -1,
-                pattern: FSVibrationSignal = .continuous,
+                signal: FSVibrationSignal = .continuous,
                 channelIndex: Int = 1,
                 stopOtherChannels: Bool = false
         ) -> Bool {
@@ -338,7 +338,7 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
                 peripheral: peripheral, characteristic: characteristic,
                 value: FSCommandDataPacket
                     .getVibrationSignalDataPacket(
-                        pattern: pattern,
+                        signal: signal,
                         direction: direction, isBearing: true,
                         intensity: intensity, channelIndex: channelIndex,
                         stopOtherChannels: stopOtherChannels)))
@@ -357,14 +357,14 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
      0 represents the 'heading' of the belt, and positive angles are clockwise.
         - intensity: The intensity of the vibration from 0 to 100 or -1 to
      use the default intensity of the belt.
-        - pattern: The vibration pattern.
+        - signal: The type of vibration signal.
         - channelIndex The channel of the vibration (to manage multiple
      vibrations).
         - stopOtherChannels `true` to stop vibration on other channels.
      - Returns: `true` if the command has been sent.
      */
     public func vibrateAtAngle(angle: Float, intensity: Int = -1,
-                               pattern: FSVibrationSignal = .continuous,
+                               signal: FSVibrationSignal = .continuous,
                                channelIndex: Int = 1,
                                stopOtherChannels: Bool = false
         ) -> Bool {
@@ -380,7 +380,7 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
             operationQueue.add(FSBleOperationWriteCharacteristic(
                 peripheral: peripheral, characteristic: characteristic,
                 value: FSCommandDataPacket.getVibrationSignalDataPacket(
-                    pattern: pattern,
+                    signal: signal,
                     direction: angle,
                     isBearing: false,
                     intensity: intensity,
@@ -1375,7 +1375,7 @@ public struct FSBeltOrientation {
 /**
  Values representing power supply status of the belt.
  */
-public enum FSPowerStatus: UInt8 {
+@objc public enum FSPowerStatus: UInt8 {
     /** The power source is unknown. */
     case unknown = 0x00
     /** The battery of the belt is used. */

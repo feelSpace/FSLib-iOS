@@ -3,7 +3,7 @@
 //  FSLibIOs
 //
 //  Created by David on 11/09/17.
-//  Copyright © 2017 feelSpace. All rights reserved.
+//  Copyright © 2017-2019 feelSpace. All rights reserved.
 //
 
 import Foundation
@@ -12,7 +12,7 @@ import CoreBluetooth
 /**
  A belt controller for navigation-oriented app.
  */
-@objc public class FSNavigationSignalController: NSObject, FSConnectionDelegate,
+@objc public class FSNavigationController: NSObject, FSConnectionDelegate,
         FSCommandDelegate {
     
     //MARK: Private properties
@@ -32,15 +32,23 @@ import CoreBluetooth
     //MARK: Public properties
     
     /**
+     Unique instance of `FSNavigationController` (singleton).
+     */
+    public static let instance: FSNavigationController = FSNavigationController()
+    
+    /**
      The state of the scan/connection with the belt.
      */
-    @objc public private(set) var connectionState: FSScanConnectionState =
-        .notConnected;
+    @objc public var connectionState: FSConnectionState {
+        return connectionManager.state
+    }
     
     /**
      The mode of the belt.
      */
-    @objc public private(set) var beltMode: FSBeltSignalMode = .unknown
+    @objc public var beltMode: FSBeltMode {
+        return commandManager.mode
+    }
     
     /**
      The active navigation direction to be signaled by the belt in navigation 
@@ -56,8 +64,6 @@ import CoreBluetooth
     
     /**
      Last known value of the belt magnetic heading.
-     
-     This property is updated only if orientation notifications are enabled.
      */
     @objc public var beltMagHeading: NSNumber? {
         if let heading = commandManager.beltOrientation?.beltMagHeading {
@@ -69,8 +75,6 @@ import CoreBluetooth
     
     /**
      Last known value of the inaccurate-compass flag of the belt.
-     
-     This property is updated only if orientation notifications are enabled.
      */
     @objc public var beltCompassInaccurate: NSNumber? {
         if let inaccurate = commandManager.beltOrientation?.beltCompassInaccurate {
@@ -78,6 +82,20 @@ import CoreBluetooth
         } else {
             return nil
         }
+    }
+    
+    /**
+     Last known value of the belt battery level.
+     */
+    @objc public var beltBatteryLevel: Double {
+        return commandManager.beltBatteryStatus.batteryLevel
+    }
+    
+    /**
+     Last known value of the belt power status.
+     */
+    @objc public var beltPowerStatus: FSPowerStatus {
+        return commandManager.beltBatteryStatus.powerStatus
     }
     
     /**
@@ -98,20 +116,10 @@ import CoreBluetooth
     /**
      Delegate that receives callbacks from the navigation signal controller.
      */
-    @objc public var delegate: FSNavigationSignalDelegate?
+    @objc public var delegate: FSNavigationDelegate?
     
     
     //MARK: Private methods
-    
-    /** Sets the connection state and inform the delegate. */
-    internal func setScanConnectionState(_ state: FSScanConnectionState) {
-        let previousState = connectionState
-        connectionState = state
-        if let d = delegate {
-            d.onScanConnectionStateChanged(previousState: previousState,
-                                           newState: connectionState)
-        }
-    }
     
     /** Checks the name of a device to know if it is a belt. */
     internal func isBelt(_ device: CBPeripheral) -> Bool {
@@ -120,21 +128,6 @@ import CoreBluetooth
                 FSConnectionManager.BELT_NAME_PREFIX.lowercased())
         }
         return false
-    }
-    
-    /** Sets the belt mode and inform the delegate. */
-    internal func setBeltMode(_ mode: FSBeltSignalMode, buttonPressed: Bool,
-                              notifyDelegate: Bool) {
-        if (mode == beltMode) {
-            return
-        }
-        beltMode = mode
-        if (connectionState == .connected && notifyDelegate) {
-            if let d = delegate {
-                d.onBeltSignalModeChanged(beltMode: mode,
-                                          buttonPressed: buttonPressed)
-            }
-        }
     }
     
     /** Sends the navigation command using the active direction and signal 
@@ -149,19 +142,19 @@ import CoreBluetooth
                 case .navigating:
                     if (!commandManager.vibrateAtMagneticBearing(
                         direction: direction.floatValue,
-                        pattern: .navigation)) {
+                        signal: .navigation)) {
                         print("Fail to send navigation command.")
                     }
                 case .approachingDestination:
                     if (!commandManager.vibrateAtMagneticBearing(
                         direction: direction.floatValue,
-                        pattern: .approachingDestination)) {
+                        signal: .approachingDestination)) {
                         print("Fail to send navigation command.")
                     }
                 case .destinationReached:
                     if (!commandManager.vibrateAtMagneticBearing(
                         direction: direction.floatValue,
-                        pattern: .destinationReached)) {
+                        signal: .destinationReachedRepeated)) {
                         print("Fail to send navigation command.")
                     }
                 }
@@ -173,15 +166,23 @@ import CoreBluetooth
         }
     }
     
-    //MARK: Public methods
-    
-    public override init() {
+    // Private initialization for singleton
+    private override init() {
         connectionManager = FSConnectionManager.instance
         commandManager = connectionManager.commandManager
         super.init()
         // Register as delegate
         connectionManager.delegate = self
         commandManager.delegate = self
+    }
+    
+    //MARK: Public methods
+    
+    /**
+     Singleton accessor. Only for objective-c.
+     */
+    @objc class public func getInstance() -> FSNavigationController {
+        return FSNavigationController.instance
     }
     
     /**
@@ -195,44 +196,29 @@ import CoreBluetooth
     @objc public func searchAndConnectBelt() {
         
         // Cancel any scan/connection
-        if (connectionState != .notConnected) {
-            setScanConnectionState(.notConnected)
-        }
         disconnectBelt()
     
         // Look for connected belt
         let connected = connectionManager.retrieveConnectedBelt()
         if (connected.count > 0) {
             // Start connection
-            setScanConnectionState(.connecting)
             connectionManager.connectBelt(connected[0])
             return
         }
         
         // Start scan
-        setScanConnectionState(.scanning)
         connectionManager.scanForBelt()
     }
     
     /**
      Disconnects or stop the scan/connection procedure.
      
-     The delegate is informed of the scan disconnection via
-     `onScanConnectionStateChanged`.
+     The delegate is informed when connection events are received.
      */
     @objc public func disconnectBelt() {
         // Stop scan/connection
         connectionManager.stopScan()
         connectionManager.disconnectBelt()
-        // Set state and inform delegate
-        if (connectionState != .notConnected) {
-            let previousState = connectionState
-            connectionState = .notConnected
-            if let d = delegate {
-                d.onScanConnectionStateChanged(previousState: previousState,
-                                               newState: .notConnected)
-            }
-        }
     }
     
     /**
@@ -356,8 +342,17 @@ import CoreBluetooth
      */
     @objc public func notifyDirection(_ direction: Float) {
         if (!commandManager.vibrateAtMagneticBearing(
-            direction: direction, pattern: .directionNotification)) {
+            direction: direction, signal: .directionNotification)) {
             print("Fail to notify direction.")
+        }
+    }
+    
+    /**
+     Starts the vibration signal that indicates the belt battery level.
+     */
+    @objc public func notifyBeltBatteryLevel() {
+        if (!commandManager.signal(signalType: .battery)) {
+            print("Fail to start battery signal.")
         }
     }
     
@@ -386,106 +381,50 @@ import CoreBluetooth
     
     /** Indicates that a belt has been found during the scan procedure. */
     final public func onBeltFound(device: CBPeripheral) {
-        if (connectionState != .scanning) {
-            // Ignore when not scanning
-            connectionManager.stopScan()
-            return
-        }
         // Check device
         if (isBelt(device)) {
             // Connect to the belt
-            setScanConnectionState(.connecting)
             connectionManager.connectBelt(device)
         }
     }
     
-    /** Indicates that the search procedure for finding a belt is finished. */
-    final public func onBeltScanFinished(cause: FSScanTerminationCause) {
-        if (connectionState == .scanning) {
-            // Failed to find a belt
-            setScanConnectionState(.notConnected)
-            disconnectBelt()
-        }
+    public func onBeltScanFinished(cause: FSScanTerminationCause) {
+        // TODO This will be removed
     }
+    
     
     /** Indicates that the connection state has changed. */
     final public func onConnectionStateChanged(previousState: FSConnectionState,
                                   newState: FSConnectionState,
                                   event: FSConnectionEvent) {
-        // Update belt mode (without notification)
-        switch commandManager.mode {
-        case .unknown, .standby, .calibration:
-            setBeltMode(.unknown, buttonPressed: false, notifyDelegate: false)
-        case .wait:
-            setBeltMode(.wait, buttonPressed: false, notifyDelegate: false)
-        case .pause:
-            setBeltMode(.pause, buttonPressed: false, notifyDelegate: false)
-        case .compass:
-            setBeltMode(.compass, buttonPressed: false, notifyDelegate: false)
-        case .app:
-            setBeltMode(.navigation, buttonPressed: false,
-                        notifyDelegate: false)
-        case .crossing:
-            setBeltMode(.crossing, buttonPressed: false, notifyDelegate: false)
-        }
-        
         // Register to orientation notifications when connected
         if (newState == .connected) {
             if (!commandManager.startOrientationNotifications(
-                minPeriod: FSNavigationSignalController.ORIENTATION_NOTIF_MIN_PERIOD,
-                minHeadingVariation: FSNavigationSignalController.ORIENTATION_NOTIF_MIN_HEADING_VARIATION)) {
+                minPeriod: FSNavigationController.ORIENTATION_NOTIF_MIN_PERIOD,
+                minHeadingVariation: FSNavigationController.ORIENTATION_NOTIF_MIN_HEADING_VARIATION)) {
                 print("Fail to register to orientation notifications.")
             }
         }
-        
-        // Update connection state with notification
-        switch connectionState {
-            
-        case .notConnected, .scanning:
-            if (newState != .notConnected) {
-                disconnectBelt()
+        // Inform delegate only for main connection events
+        if let d = delegate {
+            if (newState == .notConnected || newState == .connected ||
+                previousState == .notConnected) {
+                d.onConnectionStateChanged(previousState: previousState,
+                                           newState: connectionState)
             }
-            
-        case .connecting:
-            if (newState == .notConnected) {
-                // Connection failed
-                setScanConnectionState(.notConnected)
-                disconnectBelt()
-            } else if (newState == .connected) {
-                // Connection successful
-                setScanConnectionState(.connected)
-            }
-            
-        case .connected:
-            if (newState == .notConnected) {
-                // Connection lost
-                setScanConnectionState(.notConnected)
-                disconnectBelt()
-            } else if (newState != .connected) {
-                // Re-connection
-                setScanConnectionState(.connecting)
-            }
-            
         }
     }
     
     /** Informs that the mode of the belt has changed. */
     final public func onBeltModeChanged(_ newBeltMode: FSBeltMode) {
-        switch newBeltMode {
-        case .unknown, .standby, .calibration:
-            setBeltMode(.unknown, buttonPressed: false, notifyDelegate: true)
-        case .wait:
-            setBeltMode(.wait, buttonPressed: false, notifyDelegate: true)
-        case .pause:
-            setBeltMode(.pause, buttonPressed: false, notifyDelegate: true)
-        case .compass:
-            setBeltMode(.compass, buttonPressed: false, notifyDelegate: true)
-        case .crossing:
-            setBeltMode(.crossing, buttonPressed: false, notifyDelegate: true)
-        case .app:
-            // Send navigation command
+        // Send vibration command when in app mode
+        if (newBeltMode == .app) {
             sendNavigationCommand()
-            setBeltMode(.navigation, buttonPressed: false, notifyDelegate: true)
+        }
+        // Inform delegate
+        if let d = delegate {
+            d.onBeltModeChanged(beltMode: newBeltMode,
+                                buttonPressed: false)
         }
     }
     
@@ -505,68 +444,36 @@ import CoreBluetooth
                              pressType: FSPressType,
                              previousMode: FSBeltMode,
                              newMode: FSBeltMode) {
-        switch newMode {
-        case .unknown, .standby, .calibration:
-            setBeltMode(.unknown, buttonPressed: true, notifyDelegate: true)
-        case .wait:
-            setBeltMode(.wait, buttonPressed: true, notifyDelegate: true)
-            if (button == .home) {
-                // Home navigation requested
-                if let d = delegate {
-                    d.onBeltRequestHome()
-                }
-            }
-        case .pause:
-            setBeltMode(.pause, buttonPressed: true, notifyDelegate: true)
-            if (previousMode == .pause && button == .pause) {
-                // Resume navigation on pause button press
+        // Check for pause/resume navigation
+        if (button == .pause) {
+            if (previousMode == .pause && newMode == .pause) {
+                // Resume navigation
                 if (!commandManager.changeBeltMode(.app)) {
                     print("Fail to change belt mode.")
                 }
-            }
-            if (button == .home) {
-                // Home navigation requested
-                if let d = delegate {
-                    d.onBeltRequestHome()
-                }
-            }
-        case .compass:
-            setBeltMode(.compass, buttonPressed: true, notifyDelegate: true)
-            if (button == .home) {
-                // Home navigation requested
-                if let d = delegate {
-                    d.onBeltRequestHome()
-                }
-            }
-        case .crossing:
-            setBeltMode(.crossing, buttonPressed: true, notifyDelegate: true)
-            if (button == .home) {
-                // Home navigation requested
-                if let d = delegate {
-                    d.onBeltRequestHome()
-                }
-            }
-        case .app:
-            setBeltMode(.navigation, buttonPressed: true, notifyDelegate: true)
-            if (previousMode == .app && button == .pause) {
-                // Pause navigation on pause button press
-                setBeltMode(.pause, buttonPressed: true, notifyDelegate: true)
+            } else if (previousMode == .app && newMode == .app) {
+                // Pause navigation
                 if (!commandManager.changeBeltMode(.pause)) {
                     print("Fail to change belt mode.")
                 }
             }
-            if (button == .home) {
-                // Home navigation requested
-                if let d = delegate {
-                    d.onBeltRequestHome()
-                }
-            }
+        }
+        // Inform delegate if mode changed
+        if (newMode != previousMode) {
+            delegate?.onBeltModeChanged(beltMode: newMode, buttonPressed: true)
+        }
+        // Check if Home request
+        if (newMode == .wait || newMode == .app || newMode == .compass ||
+            newMode == .crossing) {
+            delegate?.onBeltRequestHome()
         }
     }
     
     /** Informs about an update of the battery status. */
     final public func onBeltBatteryStatusUpdated(_ status: FSBatteryStatus) {
-        // Ignore belt battery status
+        // Inform delegate
+        delegate?.onBeltBatteryStatusNotified?(
+            batteryLevel: status.batteryLevel, powerStatus: status.powerStatus)
     }
     
     /** Notifies that the belt orientation has been updated. */
@@ -578,38 +485,6 @@ import CoreBluetooth
             beltCompassInaccurate: beltOrientation.beltCompassInaccurate)
     }
     
-}
-
-/**
- States used for informing about the scan and connection progress and events.
- */
-@objc public enum FSScanConnectionState: Int {
-    /** No belt is connected. */
-    case notConnected;
-    /** The scan procedure has been started. */
-    case scanning;
-    /** A belt has been found and the connection procedure is running. */
-    case connecting;
-    /** The belt is connected and ready. */
-    case connected;
-}
-
-/**
- Navigation state of the belt.
- */
-@objc public enum FSBeltSignalMode: Int {
-    /** The belt is not yet connected and the mode is unkown. */
-    case unknown;
-    /** The belt is waiting for starting the navigation. */
-    case wait;
-    /** The belt is in compass mode. */
-    case compass;
-    /** The belt is in crossing mode. */
-    case crossing;
-    /** The belt is in navigation mode. */
-    case navigation;
-    /** The belt is in pause mode. */
-    case pause;
 }
 
 /**
