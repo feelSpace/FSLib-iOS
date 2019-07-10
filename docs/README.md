@@ -20,9 +20,7 @@ FSLib-iOS is an iOS library to control the feelSpace naviBelt from your applicat
   * [Home-button press event](#home-button-press-event)
   * [Belt orientation](#belt-orientation)
   * [Belt battery level](#belt-battery-level)
-  * [Belt heading offset](#belt-heading-offset)
 * [General purpose API](#general-purpose-api)
-  * [Overview](#overview)
   * [Connection management](#connection-management)
     * [Connection manager and delegate](#connection-manager-and-delegate)
     * [Scanning for a belt](#scanning-for-a-belt)
@@ -83,12 +81,10 @@ A smartphone must support Bluetooth low-energy, version 4.0 or higher, to connec
 ## Structure of the repository
 
 The repository contains one XCode workspace with four modules:
-* **FSLibIOs**: The FSLib framework to be use for connecting and controlling a belt from an app. The module is implemented in Swift 3.
-* **FSLibIOsDemo**: A demo application for iPhone that illustrates how to use the FSLib framework. The module is implemented in Swift 3.
+* **FSLibIOs**: The FSLib framework to be use for connecting and controlling a belt from an app. The module is implemented in Swift 4.
+* **FSLibIOsDemo**: A demo application for iPhone that illustrates how to use the FSLib framework. The module is implemented in Swift 4.
 * **FSLibIOsNaviDemo**: A demo application for iPhone that illustrate the navigation features of the FSLib interface for navigation apps.
 * **FSLibIOsObjcNaviDemo**: An objectice-C demo for iPhone that illustrate the navigation features of the FSLib interface for navigation apps.
-
-Only the two modules `FSLibIOs` and `FSLibIOsDemo` are relevant to use the belt in a general-purpose application.
 
 ## Integration of the FSLib in a XCode project
 
@@ -98,53 +94,178 @@ The `FSLibIOs` framework can be added in your XCode project as a "Linked Framewo
 
 ## Structure of the FSLib framework
 
-In the `FSLibIOs` framework, four files are exposed for the integration of FSLib in an application. The other classes or protocols are intern to the module and are more likely to change in future versions of the FSLib.
+In the `FSLibIOs` framework, six files are exposed for the integration of FSLib in an application. The other classes or protocols are intern to the module and are more likely to change in future versions of the FSLib.
 * `FSConnectionManager.swift`: The class used for retrieving, scanning and connecting to a belt.
 * `FSConnectionDelegate.swift`: The protocol containing callbacks to scan and connection events.
 * `FSCommandManager.swift`: The class used to send command to the belt.
 * `FSCommandDelegate.swift`: The protocol containing callbacks of the command manager and callback for belt events.
+* `FSNavigationController.swift`: The class used to control the belt for navigation.
+* `FSNavigationDelegate.swift`: The protocol containing callbacks of the navigation controller.
 
 # Navigation API
 
 ## Introduction
 
-*TODO*
-Principle and limits. Files. Demo.
+The FSLib provides a specific API for applications that use the belt for navigation. This navigation API is much simpler and easy to integrate than the general-purpose API. However, the available methods to control the belt are limited to the navigation domain; e.g. start/stop/pause the navigation, show a direction, notify a navigation event.
+
+The navigation API consists of the class `FSNavigationController` and the protocol `FSNavigationDelegate`. All methods required to connect a belt and control the vibration signal for navigation are in the `FSNavigationController`. The `FSNavigationDelegate` is the protocol that contains callbacks from the navigation controller.
+
+:warning: It is not possible to use at the same time the navigation API and the general purpose API. The navigation API is a layer on top of the general purpose API. The navigation controller must register as connection delegate and command delegate to work properly.
 
 ## Connection and disconnection of a belt
 
-*TODO*
+To manage the connection and control the belt, you must implement the `FSNavigationDelegate` and register your class as delegate of the `FSNavigationController`. Note that the navigation controller is accessible via a singleton `FSNavigationController.instance`.
+
+```swift
+class MyClass: FSNavigationDelegate {
+    // Navigation controller
+    var beltNavigationController = FSNavigationController.instance
+	
+    init() {
+        // Register as delegate
+        beltNavigationController.delegate = self
+        // ...
+    }
+	
+	// Implementation of the delegate methods
+	func onConnectionStateChanged(previousState: FSConnectionState,
+                                  newState: FSConnectionState) {
+        //...
+    }
+    func onBeltModeChanged(beltMode: FSBeltMode,
+                           buttonPressed: Bool) {
+        //...
+    }
+    func onBeltRequestHome() {
+        //...
+    }
+    func onBeltOrientationNotified(beltMagHeading: Int,
+                                   beltCompassInaccurate: Bool) {
+        //...
+    }
+}
+```
+
+To connect a belt, call the method `searchAndConnectBelt()`.
+
+```swift
+beltNavigationController.searchAndConnectBelt()
+```
+
+To disconnect, call `disconnectBelt()`.
+
+```swift
+beltNavigationController.disconnectBelt()
+```
+
+The connection events are notified via the delegate method `onConnectionStateChanged()`. You should only look at the `.connected` and `notConnected` states. The other states are not relevent for most applications.
+
+The connection state of the belt is also available with the read-only property `connectionState` of the navigation controller.
+
+```swift
+FSConnectionState currentConnectionState = beltNavigationController.connectionState
+if (currentConnectionState == .connected) {
+    // ...
+}
+```
 
 ## Vibration for the navigation
 
-*TODO*
+To start a vibration you must first define the direction of the signal and the type of signal. This is done with the `setNavigationDirection()` method of the navigation controller. Then you call the method `startNavigation()`. When the navigation is started, the belt is also set to the app mode.
+
+```swift
+// Set the navigation direction to East with the standard navigation vibration
+beltNavigationController.setNavigationDirection(90, signalType: .navigating)
+beltNavigationController.startNavigation()
+```
+
+Three navigation signal are available: `.navigating`, `.approachingDestination` and `.destinationReached`. The direction is given in degrees relative to magnetic North. If you want for instance a vibration signal towards West, the direction value is 270.
+
+To start/resume, stop or pause the navigation call the methods `startNavigation()`, `stopNavigation()`, and `pauseNavigation()` of the navigation manager respectively. These methods change automatically the mode of the belt.
+
+```swift
+    // Start the navigation (and switch to app mode)
+    beltNavigationController.startNavigation()
+    // ...
+    // Stop the navigation (and switch to wait mode)
+    beltNavigationController.stopNavigation()
+    // ...
+    // Pause the navigation (and switch to pause mode)
+    beltNavigationController.pauseNavigation()
+    // ....
+```
+
+Note that when the `stopNavigation()` method is called, the navigation direction is cleared. The navigation direction and type of navigation signal are available in the properties `activeNavigationDirection` and `activeNavigationSignalType` of the navigation controller respectively.
 
 ## Vibration for navigation events
 
-*TODO*
+Several vibration signals are available to notify events.
+
+To notify a direction with a short vibration, call the `notifyDirection()` method of the navigation controller. The state of the navigation or the belt mode are not modified when a direction is notified.
+
+```swift
+// Start a vibration notification towards East
+beltNavigationController.notifyDirection(90)
+```
+
+For a warning, call `notifyWarning()`. The state of the navigation or the belt mode are not modified after a warning signal.
+
+```swift
+// Start a warning signal
+beltNavigationController.notifyWarning()
+```
+
+To notify the battery level of the belt with a vibration, call `notifyBeltBatteryLevel()`.
+
+```swift
+// Start the belt battery signal
+beltNavigationController.notifyBeltBatteryLevel()
+```
+
+To notify that the destination is reached, call `notifyDestinationReached`. The parameter `shouldStopNavigation` determines if the navigation must be stoppe after the destination reached signal.
+
+```swift
+// Notify that the destination is reached and stop the navigation
+beltNavigationController.notifyDestinationReached(shouldStopNavigation: true)
+```
 
 ## Home-button press event
 
-*TODO*
+On the belt control box, the "Home" button is reserved for application-specific features. To handle a press event on the "Home" button, the "onBeltRequestHome()" delegate method must be implemented.
+
+```swift
+class MyClass: FSNavigationDelegate {
+    // Navigation controller
+    var beltNavigationController = FSNavigationController.instance
+	
+    init() {
+        // Register as delegate
+        beltNavigationController.delegate = self
+    }
+    
+    func onBeltRequestHome() {
+        // Handle the Home button press
+        //...
+    }
+}
+```
 
 ## Belt orientation
 
-*TODO*
+The orientation of the belt can be retrieved from the read-only property `beltMagHeading` of the navigation controller. Regular belt orientation notifications are also send via the delegate method `onBeltOrientationNotified`.
 
 ## Belt battery level
 
-*TODO*
+The belt battery level can be retrieved from the read-only property `beltBatteryLevel` of the navigation controller.
 
-## Belt heading offset
-
-*TODO*
+```swift
+// Retrieve the belt battery level
+var beltBatteryLevel = beltNavigationController.beltBatteryLevel
+```
 
 # General purpose API
 
-## Overview
-
-*TODO*
-Principle and limits. Files. Demo.
+:warning: It is not possible to use at the same time the navigation API and the general purpose API. The navigation API is a layer on top of the general purpose API. The navigation controller must register as connection delegate and command delegate to work properly.
 
 ## Connection management
 
