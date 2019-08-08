@@ -110,7 +110,9 @@ The FSLib provides a specific API for applications that use the belt for navigat
 
 The navigation API consists of the class `FSNavigationController` and the protocol `FSNavigationDelegate`. All methods required to connect a belt and control the vibration signal for navigation are in the `FSNavigationController`. The `FSNavigationDelegate` is the protocol that contains callbacks from the navigation controller.
 
-:warning: It is not possible to use at the same time the navigation API and the general purpose API. The navigation API is a layer on top of the general purpose API. The navigation controller must register as connection delegate and command delegate to work properly.
+Please check the module `FSLibIOsNaviDemo` for an example of application that use the navigation API.
+
+:warning: It is not possible to use at the same time the navigation API and the general purpose API. The navigation API is a layer on top of the general purpose API. Only one delegate can register to the general purpose API, and the navigation layer already register itself as delegate.
 
 ## Connection and disconnection of a belt
 
@@ -179,7 +181,7 @@ beltNavigationController.setNavigationDirection(90, signalType: .navigating)
 beltNavigationController.startNavigation()
 ```
 
-Three navigation signal are available: `.navigating`, `.approachingDestination` and `.destinationReached`. The direction is given in degrees relative to magnetic North. If you want for instance a vibration signal towards West, the direction value is 270.
+Four navigation signals are available: `.navigating`, `ongoingTurn`, `.approachingDestination` and `.destinationReached`. The direction is given in degrees relative to magnetic North. If you want for instance a vibration signal towards West, the direction value is 270.
 
 To start/resume, stop or pause the navigation call the methods `startNavigation()`, `stopNavigation()`, and `pauseNavigation()` of the navigation manager respectively. These methods change automatically the mode of the belt.
 
