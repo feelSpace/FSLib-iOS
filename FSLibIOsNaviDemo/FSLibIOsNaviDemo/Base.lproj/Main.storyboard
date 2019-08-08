@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -22,7 +22,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="e6b-Ff-0nB">
-                                <rect key="frame" x="10" y="30" width="355" height="542.5"/>
+                                <rect key="frame" x="10" y="30" width="355" height="577.5"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dcj-R5-WOh">
                                         <rect key="frame" x="0.0" y="0.0" width="355" height="30"/>
@@ -85,55 +85,62 @@
                                             <action selector="navigationNorthEastClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="aWw-vc-doO"/>
                                         </connections>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VIA-PD-Ijb">
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jPf-Rk-2ai">
                                         <rect key="frame" x="0.0" y="296" width="355" height="30"/>
+                                        <state key="normal" title="Ongoing turn West"/>
+                                        <connections>
+                                            <action selector="ongoingTurnClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="mdC-x7-skQ"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VIA-PD-Ijb">
+                                        <rect key="frame" x="0.0" y="331" width="355" height="30"/>
                                         <state key="normal" title="Approaching destination North"/>
                                         <connections>
                                             <action selector="approachingDestinationNorthClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="oFZ-xQ-W24"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dNH-64-ez3">
-                                        <rect key="frame" x="0.0" y="331" width="355" height="30"/>
+                                        <rect key="frame" x="0.0" y="366" width="355" height="30"/>
                                         <state key="normal" title="Destination reached"/>
                                         <connections>
                                             <action selector="destinationReachedClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="q04-Bg-zcq"/>
                                         </connections>
                                     </button>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Navigation direction" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NvZ-h3-SOc">
-                                        <rect key="frame" x="0.0" y="366" width="355" height="20.5"/>
+                                        <rect key="frame" x="0.0" y="401" width="355" height="20.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Navigation signal type" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xGd-Rt-i5y">
-                                        <rect key="frame" x="0.0" y="391.5" width="355" height="20.5"/>
+                                        <rect key="frame" x="0.0" y="426.5" width="355" height="20.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fzf-Zd-TFp">
-                                        <rect key="frame" x="0.0" y="417" width="355" height="30"/>
+                                        <rect key="frame" x="0.0" y="452" width="355" height="30"/>
                                         <state key="normal" title="Notify destination reached"/>
                                         <connections>
                                             <action selector="notifyDestinationReachedClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="fwW-Ta-xds"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wK8-Lt-CJT">
-                                        <rect key="frame" x="0.0" y="452" width="355" height="30"/>
+                                        <rect key="frame" x="0.0" y="487" width="355" height="30"/>
                                         <state key="normal" title="Notify warning"/>
                                         <connections>
                                             <action selector="notifyWarningClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="GHY-Hm-vZa"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FdN-5j-6HP">
-                                        <rect key="frame" x="0.0" y="487" width="355" height="30"/>
+                                        <rect key="frame" x="0.0" y="522" width="355" height="30"/>
                                         <state key="normal" title="Notify direction South"/>
                                         <connections>
                                             <action selector="notifyDirectionSouthClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="RCf-DR-y6V"/>
                                         </connections>
                                     </button>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Belt heading" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K0h-2J-epm">
-                                        <rect key="frame" x="0.0" y="522" width="355" height="20.5"/>
+                                        <rect key="frame" x="0.0" y="557" width="355" height="20.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>

@@ -178,6 +178,21 @@ class FSCommandDataPacket {
                 patternStartTime: 0,
                 exclusiveChannel: false,
                 clearOtherChannels: stopOtherChannels)
+        
+        case .ongoingTurn:
+            return getVibrationChannelConfigurationDataPacket(
+                channelIndex: channelIndex,
+                pattern: .singleLong,
+                intensity: intensity,
+                orientationType: (isBearing ?
+                    FSOrientationType.magneticBearing :
+                    FSOrientationType.angle),
+                orientation: Int(direction),
+                patternIterations: -1,
+                patternPeriod: 750,
+                patternStartTime: 0,
+                exclusiveChannel: false,
+                clearOtherChannels: stopOtherChannels)
             
         case .directionNotification:
             return getVibrationChannelConfigurationDataPacket(

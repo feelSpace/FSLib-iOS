@@ -1276,6 +1276,8 @@ public enum FSVibrationSignal: UInt8 {
     case approachingDestination = 0x84
     /** Notification of a direction (e.g. POI). */
     case directionNotification = 0x85
+    /** Repeated signal for ongoing turn */
+    case ongoingTurn = 0x86
 }
 
 /**

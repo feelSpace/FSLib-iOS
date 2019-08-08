@@ -73,6 +73,9 @@ class ViewController: UIViewController, FSNavigationDelegate {
             case .destinationReached:
                 navigationSignalTypeLabel.text =
                 "Signal type: Destination reached"
+            case .ongoingTurn:
+                navigationSignalTypeLabel.text =
+                "Signal type: Ongoing turn"
             }
         } else {
             navigationDirectionLabel.text = "Navigation direction: -"
@@ -163,6 +166,13 @@ class ViewController: UIViewController, FSNavigationDelegate {
         print("Navigation North-East.")
         beltNavigationController.setNavigationDirection(
             45, signalType: .navigating)
+        updateUILabels()
+    }
+    
+    @IBAction func ongoingTurnClick(_ sender: UIButton) {
+        print("Ongoing turn West.")
+        beltNavigationController.setNavigationDirection(
+            270, signalType: .ongoingTurn)
         updateUILabels()
     }
     

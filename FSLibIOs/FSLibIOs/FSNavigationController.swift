@@ -157,6 +157,12 @@ import CoreBluetooth
                         signal: .destinationReachedRepeated)) {
                         print("Fail to send navigation command.")
                     }
+                case .ongoingTurn:
+                    if (!commandManager.vibrateAtMagneticBearing(
+                        direction: direction.floatValue,
+                        signal: .ongoingTurn)) {
+                        print("Fail to send navigation command.")
+                    }
                 }
             } else {
                 if (!commandManager.stopVibration()) {
@@ -498,4 +504,6 @@ import CoreBluetooth
     /** Vibration signal to indicate continuously that the destination has been
      reached. */
     case destinationReached;
+    /** Repetitive vibration signal to indicate the direction at a crossing. */
+    case ongoingTurn;
 }
