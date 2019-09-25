@@ -42,7 +42,9 @@ FSLib-iOS is an iOS library to control the feelSpace naviBelt from your applicat
 
 ## Copyright and license notice
 
-Copyright feelSpace GmbH, 2017-2019.
+Copyright 2017-2019, feelSpace GmbH.
+
+Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
 
 **Note on using feelSpace Trademarks and Copyrights:**
 
