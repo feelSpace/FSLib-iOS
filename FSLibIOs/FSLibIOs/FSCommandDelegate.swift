@@ -91,6 +91,16 @@ public protocol FSCommandDelegate {
         - beltOrientation: The new information on belt orientation.
      */
     func onBeltOrientationNotified(beltOrientation: FSBeltOrientation)
+    
+    /**
+     Notifies that the state of the accuracy signal has been retrieved or
+     changed.
+     
+     - Parameters:
+        - enabled: `true` if the accuracy signal is enabled, `false` otherwise.
+     */
+    func onBeltCompassAccuracySignalStateNotified(enabled: Bool)
+    
 }
 
 /**
@@ -112,6 +122,10 @@ public extension FSCommandDelegate {
     }
     
     func onHeadingOffsetChanged(_ headingOffset: Int) {
+        // Do nothing when not overridden
+    }
+    
+    func onBeltCompassAccuracySignalStateNotified(enabled: Bool) {
         // Do nothing when not overridden
     }
  

@@ -305,6 +305,45 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
     }
     
     /**
+     Enables or disables the vibration signal for inaccurate compass.
+     
+     The delegate is informed when the state of the signal is changed with the
+     callback `onBeltCompassAccuracySignalStateNotified`.
+     
+     - Important: If the configuration of the accuracy signal is saved on the
+     belt (i.e. the `persistent` parameter is set to `true`), the user must be
+     informed of this new configuration as it will impact the compass and
+     crossing mode when no app is connected to the belt.
+     
+     - Parameters:
+        - enable: `true` to enable the inaccurate signal, `false` to disable it.
+        - persistent: `true` to save the configuration of the inaccurate signal
+     on the belt, `false` to set the configuration only for the current
+     power-cycle of the belt (i.e., the configuration is reset when the belt is
+     turned-off).
+     - Returns:` true` if the command has been sent.
+     */
+    public func changeCompassAccuracySignalState(
+        enable: Bool, persistent: Bool) -> Bool {
+        // TODO
+        return false
+    }
+    
+    /**
+     Requests the state of the accuracy signal.
+     
+     The delegate is informed when the state of the signal is retrieved with the
+     callback `onBeltCompassAccuracySignalStateNotified`.
+     
+     - Returns: `true` if the request has been sent, `false` if no belt is
+     connected.
+     */
+    public func requestCompassAccuracySignalState() -> Bool {
+        // TODO
+        return false
+    }
+    
+    /**
      Makes the belt vibrate toward a direction relative to the magnetic North.
      The vibration will be effective only in app mode.
      
