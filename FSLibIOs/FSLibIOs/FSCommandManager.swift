@@ -135,6 +135,11 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
      */
     public private(set) var beltHeadingOffset: Int? = nil
     
+    /**
+     State of the compass accuracy signal.
+     */
+    public private(set) var beltCompassAccuracySignalEnabled: Bool? = nil
+    
     //MARK: Private properties
     
     // Connection manager
@@ -325,8 +330,24 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
      */
     public func changeCompassAccuracySignalState(
         enable: Bool, persistent: Bool) -> Bool {
-        // TODO
-        return false
+        if (connectionManager.state != .connected) {
+            return false
+        }
+        // Send request for compass accuracy signal
+        if let characteristic = parameterRequestChar, let peripheral = belt {
+            operationQueue.add(FSBleOperationWriteCharacteristic(
+                peripheral: peripheral, characteristic: characteristic,
+                value: Data([
+                    0x11, // Change value
+                    0x03, // Compass accuracy signal
+                    (persistent) ? (0x01) : (0x00),
+                    (enable) ? (0x03) : (0x00)
+                    ])
+            ))
+            return true
+        } else {
+            return false
+        }
     }
     
     /**
@@ -339,8 +360,22 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
      connected.
      */
     public func requestCompassAccuracySignalState() -> Bool {
-        // TODO
-        return false
+        if (connectionManager.state != .connected) {
+            return false
+        }
+        // Send request for compass accuracy signal
+        if let characteristic = parameterRequestChar, let peripheral = belt {
+            operationQueue.add(FSBleOperationWriteCharacteristic(
+                peripheral: peripheral, characteristic: characteristic,
+                value: Data([0x10, // Request value
+                             0x01, // 1 parameter
+                             0x03 // Compass accuracy signal
+                             ])
+            ))
+            return true
+        } else {
+            return false
+        }
     }
     
     /**
@@ -763,28 +798,26 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
             // Invalid packet
             return
         }
-        if let parameterID = FSBeltParameter(rawValue: parameterPacket[1]) {
-            switch parameterID {
-            case .mode:
-                // Update and notify mode
-                updateBeltMode(parameterPacket[2])
-            case .defaultIntensity:
-                // Update and notify new intensity
-                updateDefaultIntensity(parameterPacket[2])
-            case .headingOffset:
-                // Update and notify heading offset
-                if (parameterPacket.count < 4) {
-                    // Invalid packet
-                    return
-                }
-                updateHeadingOffset(
-                    (UInt16(parameterPacket[3]) << 8) +
-                        (UInt16(parameterPacket[2])) )
-            default:
-                // TODO Support backing and delegate's notification of other
-                // parameters
-                break
+        if (parameterPacket[0] == 0x01 && parameterPacket[1] == 0x01) {
+            // Belt mode
+            updateBeltMode(parameterPacket[2])
+        } else if ((parameterPacket[0] == 0x01 && parameterPacket[1] == 0x02) ||
+            (parameterPacket[0] == 0x10 && parameterPacket[1] == 0x00)) {
+            // Default vibration intensity
+            updateDefaultIntensity(parameterPacket[2])
+        } else if ((parameterPacket[0] == 0x01 && parameterPacket[1] == 0x03) ||
+            (parameterPacket[0] == 0x10 && parameterPacket[1] == 0x01)) {
+            // Heading offset
+            if (parameterPacket.count < 4) {
+                // Invalid packet
+                return
             }
+            updateHeadingOffset(
+                (UInt16(parameterPacket[3]) << 8) +
+                    (UInt16(parameterPacket[2])) )
+        } else if (parameterPacket[0] == 0x10 && parameterPacket[1] == 0x03) {
+            // Accuracy signal state
+            updateAccuracySignalState(parameterPacket[2])
         }
     }
     
@@ -887,6 +920,16 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
             if (connectionManager.state == .connected) {
                 delegate?.onHeadingOffsetChanged(beltHeadingOffset!)
             }
+        }
+    }
+    
+    // Updates the accuracy signal state and informs the delegate
+    internal func updateAccuracySignalState(_ rawSignalState: UInt8) {
+        let signalEnabled = (rawSignalState != 0x00)
+        beltCompassAccuracySignalEnabled = signalEnabled
+        if (connectionManager.state == .connected) {
+            delegate?.onBeltCompassAccuracySignalStateNotified(
+                beltCompassAccuracySignalEnabled!)
         }
     }
     

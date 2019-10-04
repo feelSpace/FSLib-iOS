@@ -99,7 +99,7 @@ public protocol FSCommandDelegate {
      - Parameters:
         - enabled: `true` if the accuracy signal is enabled, `false` otherwise.
      */
-    func onBeltCompassAccuracySignalStateNotified(enabled: Bool)
+    func onBeltCompassAccuracySignalStateNotified(_ enabled: Bool)
     
 }
 
@@ -125,7 +125,7 @@ public extension FSCommandDelegate {
         // Do nothing when not overridden
     }
     
-    func onBeltCompassAccuracySignalStateNotified(enabled: Bool) {
+    func onBeltCompassAccuracySignalStateNotified(_ enabled: Bool) {
         // Do nothing when not overridden
     }
  
