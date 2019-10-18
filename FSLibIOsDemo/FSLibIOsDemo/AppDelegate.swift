@@ -2,8 +2,8 @@
 //  AppDelegate.swift
 //  FSLibIOsDemo
 //
-//  Created by David on 21/05/17.
-//  Copyright © 2017 feelSpace. All rights reserved.
+//  Created by David on 18.10.19.
+//  Copyright © 2019 feelSpace GmbH. All rights reserved.
 //
 
 import UIKit

@@ -113,6 +113,9 @@
         case FSNavigationSignalTypeDestinationReached:
             signalTypeLabel.text = @"Signal type: Destination reached";
             break;
+        case FSNavigationSignalTypeOngoingTurn:
+            signalTypeLabel.text = @"Signal type: Ongoing turn";
+            break;
     }
     
     // Belt heading

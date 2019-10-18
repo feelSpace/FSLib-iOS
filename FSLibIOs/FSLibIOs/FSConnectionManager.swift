@@ -435,6 +435,13 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
                                      didDiscover peripheral: CBPeripheral,
                                      advertisementData: [String : Any],
                                      rssi RSSI: NSNumber) {
+        // Check device name
+        if let name = peripheral.name {
+            if !name.lowercased().contains(
+                FSConnectionManager.BELT_NAME_PREFIX.lowercased()) {
+                return
+            }
+        }
         // Check for duplicates
         if !scannedPeripheralIdentifers.contains(peripheral.identifier) {
             // Add in list

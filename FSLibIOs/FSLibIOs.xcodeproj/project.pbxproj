@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		63130739234F3F6100B485A2 /* BeltVibrationSignal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63130738234F3F6100B485A2 /* BeltVibrationSignal.swift */; };
 		6313073B234F648700B485A2 /* NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6313073A234F648700B485A2 /* NavigationController.swift */; };
+		63233F272355FC3C00FAD4A2 /* NavigationControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63233F262355FC3C00FAD4A2 /* NavigationControllerDelegate.swift */; };
+		63233F292357311300FAD4A2 /* PowerStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63233F282357311300FAD4A2 /* PowerStatus.swift */; };
+		63233F2B2357336500FAD4A2 /* BeltConnectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63233F2A2357336500FAD4A2 /* BeltConnectionState.swift */; };
 		632CAFC61F66E4BA0085C7BA /* FSNavigationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632CAFC51F66E4BA0085C7BA /* FSNavigationDelegate.swift */; };
 		6334C5EA205821E00084A478 /* FSBleOperationSetNotifyValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6334C5E9205821E00084A478 /* FSBleOperationSetNotifyValue.swift */; };
 		6363F89B1F6044D000DBD8FE /* FSBleOperationQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6363F89A1F6044D000DBD8FE /* FSBleOperationQueue.swift */; };
@@ -39,6 +42,9 @@
 /* Begin PBXFileReference section */
 		63130738234F3F6100B485A2 /* BeltVibrationSignal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeltVibrationSignal.swift; sourceTree = "<group>"; };
 		6313073A234F648700B485A2 /* NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationController.swift; sourceTree = "<group>"; };
+		63233F262355FC3C00FAD4A2 /* NavigationControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationControllerDelegate.swift; sourceTree = "<group>"; };
+		63233F282357311300FAD4A2 /* PowerStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerStatus.swift; sourceTree = "<group>"; };
+		63233F2A2357336500FAD4A2 /* BeltConnectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeltConnectionState.swift; sourceTree = "<group>"; };
 		632CAFC51F66E4BA0085C7BA /* FSNavigationDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FSNavigationDelegate.swift; sourceTree = "<group>"; };
 		6334C5E9205821E00084A478 /* FSBleOperationSetNotifyValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FSBleOperationSetNotifyValue.swift; sourceTree = "<group>"; };
 		6363F89A1F6044D000DBD8FE /* FSBleOperationQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FSBleOperationQueue.swift; sourceTree = "<group>"; };
@@ -114,7 +120,10 @@
 				63E430941F66C66C00796671 /* FSNavigationController.swift */,
 				632CAFC51F66E4BA0085C7BA /* FSNavigationDelegate.swift */,
 				63130738234F3F6100B485A2 /* BeltVibrationSignal.swift */,
+				63233F282357311300FAD4A2 /* PowerStatus.swift */,
+				63233F2A2357336500FAD4A2 /* BeltConnectionState.swift */,
 				6313073A234F648700B485A2 /* NavigationController.swift */,
+				63233F262355FC3C00FAD4A2 /* NavigationControllerDelegate.swift */,
 			);
 			path = FSLibIOs;
 			sourceTree = "<group>";
@@ -252,8 +261,11 @@
 				63130739234F3F6100B485A2 /* BeltVibrationSignal.swift in Sources */,
 				63E357581ED1DEDB00627CD5 /* FSConnectionDelegate.swift in Sources */,
 				63E430951F66C66C00796671 /* FSNavigationController.swift in Sources */,
+				63233F272355FC3C00FAD4A2 /* NavigationControllerDelegate.swift in Sources */,
 				632CAFC61F66E4BA0085C7BA /* FSNavigationDelegate.swift in Sources */,
+				63233F2B2357336500FAD4A2 /* BeltConnectionState.swift in Sources */,
 				6363F89B1F6044D000DBD8FE /* FSBleOperationQueue.swift in Sources */,
+				63233F292357311300FAD4A2 /* PowerStatus.swift in Sources */,
 				63DBE99C1F6148420079F61E /* FSBleOperationReadCharacteristic.swift in Sources */,
 				63E3575A1ED1DEFF00627CD5 /* FSCommandDelegate.swift in Sources */,
 			);

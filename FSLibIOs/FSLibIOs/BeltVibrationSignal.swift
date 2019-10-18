@@ -13,8 +13,8 @@ import Foundation
  
  This enumeration contains all types of signal. A vibration signal can be
  either repeated indefinitely or temporary, and it can be oriented or
- non-oriented. The functions `isRepeated(...)` and `isDirectional(...)` allow to
- test the type of signal.
+ non-oriented. The functions `isRepeated(...)` and `isDirectional(...)` can be
+ used to determine the type of signal.
  */
 @objc public enum BeltVibrationSignal: Int {
     
