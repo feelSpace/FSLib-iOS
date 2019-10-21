@@ -14,7 +14,8 @@
 		63233F432359AC5500FAD4A2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63233F412359AC5500FAD4A2 /* LaunchScreen.storyboard */; };
 		63233F4E2359AC5500FAD4A2 /* FSLibIOsDemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63233F4D2359AC5500FAD4A2 /* FSLibIOsDemoTests.swift */; };
 		63233F592359AC5500FAD4A2 /* FSLibIOsDemoUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63233F582359AC5500FAD4A2 /* FSLibIOsDemoUITests.swift */; };
-		63233F682359AD6600FAD4A2 /* FSLibIOs.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63233F672359AD6600FAD4A2 /* FSLibIOs.framework */; };
+		639DEFC8235DAC1900D5496A /* FSLibIOs.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63233F672359AD6600FAD4A2 /* FSLibIOs.framework */; };
+		639DEFC9235DAC1900D5496A /* FSLibIOs.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 63233F672359AD6600FAD4A2 /* FSLibIOs.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,6 +34,20 @@
 			remoteInfo = FSLibIOsDemo;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		639DEFCA235DAC1900D5496A /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				639DEFC9235DAC1900D5496A /* FSLibIOs.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		63233F352359AC5200FAD4A2 /* FSLibIOsDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FSLibIOsDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -56,7 +71,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				63233F682359AD6600FAD4A2 /* FSLibIOs.framework in Frameworks */,
+				639DEFC8235DAC1900D5496A /* FSLibIOs.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -147,6 +162,7 @@
 				63233F312359AC5200FAD4A2 /* Sources */,
 				63233F322359AC5200FAD4A2 /* Frameworks */,
 				63233F332359AC5200FAD4A2 /* Resources */,
+				639DEFCA235DAC1900D5496A /* Embed Frameworks */,
 			);
 			buildRules = (
 			);

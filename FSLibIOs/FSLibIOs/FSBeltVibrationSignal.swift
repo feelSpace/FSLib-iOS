@@ -16,7 +16,7 @@ import Foundation
  non-oriented. The functions `isRepeated(...)` and `isDirectional(...)` can be
  used to determine the type of signal.
  */
-@objc public enum BeltVibrationSignal: Int {
+@objc public enum FSBeltVibrationSignal: Int {
     
     /**
      Continuous vibration.
@@ -113,7 +113,7 @@ import Foundation
  - Parameters:
     - signal: The vibration signal.
  */
-func isRepeated(_ signal: BeltVibrationSignal) -> Bool {
+func isRepeated(_ signal: FSBeltVibrationSignal) -> Bool {
     switch signal {
     case .continuous, .navigation, .approachingDestination,
          .turnOngoing, .nextWaypointLongDistance, .nextWaypointMediumDistance,
@@ -131,7 +131,7 @@ func isRepeated(_ signal: BeltVibrationSignal) -> Bool {
  - Returns: `true` if the vibration signal is directional, i.e. it can be
  oriented in a direction.
  */
-func isDirectional(_ signal: BeltVibrationSignal) -> Bool {
+func isDirectional(_ signal: FSBeltVibrationSignal) -> Bool {
     switch signal {
     case .continuous, .navigation, .approachingDestination,
          .turnOngoing, .directionNotification, .nextWaypointLongDistance,

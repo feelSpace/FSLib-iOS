@@ -11,25 +11,25 @@ import Foundation
 /**
  Enumeration of possible power status for a belt.
  */
-@objc public enum PowerStatus: Int {
+@objc public enum FSPowerStatus: UInt8 {
     
     /**
      Unknown power status
      */
-    case unknown;
+    case unknown = 0x00;
     
     /**
      The belt is powered by its internal battery
      */
-    case onBattery;
+    case onBattery = 0x01;
     
     /**
      The battery of the belt is charging
      */
-    case charging;
+    case charging = 0x02;
     
     /**
      The battery of the belt is full and the belt is powered by an external power source via USB.
      */
-    case externalPower;
+    case externalPower = 0x03;
 }

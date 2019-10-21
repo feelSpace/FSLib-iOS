@@ -11,7 +11,7 @@ import Foundation
 /**
  Enumeration of connection states with a belt.
  */
-@objc public enum BeltConnectionState: Int {
+@objc public enum FSBeltConnectionState: Int {
     
     /**
      No belt is connected

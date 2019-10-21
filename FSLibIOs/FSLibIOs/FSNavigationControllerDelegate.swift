@@ -9,9 +9,9 @@
 import Foundation
 
 /**
- Callbacks of the `NavigationController`.
+ Callbacks of the `FSNavigationController`.
  */
-public protocol NavigationControllerDelegate {
+public protocol FSNavigationControllerDelegate {
     
     /**
      Called the navigation state changed.
@@ -21,7 +21,7 @@ public protocol NavigationControllerDelegate {
      - Parameters:
         - state: The new state of the navigation controller.
      */
-    func onNavigationStateChange(state: NavigationState)
+    func onNavigationStateChange(state: FSNavigationState)
     
     /**
      Called when the home button on the belt has been pressed and does not
@@ -32,6 +32,7 @@ public protocol NavigationControllerDelegate {
      button was pressed.
      */
     func onBeltHomeButtonPressed(navigating: Bool)
+    
     /**
      Called when the default vibration intensity of the belt has been changed.
      
@@ -60,7 +61,7 @@ public protocol NavigationControllerDelegate {
         - batteryLevel: The battery level of the belt in percent.
         - status: The power status of the belt.
      */
-    func onBeltBatteryLevelUpdated(batteryLevel: Int, status: PowerStatus)
+    func onBeltBatteryLevelUpdated(batteryLevel: Int, status: FSPowerStatus)
     
     /**
      Called when the state of the compass accuracy signal has been retrieved or
@@ -78,7 +79,7 @@ public protocol NavigationControllerDelegate {
      - Parameters:
         - state: The new connection state.
      */
-    func onBeltConnectionStateChanged(state: BeltConnectionState)
+    func onBeltConnectionStateChanged(state: FSBeltConnectionState)
     
     /**
      Called when the connection with the belt has been unexpectedly lost.
