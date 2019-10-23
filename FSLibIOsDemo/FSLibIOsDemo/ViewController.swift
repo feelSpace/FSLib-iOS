@@ -104,7 +104,7 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
         } else {
             defaultIntensityLabel.text = String(format: "%d%%", intensity!)
             defaultIntensitySlider.value = Float(intensity!)
-            defaultIntensitySlider.isEnabled = false
+            defaultIntensitySlider.isEnabled = true
         }
     }
     
@@ -275,6 +275,14 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
         updateUI()
     }
     
+    func onBluetoothNotAvailable() {
+        showToast(message: "No Bluetooth available!")
+    }
+    
+    func onBluetoothPoweredOff() {
+        showToast(message: "Please turn on Bluetooth!")
+    }
+    
     func onBeltConnectionLost() {
         showToast(message: "Connection lost!")
     }
@@ -310,7 +318,8 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
     @IBAction func onDefaultIntensitySliderReleased(_ sender: UISlider) {
         if (beltController.connectionState == .connected) {
             let intensity = Int(defaultIntensitySlider.value)
-            beltController.changeDefaultVibrationIntensity(intensity: intensity)
+            _=beltController.changeDefaultVibrationIntensity(
+                intensity: intensity)
         }
     }
     
@@ -332,14 +341,14 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
                 title: "Disable temporarily",
                 style: .default,
                 handler: {action in
-                    self.beltController.setCompassAccuracySignal(
-                        enabled: false, persistent: false)}))
+                    _=self.beltController.setCompassAccuracySignal(
+                        enable: false, persistent: false)}))
             alert.addAction(UIAlertAction(
                 title: "Disable and save",
                 style: .default,
                 handler: {action in
-                    self.beltController.setCompassAccuracySignal(
-                        enabled: false, persistent: true)}))
+                    _=self.beltController.setCompassAccuracySignal(
+                        enable: false, persistent: true)}))
             alert.addAction(UIAlertAction(
                 title: "Cancel",
                 style: .cancel,
@@ -355,14 +364,14 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
                 title: "Enable temporarily",
                 style: .default,
                 handler: {action in
-                    self.beltController.setCompassAccuracySignal(
-                        enabled: false, persistent: false)}))
+                    _=self.beltController.setCompassAccuracySignal(
+                        enable: false, persistent: false)}))
             alert.addAction(UIAlertAction(
                 title: "Enable and save",
                 style: .default,
                 handler: {action in
-                    self.beltController.setCompassAccuracySignal(
-                        enabled: false, persistent: true)}))
+                    _=self.beltController.setCompassAccuracySignal(
+                        enable: false, persistent: true)}))
             alert.addAction(UIAlertAction(
                 title: "Cancel",
                 style: .cancel,
@@ -373,7 +382,7 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
     
     @IBAction func onStartBatterySignalButtonTap(_ sender: UIButton) {
         if (beltController.connectionState == .connected) {
-            beltController.notifyBeltBatteryLevel()
+            _=beltController.notifyBeltBatteryLevel()
         }
     }
     
@@ -478,7 +487,7 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
     @IBAction func onStartBearingNotificationButtonTap(_ sender: UIButton) {
         if (beltController.connectionState == .connected) {
             let direction = Int(notificationDirectionSlider.value)
-            beltController.notifyDirection(
+            _=beltController.notifyDirection(
                 direction: direction, isMagneticBearing: true)
         }
     }
@@ -486,20 +495,20 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
     @IBAction func onStartDirectionNotificationButtonTap(_ sender: UIButton) {
         if (beltController.connectionState == .connected) {
             let direction = Int(notificationDirectionSlider.value)
-            beltController.notifyDirection(
+            _=beltController.notifyDirection(
                 direction: direction, isMagneticBearing: false)
         }
     }
     
     @IBAction func onStartWarningButtonTap(_ sender: UIButton) {
         if (beltController.connectionState == .connected) {
-            beltController.notifyWarning(critical: false)
+            _=beltController.notifyWarning(critical: false)
         }
     }
     
     @IBAction func onStartCriticalWarningButtonTap(_ sender: UIButton) {
         if (beltController.connectionState == .connected) {
-            beltController.notifyWarning(critical: true)
+            _=beltController.notifyWarning(critical: true)
         }
     }
     

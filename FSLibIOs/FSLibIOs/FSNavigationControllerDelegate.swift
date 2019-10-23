@@ -82,6 +82,17 @@ public protocol FSNavigationControllerDelegate {
     func onBeltConnectionStateChanged(state: FSBeltConnectionState)
     
     /**
+     Called when a connection attempt failed because BLE is not available on
+     the device.
+     */
+    func onBluetoothNotAvailable()
+    
+    /**
+     Called when a connection attempt failed because BLE is not powered on.
+     */
+    func onBluetoothPoweredOff()
+    
+    /**
      Called when the connection with the belt has been unexpectedly lost.
      */
     func onBeltConnectionLost()
