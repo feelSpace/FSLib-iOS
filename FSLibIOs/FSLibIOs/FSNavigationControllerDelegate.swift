@@ -11,7 +11,7 @@ import Foundation
 /**
  Callbacks of the `FSNavigationController`.
  */
-public protocol FSNavigationControllerDelegate {
+@objc public protocol FSNavigationControllerDelegate {
     
     /**
      Called the navigation state changed.
@@ -68,7 +68,7 @@ public protocol FSNavigationControllerDelegate {
      changed.
      
      - Parameters:
-        - enable: `true` if the compass accuracy signal is enabled, `false`
+        - enabled: `true` if the compass accuracy signal is enabled, `false`
      otherwise.
      */
     func onCompassAccuracySignalStateUpdated(enabled: Bool)
@@ -106,4 +106,5 @@ public protocol FSNavigationControllerDelegate {
      Called when no belt has been found to start the connection.
      */
     func onNoBeltFound()
+    
 }

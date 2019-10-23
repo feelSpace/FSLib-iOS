@@ -414,7 +414,7 @@ import CoreBluetooth
     }
     
     /**
-     Starts a vibration npotification in a given direction.
+     Starts a vibration notification in a given direction.
      
      - Parameters:
         - direction: The direction of the vibration in degrees. The value 0
