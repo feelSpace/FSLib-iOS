@@ -365,13 +365,13 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
                 style: .default,
                 handler: {action in
                     _=self.beltController.setCompassAccuracySignal(
-                        enable: false, persistent: false)}))
+                        enable: true, persistent: false)}))
             alert.addAction(UIAlertAction(
                 title: "Enable and save",
                 style: .default,
                 handler: {action in
                     _=self.beltController.setCompassAccuracySignal(
-                        enable: false, persistent: true)}))
+                        enable: true, persistent: true)}))
             alert.addAction(UIAlertAction(
                 title: "Cancel",
                 style: .cancel,

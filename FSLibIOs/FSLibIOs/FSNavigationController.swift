@@ -161,6 +161,22 @@ import CoreBluetooth
     }
     
     /**
+     Firmware version of the connected belt.
+     
+     This property is `nil` when no belt is connected.
+     */
+    public var beltFirmwareVersion: Int? {
+        get {
+            let version = beltController.firmwareVersion
+            if (version < 0) {
+                return nil
+            } else {
+                return version
+            }
+        }
+    }
+    
+    /**
      Indicates if the pause mode of the belt corresponds to the navigation
      controller being paused.
      
@@ -179,7 +195,16 @@ import CoreBluetooth
      attribute is unknown for a short period after a connection to a belt is
      established.
      */
-    public private(set) var compassAccuracySignalEnabled: Bool?
+    public var compassAccuracySignalEnabled: Bool? {
+        get {
+            let state = beltController.beltCompassAccuracySignalEnabled
+            if (beltConnection.state != .connected) {
+                return nil
+            } else {
+                return state
+            }
+        }
+    }
     
     /**
      Delegate of the navigation controller.
@@ -188,7 +213,9 @@ import CoreBluetooth
      */
     public var delegate: FSNavigationControllerDelegate?
     
-    /** Channel index used for the navigation signal */
+    /**
+     Channel index used for the navigation signal
+     */
     public static let NAVIGATION_SIGNAL_CHANNEL: Int = 2
     
     //MARK: Public methods
@@ -568,7 +595,6 @@ import CoreBluetooth
     public func onConnectionStateChanged(previousState: FSConnectionState,
             newState: FSConnectionState, event: FSConnectionEvent) {
         isPauseModeForNavigation = false
-        compassAccuracySignalEnabled = nil
         switch newState {
         case .notConnected:
             if (event == .connectionLost ||
