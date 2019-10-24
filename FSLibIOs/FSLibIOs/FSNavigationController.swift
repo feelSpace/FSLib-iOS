@@ -1,509 +1,1008 @@
 //
-//  FSNavigationSignalController.swift
+//  NavigationController.swift
 //  FSLibIOs
 //
-//  Created by David on 11/09/17.
-//  Copyright © 2017-2019 feelSpace. All rights reserved.
+//  Created by David on 10.10.19.
+//  Copyright © 2019 feelSpace. All rights reserved.
 //
 
 import Foundation
 import CoreBluetooth
 
 /**
- A belt controller for navigation-oriented app.
+ The navigation controller is an interface to connect and control a feelSpace
+ NaviBelt.
+ 
+ The navigation controller is a simplified interface designed for navigation
+ applications.
  */
 @objc public class FSNavigationController: NSObject, FSConnectionDelegate,
         FSCommandDelegate {
     
-    //MARK: Private properties
+    /** Belt connection */
+    private var beltConnection: FSConnectionManager
     
-    /** Connection manager */
-    var connectionManager: FSConnectionManager
+    /** Belt command interface */
+    private var beltController: FSCommandManager
     
-    /** Command manager. */
-    var commandManager: FSCommandManager
+    /** Flag indicating if a delayed vibration command has been scheduled */
+    private var isVibrationCommandScheduled: Bool = false
     
-    /** Minimum period for orientation notifications. */
-    static let ORIENTATION_NOTIF_MIN_PERIOD: Double = 2.0
+    /** Time of the last vibration command sent */
+    private var lastVibrationCommandTime: Date?
     
-    /** Minimum heading variation for orientation notifications. */
-    static let ORIENTATION_NOTIF_MIN_HEADING_VARIATION: Int = 11
+    /** Scheduled vibration command */
+    private var vibrationCommandTask: Timer?
     
-    //MARK: Public properties
+    /** Minimum period between two vibration commands in seconds */
+    private static let MINIMUM_VIBRATION_COMMAND_UPDATE_PERIOD_SEC = 0.1
+    
+    /** Vibration signal to use when in navigation */
+    private var navigationSignal: FSBeltVibrationSignal?
+    
+    /** Direction of the vibration when in navigation */
+    private var navigationDirection: Int = 0
     
     /**
-     Unique instance of `FSNavigationController` (singleton).
+     Indicates if the direction of the vibration is relative to magnetic North
      */
-    public static let instance: FSNavigationController = FSNavigationController()
+    private var isMagneticBearingDirection: Bool = true
     
     /**
-     The state of the scan/connection with the belt.
-     */
-    @objc public var connectionState: FSConnectionState {
-        return connectionManager.state
-    }
-    
-    /**
-     The mode of the belt.
-     */
-    @objc public var beltMode: FSBeltMode {
-        return commandManager.mode
-    }
-    
-    /**
-     The active navigation direction to be signaled by the belt in navigation 
-     mode.
-     */
-    @objc public private(set) var activeNavigationDirection: NSNumber?
-    
-    /**
-     The type of signal to be used for indicating the navigation direction.
-     */
-    @objc public private(set) var activeNavigationSignalType: FSNavigationSignalType =
-        .navigating
-    
-    /**
-     Last known value of the belt magnetic heading.
-     */
-    @objc public var beltMagHeading: NSNumber? {
-        if let heading = commandManager.beltOrientation?.beltMagHeading {
-            return NSNumber(value: heading)
-        } else {
-            return nil
-        }
-    }
-    
-    /**
-     Last known value of the inaccurate-compass flag of the belt.
-     */
-    @objc public var beltCompassInaccurate: NSNumber? {
-        if let inaccurate = commandManager.beltOrientation?.beltCompassInaccurate {
-            return NSNumber(value: inaccurate)
-        } else {
-            return nil
-        }
-    }
-    
-    /**
-     Last known value of the belt battery level.
-     */
-    @objc public var beltBatteryLevel: Double {
-        return commandManager.beltBatteryStatus.batteryLevel
-    }
-    
-    /**
-     Last known value of the belt power status.
-     */
-    @objc public var beltPowerStatus: FSPowerStatus {
-        return commandManager.beltBatteryStatus.powerStatus
-    }
-    
-    /**
-     Heading offset of the belt in degrees.
+     State of the navigation controller.
      
-     This value, stored in the belt, represents the angle difference between the
-     heading of the belt and the heading of the belt's control box. The default
-     value on the belt is 45°.
+     The state of the navigation controller is independant of the
+     connection state, i.e. the state can be `.navigating` even when no belt is
+     connected. However, if a belt is connected, the state of the navigation
+     controller is synchronized with the belt mode, i.e. the state `.navigating`
+     correspond to the `.app` mode.
      */
-    @objc public var beltHeadingOffset: NSNumber? {
-        if let headingOffset = commandManager.beltHeadingOffset {
-            return NSNumber(value: headingOffset)
-        } else {
-            return nil
-        }
-    }
+    public private(set) var navigationState: FSNavigationState = .stopped
     
     /**
-     Delegate that receives callbacks from the navigation signal controller.
+     Connection state with the belt.
      */
-    @objc public var delegate: FSNavigationDelegate?
-    
-    
-    //MARK: Private methods
-    
-    /** Checks the name of a device to know if it is a belt. */
-    internal func isBelt(_ device: CBPeripheral) -> Bool {
-        if let name = device.name {
-            return name.lowercased().contains(
-                FSConnectionManager.BELT_NAME_PREFIX.lowercased())
-        }
-        return false
-    }
-    
-    /** Sends the navigation command using the active direction and signal 
-     type (if in app mode). */
-    internal func sendNavigationCommand() {
-        if (connectionManager.state != .connected) {
-            return
-        }
-        if (commandManager.mode == .app) {
-            if let direction = activeNavigationDirection {
-                switch activeNavigationSignalType {
-                case .navigating:
-                    if (!commandManager.vibrateAtMagneticBearing(
-                        direction: direction.floatValue,
-                        signal: .navigation)) {
-                        print("Fail to send navigation command.")
-                    }
-                case .approachingDestination:
-                    if (!commandManager.vibrateAtMagneticBearing(
-                        direction: direction.floatValue,
-                        signal: .approachingDestination)) {
-                        print("Fail to send navigation command.")
-                    }
-                case .destinationReached:
-                    if (!commandManager.vibrateAtMagneticBearing(
-                        direction: direction.floatValue,
-                        signal: .destinationReachedRepeated)) {
-                        print("Fail to send navigation command.")
-                    }
-                case .ongoingTurn:
-                    if (!commandManager.vibrateAtMagneticBearing(
-                        direction: direction.floatValue,
-                        signal: .ongoingTurn)) {
-                        print("Fail to send navigation command.")
-                    }
-                }
-            } else {
-                if (!commandManager.stopVibration()) {
-                    print("Fail to send navigation command.")
-                }
+    public var connectionState: FSBeltConnectionState {
+        get {
+            switch beltConnection.state {
+            case .notConnected:
+                return .disconnected
+            case .scanning:
+                return .scanning
+            case .connecting:
+                return .connecting
+            case .discoveringServices:
+                return .discoveringServices
+            case .handshake:
+                return .handshake
+            case .connected:
+                return .connected
             }
         }
     }
     
-    // Private initialization for singleton
-    private override init() {
-        connectionManager = FSConnectionManager.instance
-        commandManager = connectionManager.commandManager
-        super.init()
-        // Register as delegate
-        connectionManager.delegate = self
-        commandManager.delegate = self
+    /**
+     Default vibration intensity of the connected belt in range [5-100].
+     
+     This property is `nil` when no belt is connected.
+     */
+    public var defaultVibrationIntensity: Int? {
+        get {
+            let intensity = beltController.defaultIntensity
+            if (intensity < 0) {
+                return nil
+            } else {
+                return intensity
+            }
+        }
     }
+    
+    /**
+     Last known orientation of the belt in degrees relative to magnetic North.
+     
+     Positives angles are clockwise. This property is `nil` when no belt is
+     connected and until the first orientation notification is received from
+     the belt.
+     */
+    public var beltHeading: Int? {
+        get {
+            return beltController.beltOrientation?.beltMagHeading
+        }
+    }
+    
+    /**
+     Flag indicating if the orientation of the belt is accurate.
+     
+     This property is `nil` when no belt is connected and until the first
+     orientation notification is received from the belt.
+     */
+    public var beltOrientationAccurate: Bool? {
+        get {
+            return beltController.beltOrientation?.beltCompassInaccurate
+        }
+    }
+    
+    /**
+     Battery level of the belt in percent.
+     
+     This property is `nil` when no belt is connected and until the first
+     battery notification is received from the belt.
+     */
+    public var beltBatteryLevel: Int? {
+        get {
+            let level = beltController.beltBatteryStatus.batteryLevel
+            if (level < 0) {
+                return nil
+            } else {
+                return Int(level)
+            }
+        }
+    }
+    
+    /**
+     Power status of the belt.
+     
+     This property is `nil` when no belt is connected and until the first
+     battery notification is received from the belt.
+     */
+    public var beltPowerStatus: FSPowerStatus? {
+        get {
+            switch beltController.beltBatteryStatus.powerStatus {
+            case .onBattery:
+                return .onBattery
+            case .charging:
+                return .charging
+            case .externalPower:
+                return .externalPower
+            default:
+                return nil
+            }
+        }
+    }
+    
+    /**
+     Firmware version of the connected belt.
+     
+     This property is `nil` when no belt is connected.
+     */
+    public var beltFirmwareVersion: Int? {
+        get {
+            let version = beltController.firmwareVersion
+            if (version < 0) {
+                return nil
+            } else {
+                return version
+            }
+        }
+    }
+    
+    /**
+     Indicates if the pause mode of the belt corresponds to the navigation
+     controller being paused.
+     
+     Note that the pause mode of the belt can correspond to different paused
+     modes, i.e. the compass the wait mode and the app mode can all be paused,
+     resulting in the same pause mode.
+     */
+    private var isPauseModeForNavigation: Bool = false
+    
+    /**
+     State of the compass accuracy signal.
+     
+     If `true` the compass signal accuracy is enabled, if `false` it is
+     disabled. This attribute is `nil` when the state of the compass accuracy
+     signal is unknown or no belt is connected. Note that the value of this
+     attribute is unknown for a short period after a connection to a belt is
+     established.
+     */
+    public var compassAccuracySignalEnabled: Bool? {
+        get {
+            let state = beltController.beltCompassAccuracySignalEnabled
+            if (beltConnection.state != .connected) {
+                return nil
+            } else {
+                return state
+            }
+        }
+    }
+    
+    /**
+     Delegate of the navigation controller.
+     
+     A delegate must be defined to handle events of the navigation controller.
+     */
+    public var delegate: FSNavigationControllerDelegate?
+    
+    /**
+     Channel index used for the navigation signal
+     */
+    public static let NAVIGATION_SIGNAL_CHANNEL: Int = 2
     
     //MARK: Public methods
     
     /**
-     Singleton accessor. Only for objective-c.
+     Constructor.
      */
-    @objc class public func getInstance() -> FSNavigationController {
-        return FSNavigationController.instance
+    public override init() {
+        beltConnection = FSConnectionManager.instance
+        beltController = beltConnection.commandManager
+        super.init()
+        beltConnection.delegate = self
+        beltController.delegate = self
     }
     
     /**
-     Searches for a nearby belt and connects to it.
-     
-     Calling this method cancels any scan or connection before starting the
-     scan procedure.
-     The delegate is informed of the scan and connection progress via 
-     `onScanConnectionStateChanged`.
+     Searches and connects a belt.
      */
-    @objc public func searchAndConnectBelt() {
-        
-        // Cancel any scan/connection
+    public func searchAndConnectBelt() {
         disconnectBelt()
-    
-        // Look for connected belt
-        let connected = connectionManager.retrieveConnectedBelt()
+        // Look for belt connected to other application
+        let connected = beltConnection.retrieveConnectedBelt()
         if (connected.count > 0) {
             // Start connection
-            connectionManager.connectBelt(connected[0])
-            return
+            beltConnection.connectBelt(connected[0])
+        } else {
+            // Start scan
+            beltConnection.scanForBelt()
         }
-        
-        // Start scan
-        connectionManager.scanForBelt()
     }
     
     /**
-     Disconnects or stop the scan/connection procedure.
+     Connects a belt.
      
-     The delegate is informed when connection events are received.
+     - Parameters:
+        - device: The belt to connect to.
      */
-    @objc public func disconnectBelt() {
-        // Stop scan/connection
-        connectionManager.stopScan()
-        connectionManager.disconnectBelt()
+    public func connectBelt(_ device: CBPeripheral) {
+        disconnectBelt()
+        beltConnection.connectBelt(device)
+    }
+    
+    /**
+     Disconnects the belt or stops the scan and connection procedure.
+     */
+    public func disconnectBelt() {
+        beltConnection.stopScan()
+        beltConnection.disconnectBelt()
     }
     
     /**
      Starts or resumes the navigation.
      
-     If a navigation direction has been set, the navigation signal is 
-     automatically started. In case the navigation direction is `nil`, the belt 
-     is set in navigation mode with no vibration signal.
-     The delagate is informed of the mode change via the method
-     `onBeltSignalModeChange`.
+     The navigation can be started event when no belt is connected. If the
+     navigation is active when a belt is connected, the mode of the belt will
+     be automatically changed to app mode with the navigation signal.
+     
+     - Parameters:
+        - direction: The direction of the vibration in degrees. The value 0
+     represents the magnetic North or heading of the belt, and angles are
+     clockwise.
+        - isMagneticBearing: `true` if the direction is relative to magnetic
+     North, `false` if the direction is relative to the belt itself.
+        - signal: The type of vibration signal to use. If `nil`, there is no
+     vibration. Only repeated signals can be used.
+     - Returns: `true` if the navigation has been started, `false` if the
+     navigation has not been started because a temporary signal has been
+     specified.
      */
-    @objc public func startNavigation() {
-        if (connectionState != .connected) {
-            // Ignore when not connected
-            return
+    public func startNavigation(direction: Int, isMagneticBearing: Bool,
+                                signal: FSBeltVibrationSignal?) -> Bool {
+        // Check signal type
+        if (signal != nil && !isRepeated(signal!)) {
+            return false
         }
-        if (commandManager.mode == .app) {
-            // Re-send navigation signal
-            sendNavigationCommand()
+        // Set signal and change navigation state
+        if (navigationState == .navigating) {
+            _ = updateNavigationSignal(direction: direction,
+                                   isMagneticBearing: isMagneticBearing,
+                                   signal: signal)
         } else {
-            if (!commandManager.changeBeltMode(.app)) {
-                print("Fail to change belt mode.")
+            navigationState = .navigating
+            navigationDirection = direction
+            isMagneticBearingDirection = isMagneticBearing
+            navigationSignal = signal
+            if (beltConnection.state == .connected) {
+                if (beltController.mode == .app) {
+                    scheduleOrSendVibrationCommand()
+                } else {
+                    if (!beltController.changeBeltMode(.app)) {
+                        print("Fail to change belt mode to app!")
+                    }
+                }
             }
+            delegate?.onNavigationStateChange(state: navigationState)
         }
+        return true
     }
     
     /**
-     Stops the navigation and clears the navigation direction.
+     Updates the vibration signal.
      
-     If the belt is in navigation or pause mode, the belt will switch to the 
-     `wait` mode.
-     The delagate is informed of the mode change via the method
-     `onBeltSignalModeChange`.
+     - Parameters:
+        - direction: The direction of the vibration in degrees. The value 0
+     represents the magnetic North or heading of the belt, and angles are
+     clockwise.
+        - isMagneticBearing: `true` if the direction is relative to magnetic
+     North, `false` if the direction is relative to the belt itself.
+        - signal: The type of vibration signal to use. If `nil`, there is no
+     vibration. Only repeated signals can be used.
+     - Returns: `true` if the signal has been updated, `false` if the
+     signal has not been updated because a temporary signal has been
+     specified or the navigation is not started.
      */
-    @objc public func stopNavigation() {
-        if (connectionState != .connected) {
-            // Ignore when not connected
-            return
+    public func updateNavigationSignal(direction: Int, isMagneticBearing: Bool,
+            signal: FSBeltVibrationSignal?) -> Bool {
+        // Check signal type
+        if (signal != nil && !isRepeated(signal!)) {
+            return false
         }
-        // Clear navigation direction
-        activeNavigationDirection = nil
-        activeNavigationSignalType = .navigating
-        // Switch to wait mode
-        if (commandManager.mode == .app || commandManager.mode == .pause) {
-            if (!commandManager.changeBeltMode(.wait)) {
-                print("Fail to change belt mode.")
-            }
+        // Check navigation state
+        if (navigationState != .navigating) {
+            return false
         }
+        // Update signal parameters
+        navigationDirection = direction
+        isMagneticBearingDirection = isMagneticBearing
+        navigationSignal = signal
+        scheduleOrSendVibrationCommand()
+        return true
     }
     
     /**
      Pauses the navigation.
      
-     If the belt is in navigation, the belt sill switch to the `pause` mode.
-     The delagate is informed of the mode change via the method
-     `onBeltSignalModeChange`.
+     If the navigation state is `.navigating` and a belt is connected, the mode
+     of the belt is changed to pause mode.
      */
-    @objc public func pauseNavigation() {
-        if (connectionState != .connected) {
-            // Ignore when not connected
+    public func pauseNavigation() {
+        if (navigationState != .navigating) {
             return
         }
-        // Switch to pause mode if in app mode
-        if (commandManager.mode == .app) {
-            if(!commandManager.changeBeltMode(.pause)) {
-                print("Fail to change belt mode.")
+        navigationState = .paused
+        if (beltConnection.state == .connected) {
+            if (beltController.mode == .app) {
+                if (!beltController.changeBeltMode(.pause)) {
+                    print("Fail to change belt mode to pause!")
+                }
             }
         }
+        delegate?.onNavigationStateChange(state: navigationState)
     }
     
     /**
-     Sets the direction and type of signal to be used for the navigation.
+     Stops the navigation.
      
-     If the direction is `nil`, the belt will provide no navigation signal 
-     in navigation mode.
-     
-     - Parameters:
-        - direction: The direction to follow, or `nil` for no navigation signal.
-        - signalType: The signal type for the navigation.
+     If the navigation state is `.navigating` and a belt is connected, the mode
+     of the belt is changed to wait mode. Also if the connected belt is in pause
+     mode for the app, the mode of the belt is changed to wait mode.
      */
-    @objc public func setNavigationDirection(_ direction: NSNumber?,
-            signalType: FSNavigationSignalType = .navigating) {
-        activeNavigationDirection = direction
-        activeNavigationSignalType = signalType
-        sendNavigationCommand()
+    public func stopNavigation() {
+        if (navigationState == .stopped) {
+            return
+        }
+        navigationState = .stopped
+        if (beltConnection.state == .connected) {
+            if (beltController.mode == .app ||
+                (beltController.mode == .pause && isPauseModeForNavigation)) {
+                if (!beltController.changeBeltMode(.wait)) {
+                    print("Fail to change belt mode to wait!")
+                }
+            }
+        }
+        delegate?.onNavigationStateChange(state: navigationState)
     }
     
     /**
-     Starts a signal to notify that the destination has been reached, and stops
-     the navigation if requested.
+     Starts a vibration signal indicating that the destination has been reached.
+     
+     The destination reached signal is executed only once.
      
      - Parameters:
-        - shouldStopNavigation: `true` to stop the navigation and return to wait
-     mode after the destination-reached signal. If the belt is in compass mode,
-     the mode is not changed.
+        - shouldStopNavigation: `true` to stop the navigation when the signal is
+     performed.
+     - Returns: `true` if the request has been sent, `false` otherwise.
      */
-    @objc public func notifyDestinationReached(shouldStopNavigation: Bool) {
+    public func notifyDestinationReached(shouldStopNavigation: Bool) -> Bool {
         if (shouldStopNavigation) {
             stopNavigation()
         }
-        if (!commandManager.signal(signalType: .goalReached)) {
-            print("Fail to notify destination reached.")
+        if (beltConnection.state == .connected) {
+            return beltController.signal(signalType: .goalReached)
+        } else {
+            return false
+        }
+    }
+    
+    /**
+     Starts a vibration notification in a given direction.
+     
+     - Parameters:
+        - direction: The direction of the vibration in degrees. The value 0
+     represents the magnetic North or heading of the belt, and angles are
+     clockwise.
+        - isMagneticBearing: `true` if the direction is relative to magnetic
+     North, `false` if the direction is relative to the belt itself.
+     - Returns: `true` if the request has been sent, `false` otherwise.
+     */
+    public func notifyDirection(direction: Int,
+                                isMagneticBearing: Bool) -> Bool {
+        if (beltConnection.state == .connected) {
+            if (isMagneticBearing) {
+                return beltController.configureVibrationChannel(
+                    channelIndex: 0,
+                    pattern: .continuous,
+                    orientationType: .angle,
+                    orientation: direction,
+                    patternIterations: 1,
+                    patternPeriod: 1000,
+                    exclusiveChannel: false,
+                    clearOtherChannels: false)
+            } else {
+                return beltController.configureVibrationChannel(
+                    channelIndex: 0,
+                    pattern: .continuous,
+                    orientationType: .magneticBearing,
+                    orientation: direction,
+                    patternIterations: 1,
+                    patternPeriod: 1000,
+                    exclusiveChannel: false,
+                    clearOtherChannels: false)
+            }
+        } else {
+            return false
         }
     }
     
     /**
      Starts a warning vibration signal.
      
-     The warning signal can be used in all modes except `pause`.
+     - Parameters:
+        - critical: `true` if a strong warning signal must be used.
+     - Returns: `true` if the request has been sent, `false` otherwise.
      */
-    @objc public func notifyWarning() {
-        if (!commandManager.signal(signalType: .warning)) {
-            print("Fail to start warning signal.")
+    public func notifyWarning(critical: Bool) -> Bool {
+        if (beltConnection.state == .connected) {
+            if (critical) {
+                return beltController.configureVibrationChannel(
+                    channelIndex: 0,
+                    pattern: .singleLong,
+                    orientationType: .binaryMask,
+                    orientation: 0b0001000100010001,
+                    patternIterations: 3,
+                    patternPeriod: 700,
+                    exclusiveChannel: true,
+                    clearOtherChannels: false)
+            } else {
+                return beltController.configureVibrationChannel(
+                    channelIndex: 0,
+                    pattern: .shortShiftWave,
+                    intensity: 25,
+                    orientationType: .vibromotorIndex,
+                    orientation: 0,
+                    patternIterations: 2,
+                    patternPeriod: 500,
+                    exclusiveChannel: true,
+                    clearOtherChannels: false)
+            }
+        } else {
+            return false
         }
     }
     
     /**
-     Starts a signal to notify a direction.
+     Starts a vibration signal to indicate the battery level of the belt.
      
-     The direction notification can be used in all modes except `pause`.
+     - Returns: `true` if the request has been sent, `false` otherwise.
      */
-    @objc public func notifyDirection(_ direction: Float) {
-        if (!commandManager.vibrateAtMagneticBearing(
-            direction: direction, signal: .directionNotification)) {
-            print("Fail to notify direction.")
+    public func notifyBeltBatteryLevel() -> Bool {
+        if (beltConnection.state == .connected) {
+            return beltController.signal(signalType: .battery)
+        } else {
+            return false
         }
     }
     
     /**
-     Starts the vibration signal that indicates the belt battery level.
-     */
-    @objc public func notifyBeltBatteryLevel() {
-        if (!commandManager.signal(signalType: .battery)) {
-            print("Fail to start battery signal.")
-        }
-    }
-    
-    /**
-     Sends a request to the belt for changing the heading offset.
+     Changes the default vibration intensity of the connected belt.
      
-     The heading offset value will be changed asynchronously. The delegate
-     receives a notification through `onHeadingOffsetChanged` when the new
-     offset is effective. The belt may reject or adjust the offset value.
-     
-     A request is not sent if no belt is connected, or if the offset is not in
-     range [0 - 359].
+     The default vibration intensity can be changed only when a belt is
+     connected. The delegate is informed asynchronously of the intensity change
+     with the callback `onBeltDefaultVibrationIntensityChanged()`.
      
      - Parameters:
-        - requestedHeadingOffset: The requested heading offset in degrees in
-     range [0 - 359].
+        - intensity: The intensity to set inrange [5-100]. This intensity is
+     saved on the belt and used for the navigation and compass mode.
+        - vibrationFeedback: `true` if a vibration feedback must be started when
+     the intensity has changed.
+     - Returns: `true` if the request has been sent, `false` otherwise.
      */
-    @objc public func changeHeadingOffset (_ requestedHeadingOffset: Int) {
-        // Call command manager method
-        if (!commandManager.changeHeadingOffset(requestedHeadingOffset)) {
-            print("Fail to request new heading offset.")
+    public func changeDefaultVibrationIntensity(
+        intensity: Int, vibrationFeedback: Bool = true) -> Bool {
+        if (intensity < 5 || intensity > 100) {
+            return false
+        }
+        if (beltConnection.state == .connected) {
+            return beltController.changeDefaultIntensity(
+                intensity, feedbackSignal: vibrationFeedback)
+        } else {
+            return false
         }
     }
     
-    // MARK: Delegate methods
+    /**
+     Enables or disables the compass accuracy signal of the belt.
+     
+     The compass accuracy signal is changed for the navigation, compass and
+     crossing modes.
+     
+     - Important: If the configuration of the compass accuracy signal is saved
+     on the belt (i.e. the `persistent` parameter is `true`), the user must be
+     informed of this new configuration as it will also impact the compass and
+     crossing mode when no app is connected to the belt.
+     
+     - Parameters:
+        - enable: `true` to enable the compass accuracy signal, `false` to
+     disable it.
+        - persistent: `true` to save the configuration on the belt, `false`
+     to set the configuration only for the current power-cycle of the belt
+     (i.e. this configuration is reset when the belt is powered off).
+     - Returns: `true` if the request has been sent, `false` otherwise.
+     */
+    public func setCompassAccuracySignal(
+        enable: Bool, persistent: Bool) -> Bool {
+        if (beltConnection.state == .connected) {
+            return beltController.changeCompassAccuracySignalState(
+                enable: enable, persistent: persistent)
+        } else {
+            return false
+        }
+    }
     
-    /** Indicates that a belt has been found during the scan procedure. */
-    final public func onBeltFound(device: CBPeripheral) {
-        // Check device
-        if (isBelt(device)) {
-            // Connect to the belt
-            connectionManager.connectBelt(device)
+    //MARK: Implementation of delegate methods
+    
+    public func onBeltFound(device: CBPeripheral) {
+        // Connect to the belt
+        if (beltConnection.state == .notConnected ||
+            beltConnection.state == .scanning) {
+            beltConnection.connectBelt(device)
         }
     }
     
     public func onBeltScanFinished(cause: FSScanTerminationCause) {
-        // TODO This will be removed
+        switch cause {
+        case .timeout:
+            // No belt found
+            delegate?.onNoBeltFound()
+            
+        case .btNotAvailable:
+            // BT problem
+            delegate?.onBluetoothNotAvailable()
+            
+        case .btNotActive:
+            // BT powered off
+            delegate?.onBluetoothPoweredOff()
+            
+        case .alreadyConnected:
+            // Should not happen
+            break
+            
+        case .canceled:
+            // Normal termination
+            break
+        }
     }
     
+    public func onConnectionStateChanged(previousState: FSConnectionState,
+            newState: FSConnectionState, event: FSConnectionEvent) {
+        isPauseModeForNavigation = false
+        switch newState {
+        case .notConnected:
+            if (event == .connectionLost ||
+                event == .reconnectionFailed) {
+                delegate?.onBeltConnectionLost()
+            } else if (event == .connectionFailed ||
+                event == .serviceDiscoveryFailed ||
+                event == .handshakeFailed) {
+                delegate?.onBeltConnectionFailed()
+            }
+            delegate?.onBeltConnectionStateChanged(state: .disconnected)
+        case .scanning:
+            delegate?.onBeltConnectionStateChanged(state: .scanning)
+        case .connecting:
+            delegate?.onBeltConnectionStateChanged(state: .connecting)
+        case .discoveringServices:
+            delegate?.onBeltConnectionStateChanged(state: .discoveringServices)
+        case .handshake:
+            delegate?.onBeltConnectionStateChanged(state: .handshake)
+        case .connected:
+            // Register to orientation notifications
+            if (!beltController.startOrientationNotifications()) {
+                print("Fail to register to orientation notifications!")
+            }
+            // Request compass accuracy signal state
+            if (!beltController.requestCompassAccuracySignalState()) {
+                print("Fail to request compass accuracy signal state!")
+            }
+            // Start navigation signal if in navigating state
+            if (navigationState == .navigating) {
+                if (beltController.mode == .app) {
+                    // Should not happen
+                    scheduleOrSendVibrationCommand()
+                } else {
+                    // Change belt mode to app mode
+                    if (!beltController.changeBeltMode(.app)) {
+                        print("Fail to change belt mode!")
+                    }
+                }
+            }
+            // Inform delegate of state change
+            delegate?.onBeltConnectionStateChanged(state: .connected)
+        }
+    }
     
-    /** Indicates that the connection state has changed. */
-    final public func onConnectionStateChanged(previousState: FSConnectionState,
-                                  newState: FSConnectionState,
-                                  event: FSConnectionEvent) {
-        // Register to orientation notifications when connected
-        if (newState == .connected) {
-            if (!commandManager.startOrientationNotifications(
-                minPeriod: FSNavigationController.ORIENTATION_NOTIF_MIN_PERIOD,
-                minHeadingVariation: FSNavigationController.ORIENTATION_NOTIF_MIN_HEADING_VARIATION)) {
-                print("Fail to register to orientation notifications.")
+    public func onBeltModeChanged(_ newBeltMode: FSBeltMode) {
+        isPauseModeForNavigation = false
+        switch (newBeltMode) {
+        case .unknown:
+            // Should not happen
+            break
+        case .standby:
+            // Nothing to do, the belt is going to be switched off
+            break
+        case .wait:
+            // The navigation should be in stop state
+            if (navigationState != .stopped) {
+                print("Navigation state and belt mode out of sync!")
+                stopNavigation()
+            }
+        case .compass, .calibration, .crossing:
+            // The navigation should be in pause or stop state
+            if (navigationState == .navigating) {
+                print("Navigation state and belt mode out of sync!")
+                pauseNavigation()
+            }
+        case .app:
+            // The navigation has been started
+            if (navigationState != .navigating) {
+                print("Navigation state and belt mode out of sync!")
+                if (navigationState == .stopped) {
+                    _=beltController.changeBeltMode(.wait)
+                } else {
+                    _=beltController.changeBeltMode(.pause)
+                }
+            } else {
+                scheduleOrSendVibrationCommand()
+            }
+        case .pause:
+            // The navigation has been paused
+            if (navigationState != .paused) {
+                pauseNavigation()
+            } else {
+                isPauseModeForNavigation = true
             }
         }
-        // Inform delegate only for main connection events
-        if let d = delegate {
-            if (newState == .notConnected || newState == .connected ||
-                previousState == .notConnected) {
-                d.onConnectionStateChanged(previousState: previousState,
-                                           newState: connectionState)
-            }
-        }
     }
     
-    /** Informs that the mode of the belt has changed. */
-    final public func onBeltModeChanged(_ newBeltMode: FSBeltMode) {
-        // Send vibration command when in app mode
-        if (newBeltMode == .app) {
-            sendNavigationCommand()
-        }
-        // Inform delegate
-        if let d = delegate {
-            d.onBeltModeChanged(beltMode: newBeltMode,
-                                buttonPressed: false)
-        }
-    }
-    
-    /** Informs that the default vibration intensity has been changed. */
-    final public func onDefaultIntensityChanged(_ defaultIntensity: Int) {
-        // Ignore vibration intensity notifications
-    }
-    
-    /** Informs that the heading offset value has been changed on the belt. */
-    final public func onHeadingOffsetChanged(_ headingOffset: Int) {
-        // Transfer notification to navigation delegate
-        delegate?.onHeadingOffsetChanged?(headingOffset)
-    }
-    
-    /** Informs that a button on the belt has been pressed. */
-    final public func onBeltButtonPressed(button: FSBeltButton,
-                             pressType: FSPressType,
-                             previousMode: FSBeltMode,
-                             newMode: FSBeltMode) {
-        // Check for pause/resume navigation
-        if (button == .pause) {
-            if (previousMode == .pause && newMode == .pause) {
+    public func onBeltButtonPressed(button: FSBeltButton,
+            pressType: FSPressType, previousMode: FSBeltMode,
+            newMode: FSBeltMode) {
+        isPauseModeForNavigation = false
+        if (button == .home && previousMode == newMode) {
+            // Home button pressed for application action
+            // Note: Home button can be preseed to stop calibration and return
+            // to wait mode.
+            switch (navigationState) {
+            case .stopped:
+                // Should not be in app mode
+                if (newMode == .app) {
+                    print("Navigation state and belt mode out of sync!")
+                    _=beltController.changeBeltMode(.wait)
+                } else {
+                    delegate?.onBeltHomeButtonPressed(navigating: false)
+                }
+            case .paused:
                 // Resume navigation
-                if (!commandManager.changeBeltMode(.app)) {
-                    print("Fail to change belt mode.")
-                }
-            } else if (previousMode == .app && newMode == .app) {
-                // Pause navigation
-                if (!commandManager.changeBeltMode(.pause)) {
-                    print("Fail to change belt mode.")
+                _=startNavigation(direction: navigationDirection,
+                                isMagneticBearing: isMagneticBearingDirection,
+                                signal: navigationSignal)
+            case .navigating:
+                // Should be in app mode
+                if (newMode != .app) {
+                    print("Navigation state and belt mode out of sync!")
+                    _=beltController.changeBeltMode(.app)
+                } else {
+                    delegate?.onBeltHomeButtonPressed(navigating: true)
                 }
             }
-        }
-        // Inform delegate if mode changed
-        if (newMode != previousMode) {
-            delegate?.onBeltModeChanged(beltMode: newMode, buttonPressed: true)
-        }
-        // Check if Home request
-        if (newMode == .wait || newMode == .app || newMode == .compass ||
-            newMode == .crossing) {
-            delegate?.onBeltRequestHome()
+        } else if (button == .pause && previousMode == newMode) {
+            // Pause button pressed for pause or resume navigation
+            if (newMode == .app) {
+                // Pause request from belt
+                // Should be navigating
+                switch (navigationState) {
+                case .stopped:
+                    print("Navigation state and belt mode out of sync!")
+                    _=beltController.changeBeltMode(.wait)
+                case .paused:
+                    print("Navigation state and belt mode out of sync!")
+                    _=beltController.changeBeltMode(.pause)
+                case .navigating:
+                    pauseNavigation()
+                }
+                
+            } else if (newMode == .pause) {
+                // Resume request from belt
+                // Should be in pause state
+                switch (navigationState) {
+                case .stopped:
+                    print("Navigation state and belt mode out of sync!")
+                    _=beltController.changeBeltMode(.wait)
+                case .paused:
+                    _=startNavigation(direction: navigationDirection,
+                                      isMagneticBearing: isMagneticBearingDirection,
+                                      signal: navigationSignal)
+                case .navigating:
+                    print("Navigation state and belt mode out of sync!")
+                    _=beltController.changeBeltMode(.app)
+                }
+            }
+        } else if (newMode != .app) {
+            // Pause navigation if navigating
+            // Note: The mode cannot be automatically changed to app mode
+            // with a button press
+            if (navigationState == .navigating) {
+                pauseNavigation()
+            }
         }
     }
     
-    /** Informs about an update of the battery status. */
-    final public func onBeltBatteryStatusUpdated(_ status: FSBatteryStatus) {
-        // Inform delegate
-        delegate?.onBeltBatteryStatusNotified?(
-            batteryLevel: status.batteryLevel, powerStatus: status.powerStatus)
+    public func onDefaultIntensityChanged(_ defaultIntensity: Int) {
+        delegate?.onBeltDefaultVibrationIntensityChanged(
+            intensity: defaultIntensity)
     }
     
-    /** Notifies that the belt orientation has been updated. */
-    final public func onBeltOrientationNotified(
-        beltOrientation: FSBeltOrientation) {
-        // Transfer notification to navigation delegate
-        delegate?.onBeltOrientationNotified?(
-            beltMagHeading: beltOrientation.beltMagHeading,
-            beltCompassInaccurate: beltOrientation.beltCompassInaccurate)
+    public func onBeltBatteryStatusUpdated(_ status: FSBatteryStatus) {
+        delegate?.onBeltBatteryLevelUpdated(
+            batteryLevel: Int(status.batteryLevel),
+            status: status.powerStatus)
     }
     
-}
+    public func onBeltOrientationNotified(beltOrientation: FSBeltOrientation) {
+        delegate?.onBeltOrientationUpdated(
+            beltHeading: beltOrientation.beltMagHeading,
+            accurate: !beltOrientation.beltCompassInaccurate)
+    }
+    
+    public func onBeltCompassAccuracySignalStateNotified(_ enabled: Bool) {
+        delegate?.onCompassAccuracySignalStateUpdated(enabled: enabled)
+    }
+    
+    //MARK: Protected methods
+    
+    /**
+     Sends the command to start or update the vibration signal when in
+     navigation.
+     
+     This method is called by the navigation manager when the navigation is
+     started or the vibration signal is updated. Note that the navigation
+     manager has an mechanism to avoid calling this method too often to
+     preserve the Blurtooth service to be flooded.
+     This method can be overridden to manage more complexe vibration signals.
+     
+     - Parameters:
+        - beltConnection: The connection to the belt.
+        - direction: The navigation direction.
+        - isMagneticBearing: `true` if the navigation direction is relative to
+     magnetic North.
+        - signal: The type of signal for the navigation.
+     */
+    public func sendVibrationCommand(
+        beltConnection: FSConnectionManager,
+        direction: Int,
+        isMagneticBearing: Bool,
+        signal: FSBeltVibrationSignal?) {
+        if (navigationState != .navigating) {
+            // Not in navigation
+            return
+        }
+        if (beltConnection.state != .connected) {
+            // Not connected
+            return
+        }
+        if (beltController.mode != .app) {
+            // Not in app mode
+            return
+        }
+        if ((signal == nil) || (!isRepeated(signal!))) {
+            // Stop the vibration
+            _=beltController.stopVibration()
+        } else {
+            switch (signal!) {
+            case .continuous, .navigation:
+                _=beltController.configureVibrationChannel(
+                    channelIndex: FSNavigationController.NAVIGATION_SIGNAL_CHANNEL,
+                    pattern: .continuous,
+                    orientationType: (isMagneticBearing) ? (.magneticBearing) : (.angle),
+                    orientation: direction,
+                    patternIterations: 0,
+                    patternPeriod: 500,
+                    exclusiveChannel: false,
+                    clearOtherChannels: false)
+            case .approachingDestination:
+                _=beltController.configureVibrationChannel(
+                    channelIndex: FSNavigationController.NAVIGATION_SIGNAL_CHANNEL,
+                    pattern: .singleShort,
+                    orientationType: (isMagneticBearing) ? (.magneticBearing) : (.angle),
+                    orientation: direction,
+                    patternIterations: 0,
+                    patternPeriod: 500,
+                    exclusiveChannel: false,
+                    clearOtherChannels: false)
+            case .turnOngoing:
+                _=beltController.configureVibrationChannel(
+                    channelIndex: FSNavigationController.NAVIGATION_SIGNAL_CHANNEL,
+                    pattern: .singleLong,
+                    orientationType: (isMagneticBearing) ? (.magneticBearing) : (.angle),
+                    orientation: direction,
+                    patternIterations: 0,
+                    patternPeriod: 750,
+                    exclusiveChannel: false,
+                    clearOtherChannels: false)
+            case .nextWaypointLongDistance:
+                _=beltController.configureVibrationChannel(
+                    channelIndex: FSNavigationController.NAVIGATION_SIGNAL_CHANNEL,
+                    pattern: .singleLong,
+                    orientationType: (isMagneticBearing) ? (.magneticBearing) : (.angle),
+                    orientation: direction,
+                    patternIterations: 0,
+                    patternPeriod: 3000,
+                    exclusiveChannel: false,
+                    clearOtherChannels: false)
+            case .nextWaypointMediumDistance:
+                _=beltController.configureVibrationChannel(
+                    channelIndex: FSNavigationController.NAVIGATION_SIGNAL_CHANNEL,
+                    pattern: .singleLong,
+                    orientationType: (isMagneticBearing) ? (.magneticBearing) : (.angle),
+                    orientation: direction,
+                    patternIterations: 0,
+                    patternPeriod: 1500,
+                    exclusiveChannel: false,
+                    clearOtherChannels: false)
+            case .nextWaypointShortDistance:
+                _=beltController.configureVibrationChannel(
+                    channelIndex: FSNavigationController.NAVIGATION_SIGNAL_CHANNEL,
+                    pattern: .singleLong,
+                    orientationType: (isMagneticBearing) ? (.magneticBearing) : (.angle),
+                    orientation: direction,
+                    patternIterations: 0,
+                    patternPeriod: 1000,
+                    exclusiveChannel: false,
+                    clearOtherChannels: false)
+            case .nextWaypointAreaReached:
+                _=beltController.configureVibrationChannel(
+                    channelIndex: FSNavigationController.NAVIGATION_SIGNAL_CHANNEL,
+                    pattern: .singleLong,
+                    orientationType: (isMagneticBearing) ? (.magneticBearing) : (.angle),
+                    orientation: direction,
+                    patternIterations: 0,
+                    patternPeriod: 750,
+                    exclusiveChannel: false,
+                    clearOtherChannels: false)
+            case .destinationReachedRepeated:
+                _=beltController.configureVibrationChannel(
+                    channelIndex: FSNavigationController.NAVIGATION_SIGNAL_CHANNEL,
+                    pattern: .goalReached,
+                    orientationType: .vibromotorIndex,
+                    orientation: 0,
+                    patternIterations: 0,
+                    patternPeriod: 5000,
+                    exclusiveChannel: false,
+                    clearOtherChannels: false)
+            case .batteryLevel, .directionNotification,
+                 .destinationReachedSingle, .operationWarning, .criticalWarning:
+                // Temporary signal
+                break
+            }
+        }
+    }
+    
+    //MARK: Private methods
+    
+    /**
+     Schedules or sends the vibration command for the navigation signal.
+     
+     The vibration command may be delayed to avoid flooding the BT interface.
+     */
+    private func scheduleOrSendVibrationCommand() {
+        if (beltConnection.state == .connected &&
+            beltController.mode == .app &&
+            navigationState == .navigating &&
+            vibrationCommandTask == nil) {
+            if (lastVibrationCommandTime == nil ||
+                Date().timeIntervalSince(lastVibrationCommandTime!) >
+                FSNavigationController.MINIMUM_VIBRATION_COMMAND_UPDATE_PERIOD_SEC) {
+                // Send vibration command
+                print("Send vibration command")
+                lastVibrationCommandTime = Date()
+                sendVibrationCommand(
+                    beltConnection: beltConnection,
+                    direction: navigationDirection,
+                    isMagneticBearing: isMagneticBearingDirection,
+                    signal: navigationSignal)
+            } else {
+                // Schedule update
+                print("Schedule vibration command")
+                if #available(iOS 10.0, *) {
+                    vibrationCommandTask = Timer.scheduledTimer(
+                        withTimeInterval: TimeInterval(
+                            FSNavigationController.MINIMUM_VIBRATION_COMMAND_UPDATE_PERIOD_SEC),
+                        repeats: false,
+                        block: { (timer) in
+                            print("Send scheduled vibration command")
+                            self.vibrationCommandTask = nil
+                            self.lastVibrationCommandTime = Date()
+                            self.sendVibrationCommand(
+                                beltConnection: self.beltConnection,
+                                direction: self.navigationDirection,
+                                isMagneticBearing: self.isMagneticBearingDirection,
+                                signal: self.navigationSignal)
+                    })
+                } else {
+                    vibrationCommandTask = Timer.scheduledTimer(
+                        timeInterval: TimeInterval(
+                            FSNavigationController.MINIMUM_VIBRATION_COMMAND_UPDATE_PERIOD_SEC),
+                        target: self,
+                        selector: #selector(self.sendScheduledVibrationCommand),
+                        userInfo: nil,
+                        repeats: false)
+                }
+                
+            }
+        } else {
+            // Else, skip update and wait scheduled command
+            
+            print("Skip update")
+        }
+    }
+    
+    /** Scheduled update of the vibration for iOS < 10. */
+    @objc private func sendScheduledVibrationCommand() {
+        print("Send scheduled vibration command")
+        self.vibrationCommandTask = nil
+        self.lastVibrationCommandTime = Date()
+        self.sendVibrationCommand(
+            beltConnection: self.beltConnection,
+            direction: self.navigationDirection,
+            isMagneticBearing: self.isMagneticBearingDirection,
+            signal: self.navigationSignal)
+    }
 
+}
+    
 /**
- Types of signal for the navigation.
+ Enumeration of navigation states used by the navigation controller.
+ 
+ If the navigation controller is connected to a belt the state of the navigation
+ will be synchronized to the mode of the belt. If no belt is connected, the
+ navigation controller can still switch between states including
+ `NavigationState.navigating`.
  */
-@objc public enum FSNavigationSignalType: Int {
-    /** The standard signal to be used when in navigation. */
+@objc public enum FSNavigationState: Int {
+    
+    /**
+     The navigation is stopped, no direction or signal is defined.
+     */
+    case stopped;
+    
+    /**
+     The navigation is paused and can be resumed with the current direction
+     and signal type.
+     */
+    case paused;
+    
+    /**
+     The navigation has been started with a direction and signal type.
+     */
     case navigating;
-    /** The signal to be used when the final destination is in proximity. */
-    case approachingDestination;
-    /** Vibration signal to indicate continuously that the destination has been
-     reached. */
-    case destinationReached;
-    /** Repetitive vibration signal to indicate the direction at a crossing. */
-    case ongoingTurn;
+    
 }

@@ -2,10 +2,7 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:FSLibIOsObjcNaviDemo/FSLibIOsObjcNaviDemo.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:FSLibIOsNaviDemo/FSLibIOsNaviDemo.xcodeproj">
+      location = "group:FSLibIOsObjcDemo/FSLibIOsObjcDemo.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:FSLibIOsDemo/FSLibIOsDemo.xcodeproj">

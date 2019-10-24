@@ -1456,17 +1456,18 @@ public struct FSBeltOrientation {
     public var beltCompassInaccurate: Bool
 }
 
-/**
- Values representing power supply status of the belt.
- */
-@objc public enum FSPowerStatus: UInt8 {
-    /** The power source is unknown. */
-    case unknown = 0x00
-    /** The battery of the belt is used. */
-    case onBattery = 0x01
-    /** The battery is charging. */
-    case charging = 0x02
-    /** An external power supply is used without charging the battery. */
-    case external = 0x03
-}
+//TODO TBR
+///**
+// Values representing power supply status of the belt.
+// */
+//@objc public enum FSPowerStatus: UInt8 {
+//    /** The power source is unknown. */
+//    case unknown = 0x00
+//    /** The battery of the belt is used. */
+//    case onBattery = 0x01
+//    /** The battery is charging. */
+//    case charging = 0x02
+//    /** An external power supply is used without charging the battery. */
+//    case external = 0x03
+//}
 

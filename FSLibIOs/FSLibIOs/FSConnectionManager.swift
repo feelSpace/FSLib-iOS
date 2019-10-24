@@ -101,7 +101,8 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
     // Private initialization for singleton
     private override init() {
         super.init()
-        btManager = CBCentralManager(delegate: self, queue: nil)
+        btManager = CBCentralManager(
+            delegate: self, queue: nil)
         privateCommandManager = FSCommandManager(self)
     }
     
@@ -177,6 +178,9 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
             break
         }
         
+        // Set state
+        state = .scanning
+        
         // Start scan timer
         scanTimer = Timer.scheduledTimer(timeInterval: TimeInterval(timeoutSec),
                                          target: self,
@@ -195,6 +199,10 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
                 [FSConnectionManager.ADVERTISED_SERVICE_UUID], options:
                 [CBCentralManagerScanOptionAllowDuplicatesKey: false])
         }
+        
+        // Notify state change
+        delegate?.onConnectionStateChanged(
+            previousState: .notConnected, newState: state, event: .scanStarted)
     }
     
     /**
@@ -203,12 +211,17 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
      notification `onBeltScanFinished` with `Canceled` as a cause.
      */
     public func stopScan() {
-        // Inform delegate
-        if (scanTimer != nil) {
-            delegate?.onBeltScanFinished(cause: .canceled)
+        if (state != .scanning) {
+            return
         }
+        // Set state
+        state = .notConnected
         // Stop scan
         resetScan()
+        // Inform delegate
+        delegate?.onBeltScanFinished(cause: .canceled)
+        delegate?.onConnectionStateChanged(
+            previousState: .scanning, newState: state, event: .scanCanceled)
     }
     
     // Stops the scan procedure and send a delegate notification
@@ -228,12 +241,17 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
     
     // Callback of the scan timeout timer
     @objc internal func scanTimeout() {
+        if (state != .scanning) {
+            return
+        }
+        // Set state
+        state = .notConnected
         // Stop scan
         resetScan()
         // Inform delegate
-        if (state == .notConnected) {
-            delegate?.onBeltScanFinished(cause: .timeout)
-        }
+        delegate?.onBeltScanFinished(cause: .timeout)
+        delegate?.onConnectionStateChanged(
+            previousState: .scanning, newState: state, event: .scanTimeout)
     }
     
     /**
@@ -256,7 +274,14 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
                             timeoutSec: Int = CONNECTION_HANDSHAKE_TIMEOUT_SEC){
         
         // Check connection state
-        if (state != .notConnected) {
+        if (state == .scanning) {
+            // Stop scan with delegate notification
+            state = .notConnected
+            // Stop scan
+            resetScan()
+            // Inform delegate
+            delegate?.onBeltScanFinished(cause: .canceled)
+        } else if (state != .notConnected) {
             // Cannot connect when already connecting or connected
             setState(newState: state, cause: .connectionFailed,
                      forceNotification: true)
@@ -265,11 +290,6 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
         
         // Change connection state
         setState(newState: .connecting, cause: .connectionStarted)
-        
-        // Stop scan (with delegate notification)
-        if (scanTimer != nil) {
-            stopScan()
-        }
         
         // Check BT manager state
         switch btManager.state {
@@ -435,6 +455,13 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
                                      didDiscover peripheral: CBPeripheral,
                                      advertisementData: [String : Any],
                                      rssi RSSI: NSNumber) {
+        // Check device name
+        if let name = peripheral.name {
+            if !name.lowercased().contains(
+                FSConnectionManager.BELT_NAME_PREFIX.lowercased()) {
+                return
+            }
+        }
         // Check for duplicates
         if !scannedPeripheralIdentifers.contains(peripheral.identifier) {
             // Add in list

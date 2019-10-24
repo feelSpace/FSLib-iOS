@@ -8,18 +8,22 @@ FSLib-iOS is an iOS library to control the feelSpace naviBelt from your applicat
 * [Introduction to the feelSpace belt](#introduction-to-the-feelspace-belt)
   * [Belt buttons and modes](#belt-buttons-and-modes)
   * [Bluetooth communication](#bluetooth-communication)
+  * [Main features of the belt](#main-features-of-the-belt)
 * [FSLib for iOS](#fslib-for-ios)
   * [Structure of the repository](#structure-of-the-repository)
-  * [Structure of the FSLib framework](#structure-of-the-fslib-framework)
   * [Integration of the FSLib in a XCode project](#integration-of-the-fslib-in-a-xcode-project)
+  * [Setup of your project](#setup-of-your-project)
+  * [Structure of the FSLib module](#structure-of-the-fslib-module)
 * [Navigation API](#navigation-api)
   * [Introduction](#introduction)
-  * [Connection and disconnection of a belt](#connection-and-disconnection-of-a-belt)
-  * [Vibration for the navigation](#vibration-for-the-navigation)
-  * [Vibration for navigation events](#vibration-for-navigation-events)
-  * [Home-button press event](#home-button-press-event)
+  * [Navigation state and belt mode](#navigation-state-and-belt-mode)
+  * [Belt button press](#belt-button-press)
+  * [Continuous and repeated vibration signals](#continuous-and-repeated-vibration-signals)
+  * [Vibration notifications](#vibration-notifications)
+  * [Vibration intensity](#vibration-intensity)
   * [Belt orientation](#belt-orientation)
   * [Belt battery level](#belt-battery-level)
+  * [Compass accuracy signal](#compass-accuracy-signal)
 * [General purpose API](#general-purpose-api)
   * [Connection management](#connection-management)
     * [Connection manager and delegate](#connection-manager-and-delegate)
@@ -78,194 +82,177 @@ The belt contains a Bluetooth low-energy module. The communication is based on c
 
 A smartphone must support Bluetooth low-energy, version 4.0 or higher, to connect to the belt. iPhones support Bluetooth low-energy since the iPhone 4S version, released in October 2011. iPhones that were released before the 4S version do not support Bluetooth low-energy and will not be able to connect to the belt.
 
+## Main features of the belt
+
+The belt and the FSLib API propose a large set of features to cover multiple domains and use cases (e.g., navigation, VR, simulation, research experiment, outdoor and video-games, attention feedback).
+
+* 16 vibration motors
+* Up to 6 simultaneous vibrations
+* Configurable vibration intensity
+* Pre-defined and customizable vibration patterns
+* Vibration orientation can be relative to magnetic North or relative to the body
+* 8+ hours of battery autonomy when continuously vibrating
+* Compass and crossing functions that does not require any additional device
+* Wireless connection (Bluetooth Low Energy) for your application
+* Reading of the belt orientation, battery level, and belt button events from your application
+
+:construction: Some features of the belt may not be implemented in the FSLib. We will progressively add new features to the FSLib, but if you have a specific request please let us know by submitting an [issue](https://github.com/feelSpace/FSLib-iOS/issues).
+
 # FSLib for iOS
 
 ## Structure of the repository
 
-The repository contains one XCode workspace with four modules:
+The repository contains one XCode workspace with three modules:
 * **FSLibIOs**: The FSLib framework to be use for connecting and controlling a belt from an app. The module is implemented in Swift 4.
 * **FSLibIOsDemo**: A demo application for iPhone that illustrates how to use the FSLib framework. The module is implemented in Swift 4.
-* **FSLibIOsNaviDemo**: A demo application for iPhone that illustrate the navigation features of the FSLib interface for navigation apps.
-* **FSLibIOsObjcNaviDemo**: An objectice-C demo for iPhone that illustrate the navigation features of the FSLib interface for navigation apps.
+* **FSLibIOsObjcDemo**: A demo application for iPhone that illustrate how to use the FSLib framework in an Objective-C project. :construction: This Objective-C module is under development.
 
 ## Integration of the FSLib in a XCode project
 
 The `FSLibIOs` framework can be added in your XCode project as a "Linked Framework". This can be done in the "General" configuration pane of your XCode project. You can also create a local Pod with the `FSLibIOs` framework.
 
-:warning: To use the FSLib, the project must be configured to support Bluetooth functionalities. In the `Info.plist` configuration file of your project, an entry must be added in the `Required background modes` with the value `bluetooth-central`. This configuration is detailed in the apple developer guide: [Core Bluetooth Background Processing for iOS Apps](https://developer.apple.com/library/content/documentation/NetworkingInternetWeb/Conceptual/CoreBluetooth_concepts/CoreBluetoothBackgroundProcessingForIOSApps/PerformingTasksWhileYourAppIsInTheBackground.html).
+## Setup of your project
 
-## Structure of the FSLib framework
+To use the FSLib, the project must be configured to support Bluetooth functionalities. 
+* In the `Info.plist` configuration file of your project, an entry must be added in the `Required background modes` with the value `bluetooth-central`. This configuration is detailed in the apple developer guide: [Core Bluetooth Background Processing for iOS Apps](https://developer.apple.com/library/content/documentation/NetworkingInternetWeb/Conceptual/CoreBluetooth_concepts/CoreBluetoothBackgroundProcessingForIOSApps/PerformingTasksWhileYourAppIsInTheBackground.html).
+* In the `Info.plist` configuration file of your project, an entry must be added to explain why Bluetooth is used by your application. The key `NSBluetoothPeripheralUsageDescription` must be added with the description of Bluetooth usage as value. If your app has a deployment target earlier than iOS 13, you must also add the key `NSBluetoothAlwaysUsageDescription` with the same description in value. Details are given in the developer guide: [Core Bluetooth Overview](https://developer.apple.com/library/archive/documentation/NetworkingInternetWeb/Conceptual/CoreBluetooth_concepts/CoreBluetoothOverview/CoreBluetoothOverview.html#//apple_ref/doc/uid/TP40013257-CH2-SW1).
 
-In the `FSLibIOs` framework, six files are exposed for the integration of FSLib in an application. The other classes or protocols are intern to the module and are more likely to change in future versions of the FSLib.
-* `FSConnectionManager.swift`: The class used for retrieving, scanning and connecting to a belt.
-* `FSConnectionDelegate.swift`: The protocol containing callbacks to scan and connection events.
-* `FSCommandManager.swift`: The class used to send command to the belt.
-* `FSCommandDelegate.swift`: The protocol containing callbacks of the command manager and callback for belt events.
-* `FSNavigationController.swift`: The class used to control the belt for navigation.
-* `FSNavigationDelegate.swift`: The protocol containing callbacks of the navigation controller.
+## Structure of the FSLib module
+
+The FSLib proposes two approaches for connecting and controlling a belt:
+
+* **The navigation API:** It is the recommended approach. The navigation API provides simple methods to connect and control a belt. The main class to start developing with the navigation API is the `FSNavigationController`.
+* **The general API:** The general API provides a large set of methods to control the belt for complex applications. Your application must manage the mode of the belt and the belt's button events. The main classes of the general API are the `FSConnectionManager`, and the `FSCommandManager`. In any case it is recommended to look at the implementation of the FSNavigationController before you start using the general API.
 
 # Navigation API
 
 ## Introduction
 
-The FSLib provides a specific API for applications that use the belt for navigation. This navigation API is much simpler and easy to integrate than the general-purpose API. However, the available methods to control the belt are limited to the navigation domain; e.g. start/stop/pause the navigation, show a direction, notify a navigation event.
+The navigation API provides simple methods to connect and control a belt. Although the term "navigation" is used, this API can be used in different scenarios to control the orientation of a vibration signal. The orientation of the vibration can be a magnetic bearing (i.e. an angle relative to magnetic North) or a position on the belt (e.g. 90 degrees for the right side of the belt). It is also possible to use the navigation API for complex vibration signals by extending the `FSNavigationController`.
 
-The navigation API consists of the class `FSNavigationController` and the protocol `FSNavigationDelegate`. All methods required to connect a belt and control the vibration signal for navigation are in the `FSNavigationController`. The `FSNavigationDelegate` is the protocol that contains callbacks from the navigation controller.
+The main class to connect a belt and control the vibration is the `FSNavigationController`. You must also implement a `FSNavigationControllerDelegate` to handle the callback of the navigation controller.
 
-Please check the module `FSLibIOsNaviDemo` for an example of application that use the navigation API.
-
-:warning: It is not possible to use at the same time the navigation API and the general purpose API. The navigation API is a layer on top of the general purpose API. Only one delegate can register to the general purpose API, and the navigation layer already register itself as delegate.
+It is recommended to look at the demo application that illustrates how to use the navigation controller. The relevant part of the code is located in the `ViewController` class of the `FSLibIOsDemo` module.
 
 ## Connection and disconnection of a belt
 
-To manage the connection and control the belt, you must implement the `FSNavigationDelegate` and register your class as delegate of the `FSNavigationController`. Note that the navigation controller is accessible via a singleton `FSNavigationController.instance`.
+To manage the connection and control the belt, you must implement the `FSNavigationControllerDelegate` and register your class as delegate of the `FSNavigationController`.
 
 ```swift
-class MyClass: FSNavigationDelegate {
+class MyClass: FSNavigationControllerDelegate {
+    
     // Navigation controller
-    var beltNavigationController = FSNavigationController.instance
+    var beltController: FSNavigationController! = FSNavigationController()
 	
     init() {
         // Register as delegate
-        beltNavigationController.delegate = self
+        beltController.delegate = self
         // ...
     }
-	
-	// Implementation of the delegate methods
-	func onConnectionStateChanged(previousState: FSConnectionState,
-                                  newState: FSConnectionState) {
-        //...
-    }
-    func onBeltModeChanged(beltMode: FSBeltMode,
-                           buttonPressed: Bool) {
-        //...
-    }
-    func onBeltRequestHome() {
-        //...
-    }
-    func onBeltOrientationNotified(beltMagHeading: Int,
-                                   beltCompassInaccurate: Bool) {
-        //...
-    }
+    
+    // Implementation of the delegate methods
+    // ...
+    
 }
 ```
 
-To connect a belt, call the method `searchAndConnectBelt()`.
+To search and connect a belt, call the method `searchAndConnectBelt()`.
 
 ```swift
-beltNavigationController.searchAndConnectBelt()
+beltController.searchAndConnectBelt()
+```
+
+If you implemented your own scan procedure you can call `connectBelt()` with the belt in parameter.
+
+```swift
+beltController.searchAndConnectBelt(belt)
 ```
 
 To disconnect, call `disconnectBelt()`.
 
 ```swift
-beltNavigationController.disconnectBelt()
+beltController.disconnectBelt()
 ```
 
-The connection events are notified via the delegate method `onConnectionStateChanged()`. You should only look at the `.connected` and `notConnected` states. The other states are not relevent for most applications.
+The connection events are notified via the delegate method `onBeltConnectionStateChanged()`. You should only look at the `.connected` and `.notConnected` states. The other states are not relevent for most applications. The connection state of the belt is also available with the read-only property `connectionState` of the navigation controller.
 
-The connection state of the belt is also available with the read-only property `connectionState` of the navigation controller.
+If a problem occurs with the connection, the following delegate methods are called:
+* **`onBluetoothNotAvailable()`:** The smartphone has no compatible Bluetooth service.
+* **`onBluetoothPoweredOff()`:** The Bluetooth is switched off, your application should ask the user to switch on Bluetooth on the device.
+* **`onBeltConnectionFailed()`:** The connection with the belt failed. Your application should propose to retry the connection.
+* **`onBeltConnectionLost()`:** The connection with the belt has been lost. Your application should propose to reconnect the belt.
+* **`onNoBeltFound()`:** No belt has been found. Your application should ask the user to verify if the belt is powered-on.
+
+## Navigation state and belt mode
+
+The `FSNavigationController` has three states: `.stopped`, `.paused` and `.navigating`. When a belt is connected and the state is `.navigating`, the vibration of the belt is controlled by the application.
+
+Note that the state of the navigation controller can be changed even when no belt is connected. As soon as a belt is connected, the mode of the belt is automatically changed to match the state of the navigation controller (i.e. if the state is `.navigating` and a belt is connected, the mode of belt is automatically changed to app mode with the vibration signal defined by the navigation controller).
+
+Your application control the navigation state by calling the methods `startNavigation()`, `stopNavigation()` and `pauseNavigation()`. However, if a belt is connected, the state can change when the user press a button on the belt. For instance, if the state is `.navigating` and the user press the pause button on the belt, the navigation controller automatically switch to `.paused` state.
+
+## Belt button press
+
+The navigation controller already manages most of the behavior on button press and mode change. The application must only define a behavior when the home button is pressed, and the navigation is started or stopped. The callback to handle home-button press is `onBeltHomeButtonPressed()`.
+
+The detailed behavior of the navigation controller on button press is the following:
+
+* **Home button:** If the navigation is stopped or started, the delegate is informed of the button press via `onBeltHomeButtonPressed()`. If the navigation is paused and the belt is not in pause mode, the navigation is resumed automatically. If the navigation is paused and the belt is in pause mode, the vibration intensity is changed.
+* **Power button:** On short press, the battery level vibration is started without callback to the application. On long press, the belt is switched off and the delegate is informed of the disconnection via `onBeltConnectionStateChanged()`.
+* **Pause button:** If the navigation is started when the pause button is pressed, the navigation is automatically paused. If the belt was in pause mode from navigation, the navigation is automatically resumed.
+* **Compass button:** If the navigation is started when the compass button is pressed, the navigation is paused automatically and the belt goes to compass, crossing or calibration mode according to the type of press. In case the belt is in pause mode, the vibration intensity is changed.
+
+## Continuous and repeated vibration signals
+
+To start the vibration when a belt is connected your application must call `startNavigation()`. The parameters determine the type of vibration signal, the direction and type of orientation of the signal. The vibration signal can be updated by calling `updateNavigationSignal()`.
 
 ```swift
-FSConnectionState currentConnectionState = beltNavigationController.connectionState
-if (currentConnectionState == .connected) {
-    // ...
-}
+// Start a continuous signal towards East
+beltController.startNavigation(direction: 90, isMagneticBearing: true, signal: .continuous)
 ```
 
-## Vibration for the navigation
-
-To start a vibration you must first define the direction of the signal and the type of signal. This is done with the `setNavigationDirection()` method of the navigation controller. Then you call the method `startNavigation()`. When the navigation is started, the belt is also set to the app mode.
+To stop the vibration while staying in `.navigating` state, pass `nil` as signal type.
 
 ```swift
-// Set the navigation direction to East with the standard navigation vibration
-beltNavigationController.setNavigationDirection(90, signalType: .navigating)
-beltNavigationController.startNavigation()
+// Stop the vibration if in `.navigating` state
+beltController.updateNavigationSignal(direction: 0, isMagneticBearing: true, signal: nil)
 ```
 
-Four navigation signals are available: `.navigating`, `ongoingTurn`, `.approachingDestination` and `.destinationReached`. The direction is given in degrees relative to magnetic North. If you want for instance a vibration signal towards West, the direction value is 270.
+## Vibration notifications
 
-To start/resume, stop or pause the navigation call the methods `startNavigation()`, `stopNavigation()`, and `pauseNavigation()` of the navigation manager respectively. These methods change automatically the mode of the belt.
+In addition to continuous or repeated vibration signals, some temporary vibration signals can be started.
+
+* **notifyDestinationReached():** Starts a single iteration of the destination reached signal. Using this method, it is possible to stop the navigation when the signal is performed.
+* **notifyDirection():** Starts a temporary vibration in a given direction.
+* **notifyWarning():** Starts a warning vibration signal.
+* **notifyBeltBatteryLevel():** Starts the battery level signal of the belt.
+
+Exemple of temporary signal:
 
 ```swift
-    // Start the navigation (and switch to app mode)
-    beltNavigationController.startNavigation()
-    // ...
-    // Stop the navigation (and switch to wait mode)
-    beltNavigationController.stopNavigation()
-    // ...
-    // Pause the navigation (and switch to pause mode)
-    beltNavigationController.pauseNavigation()
-    // ....
+// Starts a temporary vibration on the left
+beltController.notifyDirection(direction: 270, isMagneticBearing: false)
 ```
 
-Note that when the `stopNavigation()` method is called, the navigation direction is cleared. The navigation direction and type of navigation signal are available in the properties `activeNavigationDirection` and `activeNavigationSignalType` of the navigation controller respectively.
+## Vibration intensity
 
-## Vibration for navigation events
-
-Several vibration signals are available to notify events.
-
-To notify a direction with a short vibration, call the `notifyDirection()` method of the navigation controller. The state of the navigation or the belt mode are not modified when a direction is notified.
-
-```swift
-// Start a vibration notification towards East
-beltNavigationController.notifyDirection(90)
-```
-
-For a warning, call `notifyWarning()`. The state of the navigation or the belt mode are not modified after a warning signal.
-
-```swift
-// Start a warning signal
-beltNavigationController.notifyWarning()
-```
-
-To notify the battery level of the belt with a vibration, call `notifyBeltBatteryLevel()`.
-
-```swift
-// Start the belt battery signal
-beltNavigationController.notifyBeltBatteryLevel()
-```
-
-To notify that the destination is reached, call `notifyDestinationReached`. The parameter `shouldStopNavigation` determines if the navigation must be stoppe after the destination reached signal.
-
-```swift
-// Notify that the destination is reached and stop the navigation
-beltNavigationController.notifyDestinationReached(shouldStopNavigation: true)
-```
-
-## Home-button press event
-
-On the belt control box, the "Home" button is reserved for application-specific features. To handle a press event on the "Home" button, the "onBeltRequestHome()" delegate method must be implemented.
-
-```swift
-class MyClass: FSNavigationDelegate {
-    // Navigation controller
-    var beltNavigationController = FSNavigationController.instance
-	
-    init() {
-        // Register as delegate
-        beltNavigationController.delegate = self
-    }
-    
-    func onBeltRequestHome() {
-        // Handle the Home button press
-        //...
-    }
-}
-```
+For all vibration signals except the operation warning, the default vibration intensity of the belt is used. When a belt is connected, the default intensity can be retrieved with the property `defaultVibrationIntensity`. To change the default vibration intensity the method `changeDefaultVibrationIntensity()` must be used. When a belt is connected, the delegate is informed of vibration intensity changes via the callback `onBeltDefaultVibrationIntensityChanged()`. Note that the vibration intensity can also be changed using the buttons of the belt.
 
 ## Belt orientation
 
-The orientation of the belt can be retrieved from the read-only property `beltMagHeading` of the navigation controller. Regular belt orientation notifications are also send via the delegate method `onBeltOrientationNotified`.
+The orientation of the belt (relative to magnetic North) is notified to the delegate via the callback `onBeltOrientationUpdated()`. The orientation is updated every 500 milliseconds. The last orientation value can also be retrieved with the property `beltHeading`. In addition, the property `beltOrientationAccurate` indicates if the orientation is accurate.
 
 ## Belt battery level
 
-The belt battery level can be retrieved from the read-only property `beltBatteryLevel` of the navigation controller.
+The battery level of the belt is notified to the delegate via the callback `onBeltBatteryLevelUpdated()`. The last known value of the belt battery level can also be retrieved with the property `beltBatteryLevel`, and the power status via the property `beltPowerStatus`.
 
-```swift
-// Retrieve the belt battery level
-var beltBatteryLevel = beltNavigationController.beltBatteryLevel
-```
+## Compass accuracy signal
+
+The belt emits a vibration signal to indicate that the internal compass is inaccurate. This may happen when the belt is used indoor or in a place with magnetic interferences. This compass accuracy signal is performed in compass mode, crossing mode and in application mode (the mode used in navigation). For some applications it is preferable to disable the compass accuracy signal, for instance, because vibration signals are not relative to magnetic North or orientation accuracy is not critical.
+
+You can retrieve the compass accuracy signal state via the property `compassAccuracySignalEnabled`. However, the value may be unknown for a short period after connection. The state of the compass accuracy signal can be changed when a belt is connected using the method `setCompassAccuracySignal(enable: Bool, persistent: Bool)`. Any update to the parameter (including the first reading of the parameter after connection) is notified to listeners via the callback `onCompassAccuracySignalStateUpdated(enabled: Bool)`.
+
+:warning: The accuracy signal state setting can be temporary, i.e. defined for the current power cycle of the belt and reset when the belt is powered-off, or the setting can be persistent and saved on the belt. In case the setting is saved on the belt, it is important to inform the user of this new configuration as it will also impact the compass and crossing mode when no app is connected to the belt.
 
 # General purpose API
 
