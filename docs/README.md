@@ -202,7 +202,7 @@ The detailed behavior of the navigation controller on button press is the follow
 * **Pause button:** If the navigation is started when the pause button is pressed, the navigation is automatically paused. If the belt was in pause mode from navigation, the navigation is automatically resumed.
 * **Compass button:** If the navigation is started when the compass button is pressed, the navigation is paused automatically and the belt goes to compass, crossing or calibration mode according to the type of press. In case the belt is in pause mode, the vibration intensity is changed.
 
-## Continuous and repeated vibraton signals
+## Continuous and repeated vibration signals
 
 To start the vibration when a belt is connected your application must call `startNavigation()`. The parameters determine the type of vibration signal, the direction and type of orientation of the signal. The vibration signal can be updated by calling `updateNavigationSignal()`.
 
