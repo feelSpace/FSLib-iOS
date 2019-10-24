@@ -144,7 +144,7 @@ class MyClass: FSNavigationControllerDelegate {
 	
     init() {
         // Register as delegate
-        beltNavigationController.delegate = self
+        beltController.delegate = self
         // ...
     }
     
@@ -154,121 +154,104 @@ class MyClass: FSNavigationControllerDelegate {
 }
 ```
 
-To connect a belt, call the method `searchAndConnectBelt()`.
+To search and connect a belt, call the method `searchAndConnectBelt()`.
 
 ```swift
-beltNavigationController.searchAndConnectBelt()
+beltController.searchAndConnectBelt()
+```
+
+If you implemented your own scan procedure you can call `connectBelt()` with the belt in parameter.
+
+```swift
+beltController.searchAndConnectBelt(belt)
 ```
 
 To disconnect, call `disconnectBelt()`.
 
 ```swift
-beltNavigationController.disconnectBelt()
+beltController.disconnectBelt()
 ```
 
-The connection events are notified via the delegate method `onConnectionStateChanged()`. You should only look at the `.connected` and `notConnected` states. The other states are not relevent for most applications.
+The connection events are notified via the delegate method `onBeltConnectionStateChanged()`. You should only look at the `.connected` and `.notConnected` states. The other states are not relevent for most applications. The connection state of the belt is also available with the read-only property `connectionState` of the navigation controller.
 
-The connection state of the belt is also available with the read-only property `connectionState` of the navigation controller.
+If a problem occurs with the connection, the following delegate methods are called:
+* **`onBluetoothNotAvailable()`:** The smartphone has no compatible Bluetooth service.
+* **`onBluetoothPoweredOff()`:** The Bluetooth is switched off, your application should ask the user to switch on Bluetooth on the device.
+* **`onBeltConnectionFailed()`:** The connection with the belt failed. Your application should propose to retry the connection.
+* **`onBeltConnectionLost()`:** The connection with the belt has been lost. Your application should propose to reconnect the belt.
+* **`onNoBeltFound()`:** No belt has been found. Your application should ask the user to verify if the belt is powered-on.
+
+## Navigation state and belt mode
+
+The `FSNavigationController` has three states: `.stopped`, `.paused` and `.navigating`. When a belt is connected and the state is `.navigating`, the vibration of the belt is controlled by the application.
+
+Note that the state of the navigation controller can be changed even when no belt is connected. As soon as a belt is connected, the mode of the belt is automatically changed to match the state of the navigation controller (i.e. if the state is `.navigating` and a belt is connected, the mode of belt is automatically changed to app mode with the vibration signal defined by the navigation controller).
+
+Your application control the navigation state by calling the methods `startNavigation()`, `stopNavigation()` and `pauseNavigation()`. However, if a belt is connected, the state can change when the user press a button on the belt. For instance, if the state is `.navigating` and the user press the pause button on the belt, the navigation controller automatically switch to `.paused` state.
+
+## Belt button press
+
+The navigation controller already manages most of the behavior on button press and mode change. The application must only define a behavior when the home button is pressed, and the navigation is started or stopped. The callback to handle home-button press is `onBeltHomeButtonPressed()`.
+
+The detailed behavior of the navigation controller on button press is the following:
+
+* **Home button:** If the navigation is stopped or started, the delegate is informed of the button press via `onBeltHomeButtonPressed()`. If the navigation is paused and the belt is not in pause mode, the navigation is resumed automatically. If the navigation is paused and the belt is in pause mode, the vibration intensity is changed.
+* **Power button:** On short press, the battery level vibration is started without callback to the application. On long press, the belt is switched off and the delegate is informed of the disconnection via `onBeltConnectionStateChanged()`.
+* **Pause button:** If the navigation is started when the pause button is pressed, the navigation is automatically paused. If the belt was in pause mode from navigation, the navigation is automatically resumed.
+* **Compass button:** If the navigation is started when the compass button is pressed, the navigation is paused automatically and the belt goes to compass, crossing or calibration mode according to the type of press. In case the belt is in pause mode, the vibration intensity is changed.
+
+## Continuous and repeated vibraton signals
+
+To start the vibration when a belt is connected your application must call `startNavigation()`. The parameters determine the type of vibration signal, the direction and type of orientation of the signal. The vibration signal can be updated by calling `updateNavigationSignal()`.
 
 ```swift
-FSConnectionState currentConnectionState = beltNavigationController.connectionState
-if (currentConnectionState == .connected) {
-    // ...
-}
+// Start a continuous signal towards East
+beltController.startNavigation(direction: 90, isMagneticBearing: true, signal: .continuous)
 ```
 
-## Vibration for the navigation
-
-To start a vibration you must first define the direction of the signal and the type of signal. This is done with the `setNavigationDirection()` method of the navigation controller. Then you call the method `startNavigation()`. When the navigation is started, the belt is also set to the app mode.
+To stop the vibration while staying in `.navigating` state, pass `nil` as signal type.
 
 ```swift
-// Set the navigation direction to East with the standard navigation vibration
-beltNavigationController.setNavigationDirection(90, signalType: .navigating)
-beltNavigationController.startNavigation()
+// Stop the vibration if in `.navigating` state
+beltController.updateNavigationSignal(direction: 0, isMagneticBearing: true, signal: nil)
 ```
 
-Four navigation signals are available: `.navigating`, `ongoingTurn`, `.approachingDestination` and `.destinationReached`. The direction is given in degrees relative to magnetic North. If you want for instance a vibration signal towards West, the direction value is 270.
+## Vibration notifications
 
-To start/resume, stop or pause the navigation call the methods `startNavigation()`, `stopNavigation()`, and `pauseNavigation()` of the navigation manager respectively. These methods change automatically the mode of the belt.
+In addition to continuous or repeated vibration signals, some temporary vibration signals can be started.
+
+* **notifyDestinationReached():** Starts a single iteration of the destination reached signal. Using this method, it is possible to stop the navigation when the signal is performed.
+* **notifyDirection():** Starts a temporary vibration in a given direction.
+* **notifyWarning():** Starts a warning vibration signal.
+* **notifyBeltBatteryLevel():** Starts the battery level signal of the belt.
+
+Exemple of temporary signal:
 
 ```swift
-    // Start the navigation (and switch to app mode)
-    beltNavigationController.startNavigation()
-    // ...
-    // Stop the navigation (and switch to wait mode)
-    beltNavigationController.stopNavigation()
-    // ...
-    // Pause the navigation (and switch to pause mode)
-    beltNavigationController.pauseNavigation()
-    // ....
+// Starts a temporary vibration on the left
+beltController.notifyDirection(direction: 270, isMagneticBearing: false)
 ```
 
-Note that when the `stopNavigation()` method is called, the navigation direction is cleared. The navigation direction and type of navigation signal are available in the properties `activeNavigationDirection` and `activeNavigationSignalType` of the navigation controller respectively.
+## Vibration intensity
 
-## Vibration for navigation events
-
-Several vibration signals are available to notify events.
-
-To notify a direction with a short vibration, call the `notifyDirection()` method of the navigation controller. The state of the navigation or the belt mode are not modified when a direction is notified.
-
-```swift
-// Start a vibration notification towards East
-beltNavigationController.notifyDirection(90)
-```
-
-For a warning, call `notifyWarning()`. The state of the navigation or the belt mode are not modified after a warning signal.
-
-```swift
-// Start a warning signal
-beltNavigationController.notifyWarning()
-```
-
-To notify the battery level of the belt with a vibration, call `notifyBeltBatteryLevel()`.
-
-```swift
-// Start the belt battery signal
-beltNavigationController.notifyBeltBatteryLevel()
-```
-
-To notify that the destination is reached, call `notifyDestinationReached`. The parameter `shouldStopNavigation` determines if the navigation must be stoppe after the destination reached signal.
-
-```swift
-// Notify that the destination is reached and stop the navigation
-beltNavigationController.notifyDestinationReached(shouldStopNavigation: true)
-```
-
-## Home-button press event
-
-On the belt control box, the "Home" button is reserved for application-specific features. To handle a press event on the "Home" button, the "onBeltRequestHome()" delegate method must be implemented.
-
-```swift
-class MyClass: FSNavigationDelegate {
-    // Navigation controller
-    var beltNavigationController = FSNavigationController.instance
-	
-    init() {
-        // Register as delegate
-        beltNavigationController.delegate = self
-    }
-    
-    func onBeltRequestHome() {
-        // Handle the Home button press
-        //...
-    }
-}
-```
+For all vibration signals except the operation warning, the default vibration intensity of the belt is used. When a belt is connected, the default intensity can be retrieved with the property `defaultVibrationIntensity`. To change the default vibration intensity the method `changeDefaultVibrationIntensity()` must be used. When a belt is connected, the delegate is informed of vibration intensity changes via the callback `onBeltDefaultVibrationIntensityChanged()`. Note that the vibration intensity can also be changed using the buttons of the belt.
 
 ## Belt orientation
 
-The orientation of the belt can be retrieved from the read-only property `beltMagHeading` of the navigation controller. Regular belt orientation notifications are also send via the delegate method `onBeltOrientationNotified`.
+The orientation of the belt (relative to magnetic North) is notified to the delegate via the callback `onBeltOrientationUpdated()`. The orientation is updated every 500 milliseconds. The last orientation value can also be retrieved with the property `beltHeading`. In addition, the property `beltOrientationAccurate` indicates if the orientation is accurate.
 
 ## Belt battery level
 
-The belt battery level can be retrieved from the read-only property `beltBatteryLevel` of the navigation controller.
+The battery level of the belt is notified to the delegate via the callback `onBeltBatteryLevelUpdated()`. The last known value of the belt battery level can also be retrieved with the property `beltBatteryLevel`, and the power status via the property `beltPowerStatus`.
 
-```swift
-// Retrieve the belt battery level
-var beltBatteryLevel = beltNavigationController.beltBatteryLevel
+## Compass accuracy signal
+
+The belt emits a vibration signal to indicate that the internal compass is inaccurate. This may happen when the belt is used indoor or in a place with magnetic interferences. This compass accuracy signal is performed in compass mode, crossing mode and in application mode (the mode used in navigation). For some applications it is preferable to disable the compass accuracy signal, for instance, because vibration signals are not relative to magnetic North or orientation accuracy is not critical.
+
+You can retrieve the compass accuracy signal state via the property `compassAccuracySignalEnabled`. However, the value may be unknown for a short period after connection. The state of the compass accuracy signal can be changed when a belt is connected using the method `setCompassAccuracySignal(enable: Bool, persistent: Bool)`. Any update to the parameter (including the first reading of the parameter after connection) is notified to listeners via the callback `onCompassAccuracySignalStateUpdated(enabled: Bool)`.
+
+:warning: The accuracy signal state setting can be temporary, i.e. defined for the current power cycle of the belt and reset when the belt is powered-off, or the setting can be persistent and saved on the belt. In case the setting is saved on the belt, it is important to inform the user of this new configuration as it will also impact the compass and crossing mode when no app is connected to the belt.
+
 ```
 
 # General purpose API
