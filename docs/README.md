@@ -8,7 +8,7 @@ FSLib-iOS is an iOS library to control the feelSpace naviBelt from your applicat
 * [Introduction to the feelSpace belt](#introduction-to-the-feelspace-belt)
   * [Belt buttons and modes](#belt-buttons-and-modes)
   * [Bluetooth communication](#bluetooth-communication)
-  * [Main features of the belt](#main-faetures-of-the-belt)
+  * [Main features of the belt](#main-features-of-the-belt)
 * [FSLib for iOS](#fslib-for-ios)
   * [Structure of the repository](#structure-of-the-repository)
   * [Integration of the FSLib in a XCode project](#integration-of-the-fslib-in-a-xcode-project)
@@ -128,51 +128,29 @@ The FSLib proposes two approaches for connecting and controlling a belt:
 
 The navigation API provides simple methods to connect and control a belt. Although the term "navigation" is used, this API can be used in different scenarios to control the orientation of a vibration signal. The orientation of the vibration can be a magnetic bearing (i.e. an angle relative to magnetic North) or a position on the belt (e.g. 90 degrees for the right side of the belt). It is also possible to use the navigation API for complex vibration signals by extending the `FSNavigationController`.
 
-The main class to connect a belt and control the vibration is the `NavigationController`. You must also implement a `NavigationEventListener` to handle the callback of the navigation controller.
+The main class to connect a belt and control the vibration is the `FSNavigationController`. You must also implement a `FSNavigationControllerDelegate` to handle the callback of the navigation controller.
 
-It is recommended to look at the demo application that illustrates how to use the navigation controller. The relevant part of the code is located in the `MainActivity` class of the `app` module.
-
-
-
-The FSLib provides a specific API for applications that use the belt for navigation. This navigation API is much simpler and easy to integrate than the general-purpose API. However, the available methods to control the belt are limited to the navigation domain; e.g. start/stop/pause the navigation, show a direction, notify a navigation event.
-
-The navigation API consists of the class `FSNavigationController` and the protocol `FSNavigationDelegate`. All methods required to connect a belt and control the vibration signal for navigation are in the `FSNavigationController`. The `FSNavigationDelegate` is the protocol that contains callbacks from the navigation controller.
-
-Please check the module `FSLibIOsNaviDemo` for an example of application that use the navigation API.
-
-:warning: It is not possible to use at the same time the navigation API and the general purpose API. The navigation API is a layer on top of the general purpose API. Only one delegate can register to the general purpose API, and the navigation layer already register itself as delegate.
+It is recommended to look at the demo application that illustrates how to use the navigation controller. The relevant part of the code is located in the `ViewController` class of the `FSLibIOsDemo` module.
 
 ## Connection and disconnection of a belt
 
-To manage the connection and control the belt, you must implement the `FSNavigationDelegate` and register your class as delegate of the `FSNavigationController`. Note that the navigation controller is accessible via a singleton `FSNavigationController.instance`.
+To manage the connection and control the belt, you must implement the `FSNavigationControllerDelegate` and register your class as delegate of the `FSNavigationController`.
 
 ```swift
-class MyClass: FSNavigationDelegate {
+class MyClass: FSNavigationControllerDelegate {
+    
     // Navigation controller
-    var beltNavigationController = FSNavigationController.instance
+    var beltController: FSNavigationController! = FSNavigationController()
 	
     init() {
         // Register as delegate
         beltNavigationController.delegate = self
         // ...
     }
-	
-	// Implementation of the delegate methods
-	func onConnectionStateChanged(previousState: FSConnectionState,
-                                  newState: FSConnectionState) {
-        //...
-    }
-    func onBeltModeChanged(beltMode: FSBeltMode,
-                           buttonPressed: Bool) {
-        //...
-    }
-    func onBeltRequestHome() {
-        //...
-    }
-    func onBeltOrientationNotified(beltMagHeading: Int,
-                                   beltCompassInaccurate: Bool) {
-        //...
-    }
+    
+    // Implementation of the delegate methods
+    // ...
+    
 }
 ```
 
