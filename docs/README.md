@@ -8,10 +8,12 @@ FSLib-iOS is an iOS library to control the feelSpace naviBelt from your applicat
 * [Introduction to the feelSpace belt](#introduction-to-the-feelspace-belt)
   * [Belt buttons and modes](#belt-buttons-and-modes)
   * [Bluetooth communication](#bluetooth-communication)
+  * [Main features of the belt](#main-faetures-of-the-belt)
 * [FSLib for iOS](#fslib-for-ios)
   * [Structure of the repository](#structure-of-the-repository)
-  * [Structure of the FSLib framework](#structure-of-the-fslib-framework)
   * [Integration of the FSLib in a XCode project](#integration-of-the-fslib-in-a-xcode-project)
+  * [Setup of your project](#setup-of-your-project)
+  * [Structure of the FSLib module](#structure-of-the-fslib-module)
 * [Navigation API](#navigation-api)
   * [Introduction](#introduction)
   * [Connection and disconnection of a belt](#connection-and-disconnection-of-a-belt)
@@ -78,35 +80,59 @@ The belt contains a Bluetooth low-energy module. The communication is based on c
 
 A smartphone must support Bluetooth low-energy, version 4.0 or higher, to connect to the belt. iPhones support Bluetooth low-energy since the iPhone 4S version, released in October 2011. iPhones that were released before the 4S version do not support Bluetooth low-energy and will not be able to connect to the belt.
 
+## Main features of the belt
+
+The belt and the FSLib API propose a large set of features to cover multiple domains and use cases (e.g., navigation, VR, simulation, research experiment, outdoor and video-games, attention feedback).
+
+* 16 vibration motors
+* Up to 6 simultaneous vibrations
+* Configurable vibration intensity
+* Pre-defined and customizable vibration patterns
+* Vibration orientation can be relative to magnetic North or relative to the body
+* 8+ hours of battery autonomy when continuously vibrating
+* Compass and crossing functions that does not require any additional device
+* Wireless connection (Bluetooth Low Energy) for your application
+* Reading of the belt orientation, battery level, and belt button events from your application
+
+:construction: Some features of the belt may not be implemented in the FSLib. We will progressively add new features to the FSLib, but if you have a specific request please let us know by submitting an [issue](https://github.com/feelSpace/FSLib-iOS/issues).
+
 # FSLib for iOS
 
 ## Structure of the repository
 
-The repository contains one XCode workspace with four modules:
+The repository contains one XCode workspace with three modules:
 * **FSLibIOs**: The FSLib framework to be use for connecting and controlling a belt from an app. The module is implemented in Swift 4.
 * **FSLibIOsDemo**: A demo application for iPhone that illustrates how to use the FSLib framework. The module is implemented in Swift 4.
-* **FSLibIOsNaviDemo**: A demo application for iPhone that illustrate the navigation features of the FSLib interface for navigation apps.
-* **FSLibIOsObjcNaviDemo**: An objectice-C demo for iPhone that illustrate the navigation features of the FSLib interface for navigation apps.
+* **FSLibIOsObjcDemo**: A demo application for iPhone that illustrate how to use the FSLib framework in an Objective-C project. :construction: This Objective-C module is under development.
 
 ## Integration of the FSLib in a XCode project
 
 The `FSLibIOs` framework can be added in your XCode project as a "Linked Framework". This can be done in the "General" configuration pane of your XCode project. You can also create a local Pod with the `FSLibIOs` framework.
 
-:warning: To use the FSLib, the project must be configured to support Bluetooth functionalities. In the `Info.plist` configuration file of your project, an entry must be added in the `Required background modes` with the value `bluetooth-central`. This configuration is detailed in the apple developer guide: [Core Bluetooth Background Processing for iOS Apps](https://developer.apple.com/library/content/documentation/NetworkingInternetWeb/Conceptual/CoreBluetooth_concepts/CoreBluetoothBackgroundProcessingForIOSApps/PerformingTasksWhileYourAppIsInTheBackground.html).
+## Setup of your project
 
-## Structure of the FSLib framework
+To use the FSLib, the project must be configured to support Bluetooth functionalities. 
+* In the `Info.plist` configuration file of your project, an entry must be added in the `Required background modes` with the value `bluetooth-central`. This configuration is detailed in the apple developer guide: [Core Bluetooth Background Processing for iOS Apps](https://developer.apple.com/library/content/documentation/NetworkingInternetWeb/Conceptual/CoreBluetooth_concepts/CoreBluetoothBackgroundProcessingForIOSApps/PerformingTasksWhileYourAppIsInTheBackground.html).
+* In the `Info.plist` configuration file of your project, an entry must be added to explain why Bluetooth is used by your application. The key `NSBluetoothPeripheralUsageDescription` must be added with the description of Bluetooth usage as value. If your app has a deployment target earlier than iOS 13, you must also add the key `NSBluetoothAlwaysUsageDescription` with the same description in value. Details are given in the developer guide: [Core Bluetooth Overview](https://developer.apple.com/library/archive/documentation/NetworkingInternetWeb/Conceptual/CoreBluetooth_concepts/CoreBluetoothOverview/CoreBluetoothOverview.html#//apple_ref/doc/uid/TP40013257-CH2-SW1).
 
-In the `FSLibIOs` framework, six files are exposed for the integration of FSLib in an application. The other classes or protocols are intern to the module and are more likely to change in future versions of the FSLib.
-* `FSConnectionManager.swift`: The class used for retrieving, scanning and connecting to a belt.
-* `FSConnectionDelegate.swift`: The protocol containing callbacks to scan and connection events.
-* `FSCommandManager.swift`: The class used to send command to the belt.
-* `FSCommandDelegate.swift`: The protocol containing callbacks of the command manager and callback for belt events.
-* `FSNavigationController.swift`: The class used to control the belt for navigation.
-* `FSNavigationDelegate.swift`: The protocol containing callbacks of the navigation controller.
+## Structure of the FSLib module
+
+The FSLib proposes two approaches for connecting and controlling a belt:
+
+* **The navigation API:** It is the recommended approach. The navigation API provides simple methods to connect and control a belt. The main class to start developing with the navigation API is the `FSNavigationController`.
+* **The general API:** The general API provides a large set of methods to control the belt for complex applications. Your application must manage the mode of the belt and the belt's button events. The main classes of the general API are the `FSConnectionManager`, and the `FSCommandManager`. In any case it is recommended to look at the implementation of the FSNavigationController before you start using the general API.
 
 # Navigation API
 
 ## Introduction
+
+The navigation API provides simple methods to connect and control a belt. Although the term "navigation" is used, this API can be used in different scenarios to control the orientation of a vibration signal. The orientation of the vibration can be a magnetic bearing (i.e. an angle relative to magnetic North) or a position on the belt (e.g. 90 degrees for the right side of the belt). It is also possible to use the navigation API for complex vibration signals by extending the `FSNavigationController`.
+
+The main class to connect a belt and control the vibration is the `NavigationController`. You must also implement a `NavigationEventListener` to handle the callback of the navigation controller.
+
+It is recommended to look at the demo application that illustrates how to use the navigation controller. The relevant part of the code is located in the `MainActivity` class of the `app` module.
+
+
 
 The FSLib provides a specific API for applications that use the belt for navigation. This navigation API is much simpler and easy to integrate than the general-purpose API. However, the available methods to control the belt are limited to the navigation domain; e.g. start/stop/pause the navigation, show a direction, notify a navigation event.
 
