@@ -16,12 +16,14 @@ FSLib-iOS is an iOS library to control the feelSpace naviBelt from your applicat
   * [Structure of the FSLib module](#structure-of-the-fslib-module)
 * [Navigation API](#navigation-api)
   * [Introduction](#introduction)
-  * [Connection and disconnection of a belt](#connection-and-disconnection-of-a-belt)
-  * [Vibration for the navigation](#vibration-for-the-navigation)
-  * [Vibration for navigation events](#vibration-for-navigation-events)
-  * [Home-button press event](#home-button-press-event)
+  * [Navigation state and belt mode](#navigation-state-and-belt-mode)
+  * [Belt button press](#belt-button-press)
+  * [Continuous and repeated vibration signals](#continuous-and-repeated-vibration-signals)
+  * [Vibration notifications](#vibration-notifications)
+  * [Vibration intensity](#vibration-intensity)
   * [Belt orientation](#belt-orientation)
   * [Belt battery level](#belt-battery-level)
+  * [Compass accuracy signal](#compass-accuracy-signal)
 * [General purpose API](#general-purpose-api)
   * [Connection management](#connection-management)
     * [Connection manager and delegate](#connection-manager-and-delegate)
@@ -251,8 +253,6 @@ The belt emits a vibration signal to indicate that the internal compass is inacc
 You can retrieve the compass accuracy signal state via the property `compassAccuracySignalEnabled`. However, the value may be unknown for a short period after connection. The state of the compass accuracy signal can be changed when a belt is connected using the method `setCompassAccuracySignal(enable: Bool, persistent: Bool)`. Any update to the parameter (including the first reading of the parameter after connection) is notified to listeners via the callback `onCompassAccuracySignalStateUpdated(enabled: Bool)`.
 
 :warning: The accuracy signal state setting can be temporary, i.e. defined for the current power cycle of the belt and reset when the belt is powered-off, or the setting can be persistent and saved on the belt. In case the setting is saved on the belt, it is important to inform the user of this new configuration as it will also impact the compass and crossing mode when no app is connected to the belt.
-
-```
 
 # General purpose API
 
