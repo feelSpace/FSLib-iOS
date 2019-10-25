@@ -91,8 +91,8 @@ Connect and control a feelSpace naviBelt (a tactile belt with vibration motors) 
   #  Not including the public_header_files will make all headers public.
   #
 
-  spec.source_files  = "FSLibIOs"
-  # spec.source_files  = "FSLibIOs", "FSLibIOs/**/*.{swift,h}"
+  spec.source_files  = "FSLibIOs/FSLibIOs", "FSLibIOs/FSLibIOs/**/*.{swift,h}"
+  spec.exclude_files = "FSLibIOs/FSLibIOsTests", "FSLibIOs/FSLibIOsTests/**/*.{swift,h}"
   # spec.exclude_files = "Classes/Exclude"
 
   # spec.public_header_files = "Classes/**/*.h"
