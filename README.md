@@ -8,8 +8,8 @@ An iOS library to control the feelSpace naviBelt from your application.
 
 ## Installation
 
-* [Install FSLib as a linked framework](docs/README.md#integration-of-the-fslib-in-a-xcode-project)
-* Install FSLib with CocoaPods (coming soon)
+* [Install FSLib using CocoaPods](docs/README.md#using-cocoapods)
+* [Install FSLib as a linked framework](docs/README.md#using-source-on-git)
 
 ## About feelSpace
 
