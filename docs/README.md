@@ -109,7 +109,16 @@ The repository contains one XCode workspace with three modules:
 
 ## Integration of the FSLib in a XCode project
 
-The `FSLibIOs` framework can be added in your XCode project as a "Linked Framework". This can be done in the "General" configuration pane of your XCode project. You can also create a local Pod with the `FSLibIOs` framework.
+### Using CocoaPods
+To add the last version of FSLib to your project using CocoaPods, first install and configure CocoaPods for your project (see [Using CocoaPods](https://guides.cocoapods.org/using/using-cocoapods.html)). Then, add the following dependency to your Podfile:
+
+```
+    pod 'FSLibIOs', '~> 2.0.0'
+```
+
+
+### Using source on git
+You can clone the FSLib git repository and link it to your project. First clone the FSLib-iOS repository, then add the `FSLibIOs` project to your workspace as a "Linked Framework". This can be done in the "General" configuration pane of your XCode project.
 
 ## Setup of your project
 
