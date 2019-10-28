@@ -3,14 +3,14 @@ An iOS library to control the feelSpace naviBelt from your application.
 
 ## Documentation
 
-* [FSLib iOS documentation](docs/README.md)
-* [Notes for migrating to FSLib-iOS v2.0.0](https://github.com/feelSpace/FSLib-iOS/releases/latest)
+* [FSLib iOS documentation](https://github.com/feelSpace/FSLib-iOS/tree/master/docs/README.md)
+* [Notes for migrating to FSLib-iOS v2.0.0](https://github.com/feelSpace/FSLib-iOS/releases/tag/v2.0.0)
 * Developer page (coming soon)
 
 ## Installation
 
-* [Install FSLib using CocoaPods](docs/README.md#using-cocoapods)
-* [Install FSLib as a linked framework](docs/README.md#using-source-on-git)
+* [Install FSLib using CocoaPods](https://github.com/feelSpace/FSLib-iOS/tree/master/docs/README.md#using-cocoapods)
+* [Install FSLib as a linked framework](https://github.com/feelSpace/FSLib-iOS/tree/master/docs/README.md#using-source-on-git)
 
 ## About feelSpace
 
