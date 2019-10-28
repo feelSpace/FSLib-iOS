@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "FSLibIOs"
-  spec.version      = "2.0.0"
+  spec.version      = "2.0.1"
   spec.summary      = "An iOS library to control the feelSpace naviBelt from your application."
 
   # This description is used to generate tags and improve search results.
@@ -25,7 +25,7 @@ Pod::Spec.new do |spec|
   #   * Write the description between the DESC delimiters below.
   #   * Finally, don't worry about the indent, CocoaPods strips it!
   spec.description  = <<-DESC
-Connect and control a feelSpace naviBelt (a tactile belt with vibration motors) from your application. The FSLib use Bluetooth Low Energy to communicate with the naviBelt. The FSLib can be used in multiple domains to provide a tactile feedback, for instance, navigation, VR, simulation, research experiments, outdoor and video-games, attention feedback. 
+Connect and control a feelSpace naviBelt (a tactile belt with vibration motors) from your application. The FSLib use Bluetooth Low Energy to communicate with the naviBelt. The FSLib can be used in multiple domains to provide a tactile feedback, for instance in navigation applications, VR, simulation, research experiments, outdoor and video-games, attention feedback. 
                    DESC
 
   spec.homepage     = "https://github.com/feelSpace/FSLib-iOS"

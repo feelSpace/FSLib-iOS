@@ -12,9 +12,6 @@ import CoreBluetooth
 /**
  The navigation controller is an interface to connect and control a feelSpace
  NaviBelt.
- 
- The navigation controller is a simplified interface designed for navigation
- applications.
  */
 @objc public class FSNavigationController: NSObject, FSConnectionDelegate,
         FSCommandDelegate {
@@ -55,7 +52,7 @@ import CoreBluetooth
      connection state, i.e. the state can be `.navigating` even when no belt is
      connected. However, if a belt is connected, the state of the navigation
      controller is synchronized with the belt mode, i.e. the state `.navigating`
-     correspond to the `.app` mode.
+     correspond to the `.app` mode of the belt.
      */
     public private(set) var navigationState: FSNavigationState = .stopped
     
@@ -82,7 +79,7 @@ import CoreBluetooth
     }
     
     /**
-     Default vibration intensity of the connected belt in range [5-100].
+     Default vibration intensity of the connected belt, in range [5-100].
      
      This property is `nil` when no belt is connected.
      */
@@ -98,7 +95,7 @@ import CoreBluetooth
     }
     
     /**
-     Last known orientation of the belt in degrees relative to magnetic North.
+     Last known orientation of the belt, in degrees relative to magnetic North.
      
      Positives angles are clockwise. This property is `nil` when no belt is
      connected and until the first orientation notification is received from
@@ -786,8 +783,8 @@ import CoreBluetooth
      This method is called by the navigation manager when the navigation is
      started or the vibration signal is updated. Note that the navigation
      manager has an mechanism to avoid calling this method too often to
-     preserve the Blurtooth service to be flooded.
-     This method can be overridden to manage more complexe vibration signals.
+     preserve the Bluetooth service to be flooded.
+     This method can be overridden to manage more complex vibration signals.
      
      - Parameters:
         - beltConnection: The connection to the belt.

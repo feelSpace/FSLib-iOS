@@ -14,7 +14,7 @@ import Foundation
 @objc public protocol FSNavigationControllerDelegate {
     
     /**
-     Called the navigation state changed.
+     Called when the navigation state changed.
      
      The state may be changed by the application or with a button press on the
      belt.
