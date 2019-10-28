@@ -76,7 +76,7 @@ Connect and control a feelSpace naviBelt (a tactile belt with vibration motors) 
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  spec.source       = { :git => "https://github.com/feelSpace/FSLib-iOS.git", :tag => "v#{spec.version}" }
+  spec.source       = { :git => "https://github.com/feelSpace/FSLib-iOS.git", :tag => "v2.0.1" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
