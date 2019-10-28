@@ -39,7 +39,6 @@ Connect and control a feelSpace naviBelt (a tactile belt with vibration motors) 
   #  Popular ones are 'MIT', 'BSD' and 'Apache License, Version 2.0'.
   #
 
-  # spec.license      = "MIT (example)"
   spec.license      = { :type => "apache-2.0", :file => "LICENSE" }
 
 
@@ -54,9 +53,7 @@ Connect and control a feelSpace naviBelt (a tactile belt with vibration motors) 
   #
 
   spec.author             = { "D. Meignan" => "dev@feelspace.de" }
-  # Or just: spec.author    = "D. M."
-  # spec.authors            = { "D. M." => "" }
-  # spec.social_media_url   = "https://twitter.com/D. M."
+  # spec.social_media_url   = "https://twitter.com/..."
 
   # ――― Platform Specifics ――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
   #
@@ -65,7 +62,6 @@ Connect and control a feelSpace naviBelt (a tactile belt with vibration motors) 
   #
 
   spec.platform     = :ios, "9.3"
-  # spec.platform     = :ios, "5.0"
 
   #  When using multiple platforms
   # spec.ios.deployment_target = "5.0"
@@ -80,7 +76,7 @@ Connect and control a feelSpace naviBelt (a tactile belt with vibration motors) 
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  spec.source       = { :git => "https://github.com/feelSpace/FSLib-iOS.git", :tag => "#{spec.version}" }
+  spec.source       = { :git => "https://github.com/feelSpace/FSLib-iOS.git", :tag => "v#{spec.version}" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
@@ -93,7 +89,6 @@ Connect and control a feelSpace naviBelt (a tactile belt with vibration motors) 
 
   spec.source_files  = "FSLibIOs/FSLibIOs", "FSLibIOs/FSLibIOs/**/*.{swift,h}"
   spec.exclude_files = "FSLibIOs/FSLibIOsTests", "FSLibIOs/FSLibIOsTests/**/*.{swift,h}"
-  # spec.exclude_files = "Classes/Exclude"
 
   # spec.public_header_files = "Classes/**/*.h"
 
