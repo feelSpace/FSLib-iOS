@@ -15,7 +15,7 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
     let beltController: FSNavigationController! = FSNavigationController()
     
     // Selected navigation signal
-    var selectedSignalType: FSBeltVibrationSignal? = nil
+    var selectedSignalType: FSBeltVibrationSignal = .noVibration
     
     // References to UI components
     @IBOutlet weak var connectButton: UIButton!
@@ -96,14 +96,14 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
     
     /** Updates the default intensity panel UI. */
     private func updateDefaultIntensityPanel() {
-        let intensity: Int? = beltController.defaultVibrationIntensity
-        if(intensity == nil) {
+        let intensity: Int = beltController.defaultVibrationIntensity
+        if (intensity < 0) {
             defaultIntensityLabel.text = "-"
             defaultIntensitySlider.setValue(50, animated: false)
             defaultIntensitySlider.isEnabled = false
         } else {
-            defaultIntensityLabel.text = String(format: "%d%%", intensity!)
-            defaultIntensitySlider.value = Float(intensity!)
+            defaultIntensityLabel.text = String(format: "%d%%", intensity)
+            defaultIntensitySlider.value = Float(intensity)
             defaultIntensitySlider.isEnabled = true
         }
     }
@@ -112,24 +112,20 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
     private func updateBatteryPanel() {
         let status = beltController.beltPowerStatus
         let level = beltController.beltBatteryLevel
-        if (status == nil) {
-            powerStatusLabel.text = "-"
-        } else {
-            switch (status!) {
-            case .unknown:
-                powerStatusLabel.text = "Unknown"
-            case .onBattery:
-                powerStatusLabel.text = "On battery"
-            case .charging:
-                powerStatusLabel.text = "Charging"
-            case .externalPower:
-                powerStatusLabel.text = "External power supply"
-            }
+        switch (status) {
+        case .unknown:
+            powerStatusLabel.text = "Unknown"
+        case .onBattery:
+            powerStatusLabel.text = "On battery"
+        case .charging:
+            powerStatusLabel.text = "Charging"
+        case .externalPower:
+            powerStatusLabel.text = "External power supply"
         }
-        if (level == nil) {
+        if (level < 0) {
             batteryLevelLabel.text = "-"
         } else {
-            batteryLevelLabel.text = String(format: "%d%%", level!)
+            batteryLevelLabel.text = String(format: "%d%%", level)
         }
     }
     
@@ -138,24 +134,22 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
         let heading = beltController.beltHeading
         let accurate = beltController.beltOrientationAccurate
         let accuracySignalState = beltController.compassAccuracySignalEnabled
-        if (heading == nil) {
+        if (heading < 0) {
             beltHeadingLabel.text = "-"
         } else {
-            beltHeadingLabel.text = String(format: "%d°", heading!)
+            beltHeadingLabel.text = String(format: "%d°", heading)
         }
-        if (accurate == nil) {
+        if (accurate < 0) {
             orientationAccurateLabel.text = "-"
+        } else if (accurate > 0) {
+            orientationAccurateLabel.text = "Yes"
         } else {
-            if (accurate!) {
-                orientationAccurateLabel.text = "Yes"
-            } else {
-                orientationAccurateLabel.text = "No"
-            }
+            orientationAccurateLabel.text = "No"
         }
-        if (accuracySignalState == nil) {
+        if (accuracySignalState < 0) {
             changeAccuracySignalButton.isEnabled = false
             changeAccuracySignalButton.setTitle("Unknown accuracy signal state", for: .normal)
-        } else if (accuracySignalState!) {
+        } else if (accuracySignalState > 0) {
             changeAccuracySignalButton.isEnabled = true
             changeAccuracySignalButton.setTitle("Disable accuracy signal", for: .normal)
         } else {
@@ -165,7 +159,7 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
     }
     
     /** Sets the signal for the navigation. */
-    private func setSignalType(_ selected: FSBeltVibrationSignal?) {
+    private func setSignalType(_ selected: FSBeltVibrationSignal) {
         selectedSignalType = selected
         updateNavigationSignalTypePanel()
         _=beltController.updateNavigationSignal(
@@ -176,37 +170,35 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
     
     /** Updates the signal type button label. */
     private func updateNavigationSignalTypePanel() {
-        if (selectedSignalType == nil) {
+        switch (selectedSignalType) {
+        case .noVibration:
             signalTypeButton.setTitle("No vibration", for: .normal)
-        } else {
-            switch (selectedSignalType!) {
-            case .continuous:
-                signalTypeButton.setTitle("Continuous", for: .normal)
-            case .navigation:
-                signalTypeButton.setTitle("Navigation signal", for: .normal)
-            case .approachingDestination:
-                signalTypeButton.setTitle("Approaching destination",
-                                          for: .normal)
-            case .turnOngoing:
-                signalTypeButton.setTitle("Ongoing turn", for: .normal)
-            case .nextWaypointLongDistance:
-                signalTypeButton.setTitle("Next waypoint at long distance",
-                                          for: .normal)
-            case .nextWaypointMediumDistance:
-                signalTypeButton.setTitle("Next waypoint at medium distance",
-                                          for: .normal)
-            case .nextWaypointShortDistance:
-                signalTypeButton.setTitle("Next waypoint at short distance",
-                                          for: .normal)
-            case .nextWaypointAreaReached:
-                signalTypeButton.setTitle("Waypoint area reached", for: .normal)
-            case .destinationReachedRepeated:
-                signalTypeButton.setTitle("Destination reached", for: .normal)
-            case .directionNotification, .destinationReachedSingle,
-                 .operationWarning, .criticalWarning, .batteryLevel:
-                // Should not happen
-                signalTypeButton.setTitle("Illegal signal type", for: .normal)
-            }
+        case .continuous:
+            signalTypeButton.setTitle("Continuous", for: .normal)
+        case .navigation:
+            signalTypeButton.setTitle("Navigation signal", for: .normal)
+        case .approachingDestination:
+            signalTypeButton.setTitle("Approaching destination",
+                                      for: .normal)
+        case .turnOngoing:
+            signalTypeButton.setTitle("Ongoing turn", for: .normal)
+        case .nextWaypointLongDistance:
+            signalTypeButton.setTitle("Next waypoint at long distance",
+                                      for: .normal)
+        case .nextWaypointMediumDistance:
+            signalTypeButton.setTitle("Next waypoint at medium distance",
+                                      for: .normal)
+        case .nextWaypointShortDistance:
+            signalTypeButton.setTitle("Next waypoint at short distance",
+                                      for: .normal)
+        case .nextWaypointAreaReached:
+            signalTypeButton.setTitle("Waypoint area reached", for: .normal)
+        case .destinationReachedRepeated:
+            signalTypeButton.setTitle("Destination reached", for: .normal)
+        case .directionNotification, .destinationReachedSingle,
+             .operationWarning, .criticalWarning, .batteryLevel:
+            // Should not happen
+            signalTypeButton.setTitle("Illegal signal type", for: .normal)
         }
     }
     
@@ -329,9 +321,9 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
     
     @IBAction func onChangeAccuracySignalButtonTap(_ sender: UIButton) {
         let accuracySignalState = beltController.compassAccuracySignalEnabled
-        if (accuracySignalState == nil) {
+        if (accuracySignalState < 0) {
             // Do nothing, state is unknwon
-        } else if (accuracySignalState!) {
+        } else if (accuracySignalState > 0) {
             // Disable signal dialog
             let alert = UIAlertController(
                 title: "Disable accuracy signal",
@@ -415,7 +407,7 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
             title: "No vibration",
             style: .default,
             handler: {action in
-                self.setSignalType(nil)}))
+                self.setSignalType(.noVibration)}))
         alert.addAction(UIAlertAction(
             title: "Navigation signal",
             style: .default,

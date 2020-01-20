@@ -19,6 +19,11 @@ import Foundation
 @objc public enum FSBeltVibrationSignal: Int {
     
     /**
+     No vibration.
+     */
+    case noVibration;
+    
+    /**
      Continuous vibration.
      */
     case continuous;
@@ -115,7 +120,7 @@ import Foundation
  */
 func isRepeated(_ signal: FSBeltVibrationSignal) -> Bool {
     switch signal {
-    case .continuous, .navigation, .approachingDestination,
+    case .noVibration, .continuous, .navigation, .approachingDestination,
          .turnOngoing, .nextWaypointLongDistance, .nextWaypointMediumDistance,
          .nextWaypointShortDistance, .nextWaypointAreaReached,
          .destinationReachedRepeated:

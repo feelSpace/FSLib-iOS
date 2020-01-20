@@ -13,7 +13,7 @@ import CoreBluetooth
  The navigation controller is an interface to connect and control a feelSpace
  NaviBelt.
  */
-@objc public class FSNavigationController: NSObject, FSConnectionDelegate,
+public class FSNavigationController: NSObject, FSConnectionDelegate,
         FSCommandDelegate {
     
     /** Belt connection */
@@ -35,7 +35,7 @@ import CoreBluetooth
     private static let MINIMUM_VIBRATION_COMMAND_UPDATE_PERIOD_SEC = 0.1
     
     /** Vibration signal to use when in navigation */
-    private var navigationSignal: FSBeltVibrationSignal?
+    private var navigationSignal: FSBeltVibrationSignal = .noVibration
     
     /** Direction of the vibration when in navigation */
     private var navigationDirection: Int = 0
@@ -54,12 +54,12 @@ import CoreBluetooth
      controller is synchronized with the belt mode, i.e. the state `.navigating`
      correspond to the `.app` mode of the belt.
      */
-    public private(set) var navigationState: FSNavigationState = .stopped
+    @objc public private(set) var navigationState: FSNavigationState = .stopped
     
     /**
      Connection state with the belt.
      */
-    public var connectionState: FSBeltConnectionState {
+    @objc public var connectionState: FSBeltConnectionState {
         get {
             switch beltConnection.state {
             case .notConnected:
@@ -81,57 +81,69 @@ import CoreBluetooth
     /**
      Default vibration intensity of the connected belt, in range [5-100].
      
-     This property is `nil` when no belt is connected.
+     This value is -1 when no belt is connected and until the first orientation oification is received.
+     (Optional type is not used for Objective-C compatibility reasons)
      */
-    public var defaultVibrationIntensity: Int? {
+    @objc public var defaultVibrationIntensity: Int {
         get {
-            let intensity = beltController.defaultIntensity
-            if (intensity < 0) {
-                return nil
-            } else {
-                return intensity
-            }
+            return beltController.defaultIntensity
         }
     }
     
     /**
      Last known orientation of the belt, in degrees relative to magnetic North.
      
-     Positives angles are clockwise. This property is `nil` when no belt is
-     connected and until the first orientation notification is received from
-     the belt.
+     The value is in range [0-360], and -1 if unknown. (Optional type is not used for Objective-C
+     compatibility reasons)
      */
-    public var beltHeading: Int? {
+    
+    @objc public var beltHeading: Int {
         get {
-            return beltController.beltOrientation?.beltMagHeading
+            if let heading = beltController.beltOrientation?.beltMagHeading {
+                if (heading < 0) {
+                    return heading%360
+                } else {
+                    return (heading%360)+360
+                }
+            } else {
+                return -1
+            }
         }
     }
     
     /**
      Flag indicating if the orientation of the belt is accurate.
      
-     This property is `nil` when no belt is connected and until the first
-     orientation notification is received from the belt.
+     The value is -1 when no belt is connected and until the first orientation notification is received from the
+     belt. 0 when the orientation is inaccurate, 1 if accurate. (Optional type is not used for Objective-C
+     compatibility reasons)
      */
-    public var beltOrientationAccurate: Bool? {
+    @objc public var beltOrientationAccurate: Int {
         get {
-            return beltController.beltOrientation?.beltCompassInaccurate
+            if let inaccurate = beltController.beltOrientation?.beltCompassInaccurate {
+                if (inaccurate) {
+                    return 0
+                } else {
+                    return 1
+                }
+            } else {
+                return -1
+            }
         }
     }
     
     /**
      Battery level of the belt in percent.
      
-     This property is `nil` when no belt is connected and until the first
-     battery notification is received from the belt.
+     The value is in range [0-100], and -1 if unknown. (Optional type is not used for Objective-C
+     compatibility reasons)
      */
-    public var beltBatteryLevel: Int? {
+    @objc public var beltBatteryLevel: Int {
         get {
-            let level = beltController.beltBatteryStatus.batteryLevel
-            if (level < 0) {
-                return nil
+            if (beltController.beltBatteryStatus.batteryLevel < 0) {
+                return -1
             } else {
-                return Int(level)
+                return Int(beltController.beltBatteryStatus.batteryLevel)
             }
         }
     }
@@ -139,37 +151,23 @@ import CoreBluetooth
     /**
      Power status of the belt.
      
-     This property is `nil` when no belt is connected and until the first
+     The value  is `.unknwon` when no belt is connected and until the first
      battery notification is received from the belt.
      */
-    public var beltPowerStatus: FSPowerStatus? {
+    @objc public var beltPowerStatus: FSPowerStatus {
         get {
-            switch beltController.beltBatteryStatus.powerStatus {
-            case .onBattery:
-                return .onBattery
-            case .charging:
-                return .charging
-            case .externalPower:
-                return .externalPower
-            default:
-                return nil
-            }
+            return beltController.beltBatteryStatus.powerStatus
         }
     }
     
     /**
      Firmware version of the connected belt.
      
-     This property is `nil` when no belt is connected.
+     The value is -1 when no belt is connected.
      */
-    public var beltFirmwareVersion: Int? {
+    @objc public var beltFirmwareVersion: Int {
         get {
-            let version = beltController.firmwareVersion
-            if (version < 0) {
-                return nil
-            } else {
-                return version
-            }
+            return beltController.firmwareVersion
         }
     }
     
@@ -186,19 +184,21 @@ import CoreBluetooth
     /**
      State of the compass accuracy signal.
      
-     If `true` the compass signal accuracy is enabled, if `false` it is
-     disabled. This attribute is `nil` when the state of the compass accuracy
+     If `1` the compass signal accuracy is enabled, if `0` it is
+     disabled. The value is -1 when the state of the compass accuracy
      signal is unknown or no belt is connected. Note that the value of this
      attribute is unknown for a short period after a connection to a belt is
      established.
      */
-    public var compassAccuracySignalEnabled: Bool? {
+    @objc public var compassAccuracySignalEnabled: Int {
         get {
-            let state = beltController.beltCompassAccuracySignalEnabled
-            if (beltConnection.state != .connected) {
-                return nil
+            let enabled = beltController.beltCompassAccuracySignalEnabled
+            if (beltConnection.state != .connected || enabled == nil) {
+                return -1
+            } else if (enabled!) {
+                return 1
             } else {
-                return state
+                return 0
             }
         }
     }
@@ -208,12 +208,12 @@ import CoreBluetooth
      
      A delegate must be defined to handle events of the navigation controller.
      */
-    public var delegate: FSNavigationControllerDelegate?
+    @objc public var delegate: FSNavigationControllerDelegate?
     
     /**
      Channel index used for the navigation signal
      */
-    public static let NAVIGATION_SIGNAL_CHANNEL: Int = 2
+    @objc public static let NAVIGATION_SIGNAL_CHANNEL: Int = 2
     
     //MARK: Public methods
     
@@ -231,7 +231,7 @@ import CoreBluetooth
     /**
      Searches and connects a belt.
      */
-    public func searchAndConnectBelt() {
+    @objc public func searchAndConnectBelt() {
         disconnectBelt()
         // Look for belt connected to other application
         let connected = beltConnection.retrieveConnectedBelt()
@@ -250,7 +250,7 @@ import CoreBluetooth
      - Parameters:
         - device: The belt to connect to.
      */
-    public func connectBelt(_ device: CBPeripheral) {
+    @objc public func connectBelt(_ device: CBPeripheral) {
         disconnectBelt()
         beltConnection.connectBelt(device)
     }
@@ -258,7 +258,7 @@ import CoreBluetooth
     /**
      Disconnects the belt or stops the scan and connection procedure.
      */
-    public func disconnectBelt() {
+    @objc public func disconnectBelt() {
         beltConnection.stopScan()
         beltConnection.disconnectBelt()
     }
@@ -282,10 +282,10 @@ import CoreBluetooth
      navigation has not been started because a temporary signal has been
      specified.
      */
-    public func startNavigation(direction: Int, isMagneticBearing: Bool,
-                                signal: FSBeltVibrationSignal?) -> Bool {
+    @objc public func startNavigation(direction: Int, isMagneticBearing: Bool,
+                                signal: FSBeltVibrationSignal) -> Bool {
         // Check signal type
-        if (signal != nil && !isRepeated(signal!)) {
+        if (!isRepeated(signal)) {
             return false
         }
         // Set signal and change navigation state
@@ -327,10 +327,10 @@ import CoreBluetooth
      signal has not been updated because a temporary signal has been
      specified or the navigation is not started.
      */
-    public func updateNavigationSignal(direction: Int, isMagneticBearing: Bool,
-            signal: FSBeltVibrationSignal?) -> Bool {
+    @objc public func updateNavigationSignal(direction: Int, isMagneticBearing: Bool,
+            signal: FSBeltVibrationSignal) -> Bool {
         // Check signal type
-        if (signal != nil && !isRepeated(signal!)) {
+        if (!isRepeated(signal)) {
             return false
         }
         // Check navigation state
@@ -351,7 +351,7 @@ import CoreBluetooth
      If the navigation state is `.navigating` and a belt is connected, the mode
      of the belt is changed to pause mode.
      */
-    public func pauseNavigation() {
+    @objc public func pauseNavigation() {
         if (navigationState != .navigating) {
             return
         }
@@ -373,7 +373,7 @@ import CoreBluetooth
      of the belt is changed to wait mode. Also if the connected belt is in pause
      mode for the app, the mode of the belt is changed to wait mode.
      */
-    public func stopNavigation() {
+    @objc public func stopNavigation() {
         if (navigationState == .stopped) {
             return
         }
@@ -399,7 +399,7 @@ import CoreBluetooth
      performed.
      - Returns: `true` if the request has been sent, `false` otherwise.
      */
-    public func notifyDestinationReached(shouldStopNavigation: Bool) -> Bool {
+    @objc public func notifyDestinationReached(shouldStopNavigation: Bool) -> Bool {
         if (shouldStopNavigation) {
             stopNavigation()
         }
@@ -421,7 +421,7 @@ import CoreBluetooth
      North, `false` if the direction is relative to the belt itself.
      - Returns: `true` if the request has been sent, `false` otherwise.
      */
-    public func notifyDirection(direction: Int,
+    @objc public func notifyDirection(direction: Int,
                                 isMagneticBearing: Bool) -> Bool {
         if (beltConnection.state == .connected) {
             if (isMagneticBearing) {
@@ -457,7 +457,7 @@ import CoreBluetooth
         - critical: `true` if a strong warning signal must be used.
      - Returns: `true` if the request has been sent, `false` otherwise.
      */
-    public func notifyWarning(critical: Bool) -> Bool {
+    @objc public func notifyWarning(critical: Bool) -> Bool {
         if (beltConnection.state == .connected) {
             if (critical) {
                 return beltController.configureVibrationChannel(
@@ -491,7 +491,7 @@ import CoreBluetooth
      
      - Returns: `true` if the request has been sent, `false` otherwise.
      */
-    public func notifyBeltBatteryLevel() -> Bool {
+    @objc public func notifyBeltBatteryLevel() -> Bool {
         if (beltConnection.state == .connected) {
             return beltController.signal(signalType: .battery)
         } else {
@@ -513,7 +513,7 @@ import CoreBluetooth
      the intensity has changed.
      - Returns: `true` if the request has been sent, `false` otherwise.
      */
-    public func changeDefaultVibrationIntensity(
+    @objc public func changeDefaultVibrationIntensity(
         intensity: Int, vibrationFeedback: Bool = true) -> Bool {
         if (intensity < 5 || intensity > 100) {
             return false
@@ -545,7 +545,7 @@ import CoreBluetooth
      (i.e. this configuration is reset when the belt is powered off).
      - Returns: `true` if the request has been sent, `false` otherwise.
      */
-    public func setCompassAccuracySignal(
+    @objc public func setCompassAccuracySignal(
         enable: Bool, persistent: Bool) -> Bool {
         if (beltConnection.state == .connected) {
             return beltController.changeCompassAccuracySignalState(
@@ -797,7 +797,7 @@ import CoreBluetooth
         beltConnection: FSConnectionManager,
         direction: Int,
         isMagneticBearing: Bool,
-        signal: FSBeltVibrationSignal?) {
+        signal: FSBeltVibrationSignal) {
         if (navigationState != .navigating) {
             // Not in navigation
             return
@@ -810,11 +810,13 @@ import CoreBluetooth
             // Not in app mode
             return
         }
-        if ((signal == nil) || (!isRepeated(signal!))) {
+        if (!isRepeated(signal)) {
             // Stop the vibration
             _=beltController.stopVibration()
         } else {
-            switch (signal!) {
+            switch (signal) {
+            case .noVibration:
+                _=beltController.stopVibration()
             case .continuous, .navigation:
                 _=beltController.configureVibrationChannel(
                     channelIndex: FSNavigationController.NAVIGATION_SIGNAL_CHANNEL,
