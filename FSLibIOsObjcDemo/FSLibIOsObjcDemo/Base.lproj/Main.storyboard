@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
-    <device id="retina6_1" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -56,6 +54,9 @@
                                                         <rect key="frame" x="0.0" y="51" width="414" height="50"/>
                                                         <inset key="contentEdgeInsets" minX="16" minY="16" maxX="16" maxY="16"/>
                                                         <state key="normal" title="Search and connect belt"/>
+                                                        <connections>
+                                                            <action selector="onConnectButtonTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="hB7-Yp-Ja7"/>
+                                                        </connections>
                                                     </button>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="fcV-hw-j4t" userLabel="Separator">
                                                         <rect key="frame" x="0.0" y="101" width="414" height="1"/>
@@ -68,6 +69,9 @@
                                                         <rect key="frame" x="0.0" y="102" width="414" height="50"/>
                                                         <inset key="contentEdgeInsets" minX="16" minY="16" maxX="16" maxY="16"/>
                                                         <state key="normal" title="Disconnect"/>
+                                                        <connections>
+                                                            <action selector="onDisconnectButtonTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="dMn-AO-5G5"/>
+                                                        </connections>
                                                     </button>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2vA-fd-Q2m" userLabel="Separator">
                                                         <rect key="frame" x="0.0" y="152" width="414" height="1"/>
@@ -195,6 +199,11 @@
                                                         <subviews>
                                                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="fill" contentVerticalAlignment="center" value="50" minValue="5" maxValue="100" translatesAutoresizingMaskIntoConstraints="NO" id="gu3-LJ-hLt">
                                                                 <rect key="frame" x="14" y="0.0" width="386" height="47"/>
+                                                                <connections>
+                                                                    <action selector="onDefaultIntensitySliderReleased:" destination="BYZ-38-t0r" eventType="touchUpInside" id="9RO-u9-LqV"/>
+                                                                    <action selector="onDefaultIntensitySliderReleasedOutside:" destination="BYZ-38-t0r" eventType="touchUpOutside" id="ftx-Lo-2La"/>
+                                                                    <action selector="onDefaultIntensitySliderValueChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="0uS-OC-wOq"/>
+                                                                </connections>
                                                             </slider>
                                                         </subviews>
                                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -337,6 +346,9 @@
                                                         <rect key="frame" x="0.0" y="531" width="414" height="50"/>
                                                         <inset key="contentEdgeInsets" minX="16" minY="16" maxX="16" maxY="16"/>
                                                         <state key="normal" title="Change accuracy signal"/>
+                                                        <connections>
+                                                            <action selector="onChangeAccuracySignalButtonTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Qpm-G9-WtX"/>
+                                                        </connections>
                                                     </button>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="u3Y-V3-ouX" userLabel="Separator">
                                                         <rect key="frame" x="0.0" y="581" width="414" height="1"/>
@@ -470,6 +482,9 @@
                                                         <rect key="frame" x="0.0" y="740" width="414" height="50"/>
                                                         <inset key="contentEdgeInsets" minX="16" minY="16" maxX="16" maxY="16"/>
                                                         <state key="normal" title="Start battery notification"/>
+                                                        <connections>
+                                                            <action selector="onStartBatterySignalButtonTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Tf2-Qy-Cwz"/>
+                                                        </connections>
                                                     </button>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WfX-WG-yHJ" userLabel="Separator">
                                                         <rect key="frame" x="0.0" y="790" width="414" height="1"/>
@@ -549,6 +564,9 @@
                                                         <subviews>
                                                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="fill" contentVerticalAlignment="center" minValue="0.0" maxValue="259" translatesAutoresizingMaskIntoConstraints="NO" id="G2e-Fe-kIO">
                                                                 <rect key="frame" x="14" y="0.0" width="386" height="47"/>
+                                                                <connections>
+                                                                    <action selector="onNavigationDirectionSliderValueChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="IJs-Zc-uIW"/>
+                                                                </connections>
                                                             </slider>
                                                         </subviews>
                                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -593,6 +611,9 @@
                                                                     <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VTT-5q-LA3">
                                                                         <rect key="frame" x="79" y="10.5" width="49" height="31"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                                        <connections>
+                                                                            <action selector="onMagneticBearingSwitchValueChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="NXr-r7-J3Z"/>
+                                                                        </connections>
                                                                     </switch>
                                                                 </subviews>
                                                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -631,6 +652,9 @@
                                                                 <rect key="frame" x="207" y="0.0" width="207" height="52.5"/>
                                                                 <inset key="contentEdgeInsets" minX="16" minY="16" maxX="16" maxY="16"/>
                                                                 <state key="normal" title="No vibration"/>
+                                                                <connections>
+                                                                    <action selector="onSignalTypeButtonTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="987-N0-hEc"/>
+                                                                </connections>
                                                             </button>
                                                         </subviews>
                                                     </stackView>
@@ -645,6 +669,9 @@
                                                         <rect key="frame" x="0.0" y="1064.5" width="414" height="50"/>
                                                         <inset key="contentEdgeInsets" minX="16" minY="16" maxX="0.0" maxY="16"/>
                                                         <state key="normal" title="Start navigation"/>
+                                                        <connections>
+                                                            <action selector="onStartNavigationButtonTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="22x-Uy-e9o"/>
+                                                        </connections>
                                                     </button>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aN0-E0-jQJ" userLabel="Separator">
                                                         <rect key="frame" x="0.0" y="1114.5" width="414" height="1"/>
@@ -657,6 +684,9 @@
                                                         <rect key="frame" x="0.0" y="1115.5" width="414" height="50"/>
                                                         <inset key="contentEdgeInsets" minX="16" minY="16" maxX="0.0" maxY="16"/>
                                                         <state key="normal" title="Pause navigation"/>
+                                                        <connections>
+                                                            <action selector="onPauseNavigationButtonTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Wdh-8r-7cB"/>
+                                                        </connections>
                                                     </button>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zka-0j-oPt" userLabel="Separator">
                                                         <rect key="frame" x="0.0" y="1165.5" width="414" height="1"/>
@@ -669,6 +699,9 @@
                                                         <rect key="frame" x="0.0" y="1166.5" width="414" height="50"/>
                                                         <inset key="contentEdgeInsets" minX="16" minY="16" maxX="0.0" maxY="16"/>
                                                         <state key="normal" title="Stop navigation"/>
+                                                        <connections>
+                                                            <action selector="onStopNavigationButtonTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="fw0-k3-E2a"/>
+                                                        </connections>
                                                     </button>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="e6t-Pc-Ap5" userLabel="Separator">
                                                         <rect key="frame" x="0.0" y="1216.5" width="414" height="1"/>
@@ -796,6 +829,9 @@
                                                         <subviews>
                                                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="fill" contentVerticalAlignment="center" minValue="0.0" maxValue="259" translatesAutoresizingMaskIntoConstraints="NO" id="NeE-GU-vdh">
                                                                 <rect key="frame" x="14" y="0.0" width="386" height="47"/>
+                                                                <connections>
+                                                                    <action selector="onNotificationDirectionSliderValueChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="Qd9-on-LF1"/>
+                                                                </connections>
                                                             </slider>
                                                         </subviews>
                                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -817,6 +853,9 @@
                                                         <rect key="frame" x="0.0" y="1437.5" width="414" height="50"/>
                                                         <inset key="contentEdgeInsets" minX="16" minY="16" maxX="0.0" maxY="16"/>
                                                         <state key="normal" title="Start bearing notification"/>
+                                                        <connections>
+                                                            <action selector="onStartBearingNotificationButtonTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="28K-BU-rF0"/>
+                                                        </connections>
                                                     </button>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hTY-up-U8R" userLabel="Separator">
                                                         <rect key="frame" x="0.0" y="1487.5" width="414" height="1"/>
@@ -829,6 +868,9 @@
                                                         <rect key="frame" x="0.0" y="1488.5" width="414" height="50"/>
                                                         <inset key="contentEdgeInsets" minX="16" minY="16" maxX="0.0" maxY="16"/>
                                                         <state key="normal" title="Start direction notification"/>
+                                                        <connections>
+                                                            <action selector="onStartDirectionNotificationButtonTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="pzG-f8-B8I"/>
+                                                        </connections>
                                                     </button>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KjE-R8-TrX" userLabel="Separator">
                                                         <rect key="frame" x="0.0" y="1538.5" width="414" height="1"/>
@@ -841,6 +883,9 @@
                                                         <rect key="frame" x="0.0" y="1539.5" width="414" height="50"/>
                                                         <inset key="contentEdgeInsets" minX="16" minY="16" maxX="0.0" maxY="16"/>
                                                         <state key="normal" title="Start warning notification"/>
+                                                        <connections>
+                                                            <action selector="onStartWarningButtonTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="6Ia-Ul-6sO"/>
+                                                        </connections>
                                                     </button>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="egH-pL-TKa" userLabel="Separator">
                                                         <rect key="frame" x="0.0" y="1589.5" width="414" height="1"/>
@@ -853,6 +898,9 @@
                                                         <rect key="frame" x="0.0" y="1590.5" width="414" height="50"/>
                                                         <inset key="contentEdgeInsets" minX="16" minY="16" maxX="0.0" maxY="16"/>
                                                         <state key="normal" title="Start critical warning notification"/>
+                                                        <connections>
+                                                            <action selector="onStartCriticalWarningButtonTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="q8I-yg-rAX"/>
+                                                        </connections>
                                                     </button>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6JZ-nA-bTH" userLabel="Separator">
                                                         <rect key="frame" x="0.0" y="1640.5" width="414" height="1"/>
@@ -900,6 +948,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="-599" y="184"/>
         </scene>
     </scenes>
 </document>
