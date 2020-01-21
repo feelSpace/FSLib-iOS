@@ -132,7 +132,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
     public func retrieveLastConnectedBelt() -> CBPeripheral? {
         // TODO Retrieve the belt with its UUID
         // TODO Use UserDefault to store UUID
-        var knownDevices = btManager.retrievePeripherals(withIdentifiers: [])
+        let knownDevices = btManager.retrievePeripherals(withIdentifiers: [])
         if knownDevices.count == 1 {
             if (knownDevices[0].name?.hasPrefix(
                 FSConnectionManager.BELT_NAME_PREFIX)) != nil {
