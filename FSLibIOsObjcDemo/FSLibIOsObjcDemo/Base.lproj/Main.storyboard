@@ -945,6 +945,33 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="RTl-Ha-HQr"/>
                     </view>
+                    <connections>
+                        <outlet property="batteryLevelLabel" destination="fw4-Ct-lMc" id="Nub-RQ-4m8"/>
+                        <outlet property="beltHeadingLabel" destination="Ugt-tk-9R3" id="uSN-93-o5S"/>
+                        <outlet property="changeAccuracySignalButton" destination="RIt-1h-0kQ" id="NTv-wK-N91"/>
+                        <outlet property="connectButton" destination="ENK-Ws-VNg" id="taU-8I-R7w"/>
+                        <outlet property="connectionStateLabel" destination="hF3-QU-OGd" id="M8F-WK-usu"/>
+                        <outlet property="defaultIntensityLabel" destination="hg6-Io-Klz" id="Fjn-l5-jAk"/>
+                        <outlet property="defaultIntensitySlider" destination="gu3-LJ-hLt" id="hfU-h5-6ux"/>
+                        <outlet property="disconnectButton" destination="huF-PI-Fsq" id="TL2-lA-IkP"/>
+                        <outlet property="magneticBearingSwitch" destination="VTT-5q-LA3" id="rcj-Gu-jxC"/>
+                        <outlet property="navigationDirectionLabel" destination="KXI-Jm-NZ4" id="xQs-w6-apL"/>
+                        <outlet property="navigationDirectionSlider" destination="G2e-Fe-kIO" id="mRa-1S-Gc2"/>
+                        <outlet property="navigationStateLabel" destination="A8S-GL-WKB" id="W7J-wX-xzz"/>
+                        <outlet property="notificationDirectionLabel" destination="BsY-xD-0Kk" id="3V0-Hl-XGi"/>
+                        <outlet property="notificationDirectionSlider" destination="NeE-GU-vdh" id="57N-wr-17S"/>
+                        <outlet property="orientationAccurateLabel" destination="ThP-4S-H50" id="vJt-xv-F7k"/>
+                        <outlet property="pauseNavigationButton" destination="xdM-c9-dKX" id="bDE-DG-XhN"/>
+                        <outlet property="powerStatusLabel" destination="bZc-q7-2eL" id="f6B-bs-tbM"/>
+                        <outlet property="signalTypeButton" destination="4pE-2Z-j2e" id="yU9-V6-SL4"/>
+                        <outlet property="startBatterySignalButton" destination="mhs-ZX-IcZ" id="4AU-33-xSr"/>
+                        <outlet property="startBearingNotificationButton" destination="poW-uQ-z98" id="v3G-gK-ata"/>
+                        <outlet property="startCriticalWarningButton" destination="aSS-Nd-ztb" id="hJD-lj-gzB"/>
+                        <outlet property="startDirectionNotificationButton" destination="ssD-ZC-q5t" id="HX5-Ce-8VL"/>
+                        <outlet property="startNavigationButton" destination="n1L-Gh-7sX" id="kAt-gR-y69"/>
+                        <outlet property="startWarningButton" destination="KHm-Gf-sWv" id="nUO-5q-oVI"/>
+                        <outlet property="stopNavigationButton" destination="R88-JI-mam" id="9Iq-gI-aZv"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>

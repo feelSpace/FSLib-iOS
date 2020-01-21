@@ -50,7 +50,7 @@
     beltController = [[FSNavigationController alloc] init];
     [beltController setDelegate:self];
     // Selected signal type
-    selectedSignalType = FSBeltVibrationSignalNoVibration;
+    selectedSignalType = FSBeltVibrationSignalContinuous;
     // Update UI
     [self updateUI];
 }
@@ -58,165 +58,346 @@
 //MARK: Private methods
 
 - (void)updateUI {
-    //MARK: TODO
+    [self updateConnectionPanel];
+    [self updateDefaultIntensityPanel];
+    [self updateOrientationPanel];
+    [self updateBatteryPanel];
+    [self updateNavigationSignalTypePanel];
+    [self updateNavigationStatePanel];
 }
 
 - (void)updateConnectionPanel {
-    //MARK: TODO
+    switch (beltController.connectionState) {
+        case FSBeltConnectionStateDisconnected:
+            connectButton.enabled = YES;
+            disconnectButton.enabled = NO;
+            connectionStateLabel.text = @"Disconnected";
+            break;
+        case FSBeltConnectionStateScanning:
+            connectButton.enabled = NO;
+            disconnectButton.enabled = YES;
+            connectionStateLabel.text = @"Scanning";
+            break;
+        case FSBeltConnectionStateConnecting:
+            connectButton.enabled = NO;
+            disconnectButton.enabled = YES;
+            connectionStateLabel.text = @"Connecting";
+            break;
+        case FSBeltConnectionStateReconnecting:
+            connectButton.enabled = NO;
+            disconnectButton.enabled = YES;
+            connectionStateLabel.text = @"Reconnecting";
+            break;
+        case FSBeltConnectionStateDiscoveringServices:
+            connectButton.enabled = NO;
+            disconnectButton.enabled = YES;
+            connectionStateLabel.text = @"Discovering services";
+            break;
+        case FSBeltConnectionStateHandshake:
+            connectButton.enabled = NO;
+            disconnectButton.enabled = YES;
+            connectionStateLabel.text = @"Handshake";
+            break;
+        case FSBeltConnectionStateConnected:
+            connectButton.enabled = NO;
+            disconnectButton.enabled = YES;
+            connectionStateLabel.text = @"Connected";
+            break;
+    }
 }
 
 - (void)updateDefaultIntensityPanel {
-    //MARK: TODO
+    if (beltController.defaultVibrationIntensity < 0) {
+        defaultIntensityLabel.text = @"Unknown";
+        [defaultIntensitySlider setValue:50 animated:NO];
+        defaultIntensitySlider.enabled = NO;
+    } else {
+        defaultIntensityLabel.text = [NSString stringWithFormat:@"%ld%%", (long)beltController.defaultVibrationIntensity];
+        [defaultIntensitySlider setValue:beltController.defaultVibrationIntensity animated:NO];
+        defaultIntensitySlider.enabled = YES;
+    }
 }
 
 - (void)updateBatteryPanel {
-    //MARK: TODO
+    switch (beltController.beltPowerStatus) {
+        case FSPowerStatusUnknown:
+            powerStatusLabel.text = @"Unknown";
+            break;
+        case FSPowerStatusOnBattery:
+            powerStatusLabel.text = @"On battery";
+            break;
+        case FSPowerStatusCharging:
+            powerStatusLabel.text = @"Charging";
+            break;
+        case FSPowerStatusExternalPower:
+            powerStatusLabel.text = @"External power supply";
+            break;
+    }
+    if (beltController.beltBatteryLevel < 0) {
+        batteryLevelLabel.text = @"Unknown";
+    } else {
+        batteryLevelLabel.text = [NSString stringWithFormat:@"%ld%%", (long)beltController.beltBatteryLevel];
+    }
 }
 
 - (void)updateOrientationPanel {
-    //MARK: TODO
+    if (beltController.beltHeading < 0) {
+        beltHeadingLabel.text = @"Unknown";
+    } else {
+        beltHeadingLabel.text = [NSString stringWithFormat:@"%ld°", (long)beltController.beltHeading];
+    }
+    if (beltController.beltOrientationAccurate < 0) {
+        orientationAccurateLabel.text = @"Unknown";
+    } else if (beltController.beltOrientationAccurate > 0) {
+        orientationAccurateLabel.text = @"Yes";
+    } else {
+        orientationAccurateLabel.text = @"No";
+    }
+    if (beltController.compassAccuracySignalEnabled < 0) {
+        changeAccuracySignalButton.enabled = NO;
+        [changeAccuracySignalButton setTitle:@"Unknown accuracy signal state" forState:UIControlStateNormal];
+    } else if (beltController.compassAccuracySignalEnabled > 0) {
+        changeAccuracySignalButton.enabled = YES;
+        [changeAccuracySignalButton setTitle:@"Disable accuracy signal" forState:UIControlStateNormal];
+    } else {
+        changeAccuracySignalButton.enabled = YES;
+        [changeAccuracySignalButton setTitle:@"Enable accuracy signal" forState:UIControlStateNormal];
+    }
 }
 
 - (void)updateNavigationSignalTypePanel {
-    //MARK: TODO
+    switch (selectedSignalType) {
+        case FSBeltVibrationSignalNoVibration:
+            [signalTypeButton setTitle:@"No vibration" forState:UIControlStateNormal];
+            break;
+        case FSBeltVibrationSignalContinuous:
+            [signalTypeButton setTitle:@"Continuous" forState:UIControlStateNormal];
+            break;
+        case FSBeltVibrationSignalNavigation:
+            [signalTypeButton setTitle:@"Navigation signal" forState:UIControlStateNormal];
+            break;
+        case FSBeltVibrationSignalApproachingDestination:
+            [signalTypeButton setTitle:@"Approaching destination" forState:UIControlStateNormal];
+            break;
+        case FSBeltVibrationSignalTurnOngoing:
+            [signalTypeButton setTitle:@"Ongoing turn" forState:UIControlStateNormal];
+            break;
+        case FSBeltVibrationSignalDirectionNotification:
+            [signalTypeButton setTitle:@"Illegal signal type" forState:UIControlStateNormal];
+            break;
+        case FSBeltVibrationSignalNextWaypointLongDistance:
+            [signalTypeButton setTitle:@"Next waypoint at long distance" forState:UIControlStateNormal];
+            break;
+        case FSBeltVibrationSignalNextWaypointMediumDistance:
+            [signalTypeButton setTitle:@"Next waypoint at medium distance" forState:UIControlStateNormal];
+            break;
+        case FSBeltVibrationSignalNextWaypointShortDistance:
+            [signalTypeButton setTitle:@"Next waypoint at short distance" forState:UIControlStateNormal];
+            break;
+        case FSBeltVibrationSignalNextWaypointAreaReached:
+            [signalTypeButton setTitle:@"Waypoint area reached" forState:UIControlStateNormal];
+            break;
+        case FSBeltVibrationSignalDestinationReachedRepeated:
+            [signalTypeButton setTitle:@"Destination reached" forState:UIControlStateNormal];
+            break;
+        case FSBeltVibrationSignalDestinationReachedSingle:
+            [signalTypeButton setTitle:@"Illegal signal type" forState:UIControlStateNormal];
+            break;
+        case FSBeltVibrationSignalOperationWarning:
+            [signalTypeButton setTitle:@"Illegal signal type" forState:UIControlStateNormal];
+            break;
+        case FSBeltVibrationSignalCriticalWarning:
+            [signalTypeButton setTitle:@"Illegal signal type" forState:UIControlStateNormal];
+            break;
+        case FSBeltVibrationSignalBatteryLevel:
+            [signalTypeButton setTitle:@"Illegal signal type" forState:UIControlStateNormal];
+            break;
+    }
 }
 
 - (void)updateNavigationStatePanel {
-    //MARK: TODO
+    switch (beltController.navigationState) {
+        case FSNavigationStateStopped:
+            navigationStateLabel.text = @"Stopped";
+            break;
+        case FSNavigationStatePaused:
+            navigationStateLabel.text = @"Paused";
+            break;
+        case FSNavigationStateNavigating:
+            navigationStateLabel.text = @"Navigating";
+            break;
+    }
 }
 
 - (void)setSignalType:(FSBeltVibrationSignal)selected {
-    //MARK: TODO
+    selectedSignalType = selected;
+    [self updateNavigationSignalTypePanel];
+    (void)[beltController updateNavigationSignalWithDirection:(int)navigationDirectionSlider.value isMagneticBearing:magneticBearingSwitch.on signal:selectedSignalType];
 }
 
-- (void)showToast:(NSString*)message {
-    //MARK: TODO
+// Code from: https://stackoverflow.com/a/46728731
+- (void)showToast:(NSString*)Message {
+    UIAlertController * alert=[UIAlertController alertControllerWithTitle:nil
+                                                                  message:@""
+                                                           preferredStyle:UIAlertControllerStyleAlert];
+    UIView *firstSubview = alert.view.subviews.firstObject;
+    UIView *alertContentView = firstSubview.subviews.firstObject;
+    for (UIView *subSubView in alertContentView.subviews) {
+        subSubView.backgroundColor = [UIColor colorWithRed:141/255.0f green:0/255.0f blue:254/255.0f alpha:1.0f];
+    }
+    NSMutableAttributedString *AS = [[NSMutableAttributedString alloc] initWithString:Message];
+    [AS addAttribute: NSForegroundColorAttributeName value: [UIColor whiteColor] range: NSMakeRange(0,AS.length)];
+    [alert setValue:AS forKey:@"attributedTitle"];
+    [self presentViewController:alert animated:YES completion:nil];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [alert dismissViewControllerAnimated:YES completion:^{
+        }];
+    });
 }
 
 
 //MARK: UI Event handlers
 
 - (IBAction)onConnectButtonTap:(id)sender{
-    [beltController searchAndConnectBelt];
+    if (beltController.connectionState == FSBeltConnectionStateDisconnected) {
+        [beltController searchAndConnectBelt];
+    }
 }
 
 - (IBAction)onDisconnectButtonTap:(id)sender{
-    //MARK: TODO
+    if (beltController.connectionState != FSBeltConnectionStateDisconnected) {
+        [beltController disconnectBelt];
+    }
 }
 
 - (IBAction)onDefaultIntensitySliderValueChanged:(id)sender{
-    //MARK: TODO
+    defaultIntensityLabel.text = [NSString stringWithFormat:@"%d%%", (int)defaultIntensitySlider.value];
 }
 
 - (IBAction)onDefaultIntensitySliderReleased:(id)sender{
-    //MARK: TODO
+    if (beltController.connectionState == FSBeltConnectionStateConnected) {
+        (void)[beltController changeDefaultVibrationIntensityWithIntensity:(int)defaultIntensitySlider.value vibrationFeedback:YES];
+    }
 }
 
 - (IBAction)onDefaultIntensitySliderReleasedOutside:(id)sender{
-    //MARK: TODO
+    [self onDefaultIntensitySliderReleased:sender];
 }
 
 - (IBAction)onChangeAccuracySignalButtonTap:(id)sender{
     //MARK: TODO
+    [self showToast:@"UI not yet implemented."];
 }
 
 - (IBAction)onStartBatterySignalButtonTap:(id)sender{
-    //MARK: TODO
+    if (beltController.connectionState == FSBeltConnectionStateConnected) {
+        (void)[beltController notifyBeltBatteryLevel];
+    }
 }
 
 - (IBAction)onNavigationDirectionSliderValueChanged:(id)sender{
-    //MARK: TODO
+    navigationDirectionLabel.text = [NSString stringWithFormat:@"%d°", (int)navigationDirectionSlider.value];
+    (void)[beltController updateNavigationSignalWithDirection:(int)navigationDirectionSlider.value isMagneticBearing:magneticBearingSwitch.on signal:selectedSignalType];
 }
 
 - (IBAction)onMagneticBearingSwitchValueChanged:(id)sender{
-    //MARK: TODO
+    (void)[beltController updateNavigationSignalWithDirection:(int)navigationDirectionSlider.value isMagneticBearing:magneticBearingSwitch.on signal:selectedSignalType];
 }
 
 - (IBAction)onSignalTypeButtonTap:(id)sender{
     //MARK: TODO
+    [self showToast:@"UI not yet implemented."];
 }
 
 - (IBAction)onStartNavigationButtonTap:(id)sender{
-    //MARK: TODO
+    (void)[beltController startNavigationWithDirection:(int)navigationDirectionSlider.value isMagneticBearing:magneticBearingSwitch.on signal:selectedSignalType];
 }
 
 - (IBAction)onPauseNavigationButtonTap:(id)sender{
-    //MARK: TODO
+    [beltController pauseNavigation];
 }
 
 - (IBAction)onStopNavigationButtonTap:(id)sender{
-    //MARK: TODO
+    [beltController stopNavigation];
 }
 
 - (IBAction)onNotificationDirectionSliderValueChanged:(id)sender{
-    //MARK: TODO
+    notificationDirectionLabel.text = [NSString stringWithFormat:@"%d°", (int)notificationDirectionSlider.value];
 }
 
 - (IBAction)onStartBearingNotificationButtonTap:(id)sender{
-    //MARK: TODO
+    if (beltController.connectionState == FSBeltConnectionStateConnected) {
+        (void)[beltController notifyDirectionWithDirection:(int)notificationDirectionSlider.value isMagneticBearing:YES];
+    }
 }
 
 - (IBAction)onStartDirectionNotificationButtonTap:(id)sender{
-    //MARK: TODO
+    if (beltController.connectionState == FSBeltConnectionStateConnected) {
+        (void)[beltController notifyDirectionWithDirection:(int)notificationDirectionSlider.value isMagneticBearing:NO];
+    }
 }
 
 - (IBAction)onStartWarningButtonTap:(id)sender{
-    //MARK: TODO
+    if (beltController.connectionState == FSBeltConnectionStateConnected) {
+        [beltController notifyWarningWithCritical:NO];
+    }
 }
 
 - (IBAction)onStartCriticalWarningButtonTap:(id)sender{
-    //MARK: TODO
+    if (beltController.connectionState == FSBeltConnectionStateConnected) {
+        [beltController notifyWarningWithCritical:YES];
+    }
 }
 
 
 //MARK: Delegate methods implementation
 
 - (void)onBeltBatteryLevelUpdatedWithBatteryLevel:(NSInteger)batteryLevel status:(enum FSPowerStatus)status {
-    //TODO: TBI
+    [self updateBatteryPanel];
 }
 
 - (void)onBeltConnectionFailed {
-    //TODO: TBI
+    [self showToast:@"Connection failed!"];
 }
 
 - (void)onBeltConnectionLost {
-    //TODO: TBI
+    [self showToast:@"Connection lost!"];
 }
 
 - (void)onBeltConnectionStateChangedWithState:(enum FSBeltConnectionState)state {
-    //TODO: TBI
+    [self updateUI];
 }
 
 - (void)onBeltDefaultVibrationIntensityChangedWithIntensity:(NSInteger)intensity {
-    //TODO: TBI
+    [self updateDefaultIntensityPanel];
 }
 
 - (void)onBeltHomeButtonPressedWithNavigating:(BOOL)navigating {
-    //TODO: TBI
+    [self showToast:@"Home button pressed!"];
 }
 
 - (void)onBeltOrientationUpdatedWithBeltHeading:(NSInteger)beltHeading accurate:(BOOL)accurate {
-    //TODO: TBI
+    [self updateOrientationPanel];
 }
 
 - (void)onBluetoothNotAvailable {
-    //TODO: TBI
+    [self showToast:@"No Bluetooth available!"];
 }
 
 - (void)onBluetoothPoweredOff {
-    //TODO: TBI
+    [self showToast:@"Please turn on Bluetooth!"];
 }
 
 - (void)onCompassAccuracySignalStateUpdatedWithEnabled:(BOOL)enabled {
-    //TODO: TBI
+    [self updateOrientationPanel];
 }
 
 - (void)onNavigationStateChangeWithState:(enum FSNavigationState)state {
-    //TODO: TBI
+    [self updateUI];
 }
 
 - (void)onNoBeltFound {
-    //TODO: TBI
+    [self showToast:@"No belt found!"];
 }
 
 @end

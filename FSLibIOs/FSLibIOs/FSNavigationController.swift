@@ -101,9 +101,9 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
         get {
             if let heading = beltController.beltOrientation?.beltMagHeading {
                 if (heading < 0) {
-                    return heading%360
-                } else {
                     return (heading%360)+360
+                } else {
+                    return heading%360
                 }
             } else {
                 return -1
