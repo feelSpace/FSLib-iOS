@@ -492,6 +492,22 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
     final public func centralManager(_ central: CBCentralManager,
                                      didDisconnectPeripheral peripheral: CBPeripheral,
                                      error: Error?) {
-        clearConnection(.connectionLost)
+        switch state {
+        case .notConnected:
+            // Nothing to do, should not happen
+            break
+        case .scanning:
+            // Nothing to do, should not happen
+            break
+        case .connecting:
+            clearConnection(.connectionFailed)
+        case .discoveringServices:
+            clearConnection(.serviceDiscoveryFailed)
+        case .handshake:
+            clearConnection(.handshakeFailed)
+        case .connected:
+            clearConnection(.connectionLost)
+        }
+        
     }
 }

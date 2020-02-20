@@ -19,7 +19,6 @@
 		63DBE99C1F6148420079F61E /* FSBleOperationReadCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63DBE99B1F6148420079F61E /* FSBleOperationReadCharacteristic.swift */; };
 		63DBE99E1F6148640079F61E /* FSBleOperationWriteCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63DBE99D1F6148640079F61E /* FSBleOperationWriteCharacteristic.swift */; };
 		63E357171ED1DE4200627CD5 /* FSLibIOs.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63E3570D1ED1DE4100627CD5 /* FSLibIOs.framework */; };
-		63E3571C1ED1DE4200627CD5 /* FSLibIOsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E3571B1ED1DE4200627CD5 /* FSLibIOsTests.swift */; };
 		63E3571E1ED1DE4200627CD5 /* FSLibIOs.h in Headers */ = {isa = PBXBuildFile; fileRef = 63E357101ED1DE4100627CD5 /* FSLibIOs.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		63E357581ED1DEDB00627CD5 /* FSConnectionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E357571ED1DEDB00627CD5 /* FSConnectionDelegate.swift */; };
 		63E3575A1ED1DEFF00627CD5 /* FSCommandDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E357591ED1DEFF00627CD5 /* FSCommandDelegate.swift */; };
@@ -53,7 +52,6 @@
 		63E357101ED1DE4100627CD5 /* FSLibIOs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FSLibIOs.h; sourceTree = "<group>"; };
 		63E357111ED1DE4100627CD5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		63E357161ED1DE4200627CD5 /* FSLibIOsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FSLibIOsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		63E3571B1ED1DE4200627CD5 /* FSLibIOsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FSLibIOsTests.swift; sourceTree = "<group>"; };
 		63E3571D1ED1DE4200627CD5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		63E357571ED1DEDB00627CD5 /* FSConnectionDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FSConnectionDelegate.swift; sourceTree = "<group>"; };
 		63E357591ED1DEFF00627CD5 /* FSCommandDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FSCommandDelegate.swift; sourceTree = "<group>"; };
@@ -125,7 +123,6 @@
 		63E3571A1ED1DE4200627CD5 /* FSLibIOsTests */ = {
 			isa = PBXGroup;
 			children = (
-				63E3571B1ED1DE4200627CD5 /* FSLibIOsTests.swift */,
 				63E3571D1ED1DE4200627CD5 /* Info.plist */,
 			);
 			path = FSLibIOsTests;
@@ -267,7 +264,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				63E3571C1ED1DE4200627CD5 /* FSLibIOsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -405,7 +401,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = XUB29JE5X7;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -416,7 +412,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MARKETING_VERSION = 2.0.3;
+				MARKETING_VERSION = 2.0.4;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
@@ -436,7 +432,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = XUB29JE5X7;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -447,7 +443,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MARKETING_VERSION = 2.0.3;
+				MARKETING_VERSION = 2.0.4;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
