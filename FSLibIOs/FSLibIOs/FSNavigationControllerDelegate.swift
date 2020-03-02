@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CoreBluetooth
 
 /**
  Callbacks of the `FSNavigationController`.
@@ -99,12 +100,29 @@ import Foundation
     
     /**
      Called when the connection with a belt failed.
+     
+     - Parameter checkPairing: If `true` the user should be informed to check if the belt as been
+     paired before a connection attempt.
      */
-    func onBeltConnectionFailed()
+    func onBeltConnectionFailed(checkPairing: Bool)
     
     /**
      Called when no belt has been found to start the connection.
      */
     func onNoBeltFound()
+    
+    /**
+     Called when a belt has been found during the scan procedure.
+     This is only called when the scan procedure has been started using `searchBelt()`.
+     
+     - Parameter belt: The belt found.
+     */
+    func onBeltFound(belt: CBPeripheral)
+    
+    /**
+     Called when the scan procedure ends.
+     This is only called when the scan procedure has been started using `searchBelt()`.
+     */
+    func onBeltSearchFinished()
     
 }

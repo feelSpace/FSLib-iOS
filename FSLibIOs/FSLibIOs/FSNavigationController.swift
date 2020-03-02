@@ -19,6 +19,9 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
     /** Belt connection */
     private var beltConnection: FSConnectionManager
     
+    /** Flag to connect automaticallz when a belt is found */
+    private var connectWhenFound: Bool = false
+    
     /** Belt command interface */
     private var beltController: FSCommandManager
     
@@ -240,8 +243,17 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
             beltConnection.connectBelt(connected[0])
         } else {
             // Start scan
+            connectWhenFound = true
             beltConnection.scanForBelt()
         }
+    }
+    
+    /**
+     Searches for adverstising belts.
+     */
+    @objc public func searchBelt() {
+        connectWhenFound = false
+        beltConnection.scanForBelt()
     }
     
     /**
@@ -561,15 +573,23 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
         // Connect to the belt
         if (beltConnection.state == .notConnected ||
             beltConnection.state == .scanning) {
-            beltConnection.connectBelt(device)
+            if (connectWhenFound) {
+                beltConnection.connectBelt(device)
+            } else {
+                delegate?.onBeltFound(belt: device)
+            }
         }
     }
     
     public func onBeltScanFinished(cause: FSScanTerminationCause) {
         switch cause {
         case .timeout:
-            // No belt found
-            delegate?.onNoBeltFound()
+            if connectWhenFound {
+                // No belt found
+                delegate?.onNoBeltFound()
+            } else {
+                delegate?.onBeltSearchFinished()
+            }
             
         case .btNotAvailable:
             // BT problem
@@ -598,9 +618,11 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
                 event == .reconnectionFailed) {
                 delegate?.onBeltConnectionLost()
             } else if (event == .connectionFailed ||
-                event == .serviceDiscoveryFailed ||
                 event == .handshakeFailed) {
-                delegate?.onBeltConnectionFailed()
+                delegate?.onBeltConnectionFailed(checkPairing: false)
+            } else if (event == .serviceDiscoveryFailed) {
+                // Maybe a pairing problem
+                delegate?.onBeltConnectionFailed(checkPairing: true)
             }
             delegate?.onBeltConnectionStateChanged(state: .disconnected)
         case .scanning:

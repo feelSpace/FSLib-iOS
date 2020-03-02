@@ -16,6 +16,8 @@
 		63233F592359AC5500FAD4A2 /* FSLibIOsDemoUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63233F582359AC5500FAD4A2 /* FSLibIOsDemoUITests.swift */; };
 		639DEFC8235DAC1900D5496A /* FSLibIOs.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63233F672359AD6600FAD4A2 /* FSLibIOs.framework */; };
 		639DEFC9235DAC1900D5496A /* FSLibIOs.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 63233F672359AD6600FAD4A2 /* FSLibIOs.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		63A3527E240D224100CCCB1E /* BeltListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63A3527D240D224100CCCB1E /* BeltListViewController.swift */; };
+		63A35280240D382800CCCB1E /* BeltCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63A3527F240D382800CCCB1E /* BeltCellView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,6 +66,8 @@
 		63233F582359AC5500FAD4A2 /* FSLibIOsDemoUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FSLibIOsDemoUITests.swift; sourceTree = "<group>"; };
 		63233F5A2359AC5500FAD4A2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		63233F672359AD6600FAD4A2 /* FSLibIOs.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = FSLibIOs.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		63A3527D240D224100CCCB1E /* BeltListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeltListViewController.swift; sourceTree = "<group>"; };
+		63A3527F240D382800CCCB1E /* BeltCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeltCellView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,6 +126,8 @@
 				63233F3F2359AC5500FAD4A2 /* Assets.xcassets */,
 				63233F412359AC5500FAD4A2 /* LaunchScreen.storyboard */,
 				63233F442359AC5500FAD4A2 /* Info.plist */,
+				63A3527D240D224100CCCB1E /* BeltListViewController.swift */,
+				63A3527F240D382800CCCB1E /* BeltCellView.swift */,
 			);
 			path = FSLibIOsDemo;
 			sourceTree = "<group>";
@@ -286,6 +292,8 @@
 			files = (
 				63233F3B2359AC5200FAD4A2 /* ViewController.swift in Sources */,
 				63233F392359AC5200FAD4A2 /* AppDelegate.swift in Sources */,
+				63A3527E240D224100CCCB1E /* BeltListViewController.swift in Sources */,
+				63A35280240D382800CCCB1E /* BeltCellView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

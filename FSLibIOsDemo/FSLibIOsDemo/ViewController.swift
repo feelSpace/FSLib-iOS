@@ -8,6 +8,20 @@
 
 import UIKit
 import FSLibIOs
+import CoreBluetooth
+
+
+public extension Notification.Name {
+    
+    /** Notification for connection state changed */
+    static let beltConnectionStateChanged = Notification.Name(
+        "beltConnectionStateChanged")
+    
+    /** Notification for belt found. */
+    static let beltFound = Notification.Name(
+        "beltFound")
+    
+}
 
 class ViewController: UIViewController, FSNavigationControllerDelegate {
     
@@ -17,8 +31,12 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
     // Selected navigation signal
     var selectedSignalType: FSBeltVibrationSignal = .noVibration
     
+    // List of belts (used when searching)
+    var beltList = [CBPeripheral]()
+    
     // References to UI components
     @IBOutlet weak var connectButton: UIButton!
+    @IBOutlet weak var searchButton: UIButton!
     @IBOutlet weak var disconnectButton: UIButton!
     @IBOutlet weak var connectionStateLabel: UILabel!
     @IBOutlet weak var defaultIntensityLabel: UILabel!
@@ -49,6 +67,13 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
         beltController.delegate = self
         updateUI()
     }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "showBeltListSegue" {
+            let beltListViewController = segue.destination as! BeltListViewController
+            beltListViewController.mainViewController = self
+        }
+    }
 
     /** Updates the whole UI. */
     private func updateUI() {
@@ -65,30 +90,37 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
         switch beltController.connectionState {
         case .disconnected:
             connectButton.isEnabled = true
+            searchButton.isEnabled = true
             disconnectButton.isEnabled = false
             connectionStateLabel.text = "Disconnected"
         case .scanning:
             connectButton.isEnabled = false
+            searchButton.isEnabled = false
             disconnectButton.isEnabled =  true
             connectionStateLabel.text = "Scanning"
         case .connecting:
             connectButton.isEnabled = false
+            searchButton.isEnabled = false
             disconnectButton.isEnabled = true
             connectionStateLabel.text = "Connecting"
         case .reconnecting:
             connectButton.isEnabled = false
+            searchButton.isEnabled = false
             disconnectButton.isEnabled = true
             connectionStateLabel.text = "Reconnecting"
         case .discoveringServices:
             connectButton.isEnabled = false
+            searchButton.isEnabled = false
             disconnectButton.isEnabled = true
             connectionStateLabel.text = "Discovering services"
         case .handshake:
             connectButton.isEnabled = false
+            searchButton.isEnabled = false
             disconnectButton.isEnabled = true
             connectionStateLabel.text = "Handshake"
         case .connected:
             connectButton.isEnabled = false
+            searchButton.isEnabled = false
             disconnectButton.isEnabled = true
             connectionStateLabel.text = "Connected"
         }
@@ -265,6 +297,8 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
     
     func onBeltConnectionStateChanged(state: FSBeltConnectionState) {
         updateUI()
+        NotificationCenter.default.post(
+            name: .beltConnectionStateChanged, object: nil)
     }
     
     func onBluetoothNotAvailable() {
@@ -279,12 +313,26 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
         showToast(message: "Connection lost!")
     }
     
-    func onBeltConnectionFailed() {
-        showToast(message: "Connection failed!")
+    func onBeltConnectionFailed(checkPairing: Bool) {
+        if (checkPairing) {
+            showToast(message: "Please check pairing!")
+        } else {
+            showToast(message: "Connection failed!")
+        }
     }
     
     func onNoBeltFound() {
         showToast(message: "No belt found!")
+    }
+    
+    func onBeltSearchFinished() {
+        // Nothing to do
+    }
+    
+    func onBeltFound(belt: CBPeripheral) {
+        beltList.append(belt)
+        NotificationCenter.default.post(
+            name: .beltFound, object: nil)
     }
     
     //MARK: UI event handlers
@@ -292,6 +340,15 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
     @IBAction func onConnectButtonTap(_ sender: UIButton) {
         if (beltController.connectionState == .disconnected) {
             beltController.searchAndConnectBelt()
+        }
+    }
+    
+    @IBAction func onSearchButtonTap(_ sender: UIButton) {
+        if (beltController.connectionState == .disconnected) {
+            // Start scan and open belt list view
+            beltList.removeAll()
+            beltController.searchBelt()
+            performSegue(withIdentifier: "showBeltListSegue", sender: self)
         }
     }
     
