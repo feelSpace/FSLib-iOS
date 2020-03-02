@@ -113,7 +113,7 @@ The repository contains one XCode workspace with three modules:
 To add the last version of FSLib to your project using CocoaPods, first install and configure CocoaPods for your project (see [Using CocoaPods](https://guides.cocoapods.org/using/using-cocoapods.html)). Then, add the following dependency to your Podfile:
 
 ```
-    pod 'FSLibIOs', '~> 2.0.3'
+    pod 'FSLibIOs', '~> 2.0.5'
 ```
 
 
