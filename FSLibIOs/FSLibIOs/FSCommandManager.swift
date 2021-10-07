@@ -45,7 +45,8 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
     public static let BELT_SENSOR_SERVICE_UUID = CBUUID(string: "FE52")
     
     /** Orientation data notification characteristic UUID. */
-    public static let ORIENTATION_DATA_NOTIFICATION_CHAR_UUID = CBUUID(string: "FE0C")
+    public static let ORIENTATION_DATA_NOTIFICATION_CHAR_UUID =
+        CBUUID(string: "FE0C")
     
     /** Belt debug service UUID. */
     public static let BELT_DEBUG_SERVICE_UUID = CBUUID(string: "FE53")
@@ -981,13 +982,30 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
     
     // *** CBPeripheralDelegate ***
     
+    // TODO: Service discovery and handshake have to be refactored by using Operations
+    // TODO: Perform notification registration in handshake procedure
+    // TODO: Keep error in Operation when operation fails
+    // TODO: Use Logger to print debug message
+    
     // Callback for service discovery
     final public func peripheral(_ peripheral: CBPeripheral,
                                  didDiscoverServices error: Error?) {
         // Check error
         if (error != nil) {
             // Failed to discover services
-            connectionManager.clearConnection(.serviceDiscoveryFailed)
+            clearGattReference()
+            if let gattError = error as? CBATTError,
+                    gattError.code == .readNotPermitted ||
+                    gattError.code == .insufficientEncryption ||
+                    gattError.code == .insufficientAuthorization ||
+                    gattError.code == .insufficientAuthentication ||
+                    gattError.code == .insufficientEncryptionKeySize {
+                connectionManager.onServiceDiscoveryFinished(
+                    error: .gattDiscoveryPermissionError)
+            } else {
+                connectionManager.onServiceDiscoveryFinished(
+                    error: .serviceDiscoveryFailed)
+            }
             return
         }
         
@@ -1033,7 +1051,19 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
         // Check error
         if (error != nil) {
             // Failed to discover characteristics
-            connectionManager.clearConnection(.serviceDiscoveryFailed)
+            clearGattReference()
+            if let gattError = error as? CBATTError,
+                    gattError.code == .readNotPermitted ||
+                    gattError.code == .insufficientEncryption ||
+                    gattError.code == .insufficientAuthorization ||
+                    gattError.code == .insufficientAuthentication ||
+                    gattError.code == .insufficientEncryptionKeySize {
+                connectionManager.onServiceDiscoveryFinished(
+                    error: .gattDiscoveryPermissionError)
+            } else {
+                connectionManager.onServiceDiscoveryFinished(
+                    error: .serviceDiscoveryFailed)
+            }
             return
         }
         
@@ -1043,7 +1073,9 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
             if (service.characteristics == nil ||
                 service.characteristics?.count == 0) {
                 // No characteristic discovered
-                connectionManager.clearConnection(.serviceDiscoveryFailed)
+                clearGattReference()
+                connectionManager.onServiceDiscoveryFinished(
+                    error: .serviceDiscoveryFailed)
                 return
             }
             for characteristic in service.characteristics! {
@@ -1083,7 +1115,9 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
             if (service.characteristics == nil ||
                 service.characteristics?.count == 0) {
                 // No characteristic discovered
-                connectionManager.clearConnection(.serviceDiscoveryFailed)
+                clearGattReference()
+                connectionManager.onServiceDiscoveryFinished(
+                    error: .serviceDiscoveryFailed)
                 return
             }
             for characteristic in service.characteristics! {
@@ -1098,7 +1132,9 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
             if (service.characteristics == nil ||
                 service.characteristics?.count == 0) {
                 // No characteristic discovered
-                connectionManager.clearConnection(.serviceDiscoveryFailed)
+                clearGattReference()
+                connectionManager.onServiceDiscoveryFinished(
+                    error: .serviceDiscoveryFailed)
                 return
             }
             for characteristic in service.characteristics! {
@@ -1145,9 +1181,26 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
         if let err = error {
             print("Error GATT update notification:",  err.localizedDescription)
         }
-        if (error != nil && connectionManager.state == .discoveringServices) {
-            // Failed to register for notifications
-            connectionManager.clearConnection(.handshakeFailed)
+        // Check error
+        if (error != nil &&
+                (connectionManager.state == .discoveringServices ||
+                    connectionManager.state == .handshake)) {
+            // Failed to set descriptor value
+            clearGattReference()
+            if let gattError = error as? CBATTError,
+                    gattError.code == .readNotPermitted ||
+                    gattError.code == .writeNotPermitted ||
+                    gattError.code == .insufficientEncryption ||
+                    gattError.code == .insufficientAuthorization ||
+                    gattError.code == .insufficientAuthentication ||
+                    gattError.code == .insufficientEncryptionKeySize {
+                connectionManager.onServiceDiscoveryFinished(
+                    error: .handshakePermissionError)
+            } else {
+                connectionManager.onServiceDiscoveryFinished(
+                    error: .handshakeFailed)
+            }
+            return
         } else {
             if (characteristic.uuid == FSCommandManager.KEEP_ALIVE_CHAR_UUID) {
                 keepAliveCharRegistered = true
@@ -1177,72 +1230,79 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
             batteryStatusCharRegistered &&
             connectionManager.state == .discoveringServices) {
             // Start handshake
-            connectionManager.setState(newState: .handshake,
-                                       cause: .servicesDiscovered)
-            // Read firmware version
-            if let characteristic = firmwareInfoChar, let peripheral = belt {
-                operationQueue.add(FSBleOperationReadCharacteristic(
-                    peripheral: peripheral, characteristic: characteristic,
-                    onOperationDone: {(operation) -> () in
-                        if (operation.state == .failed) {
-                            FSConnectionManager.instance.clearConnection(
-                                .handshakeFailed)
-                        }
-                }))
-            }
-            // Read battery status
-            if let characteristic = batteryStatusChar, let peripheral = belt {
-                operationQueue.add(FSBleOperationReadCharacteristic(
-                    peripheral: peripheral, characteristic: characteristic,
-                    onOperationDone: {(operation) -> () in
-                        if (operation.state == .failed) {
-                            FSConnectionManager.instance.clearConnection(
-                                .handshakeFailed)
-                        }
-                }))
-            }
-            // Request default intensity
-            if let characteristic = parameterRequestChar,
-                let peripheral = belt {
-                operationQueue.add(FSBleOperationWriteCharacteristic(
-                    peripheral: peripheral, characteristic: characteristic,
-                    value: Data([0x01,
-                                 FSBeltParameter.defaultIntensity.rawValue]),
-                    onOperationDone: {(operation) -> () in
-                        if (operation.state == .failed) {
-                            FSConnectionManager.instance.clearConnection(
-                                .handshakeFailed)
-                        }
-                }))
-            }
-            // Request belt mode
-            if let characteristic = parameterRequestChar,
-                let peripheral = belt {
-                operationQueue.add(FSBleOperationWriteCharacteristic(
-                    peripheral: peripheral, characteristic: characteristic,
-                    value: Data([0x01, FSBeltParameter.mode.rawValue]),
-                    onOperationDone: {(operation) -> () in
-                        if (operation.state == .failed) {
-                            FSConnectionManager.instance.clearConnection(
-                                .handshakeFailed)
-                        }
-                }))
-            }
-            // Request heading offset
-            if let characteristic = parameterRequestChar,
-                let peripheral = belt {
-                operationQueue.add(FSBleOperationWriteCharacteristic(
-                    peripheral: peripheral, characteristic: characteristic,
-                    value: Data([0x01,
-                                 FSBeltParameter.headingOffset.rawValue])))
-                // Note: Handshake does not fail when this request fails
-            }
-            // Note: Handshake finished in callback for read operations
+            connectionManager.onServiceDiscoveryFinished(error: nil)
+            
         }
         // Callback for operation queue
         operationQueue.peripheralDidUpdateNotificationStateFor(
             peripheral: peripheral, characteristic: characteristic,
             error: error)
+    }
+    
+    internal func startHandshake() {
+        // Read firmware version
+        if let characteristic = firmwareInfoChar, let peripheral = belt {
+            operationQueue.add(FSBleOperationReadCharacteristic(
+                peripheral: peripheral, characteristic: characteristic,
+                onOperationDone: {(operation) -> () in
+                    if (operation.state == .failed) {
+                        self.clearGattReference()
+                        self.connectionManager.onHandshakeFinished(
+                            error: .handshakeFailed)
+                    }
+            }))
+        }
+        // Read battery status
+        if let characteristic = batteryStatusChar, let peripheral = belt {
+            operationQueue.add(FSBleOperationReadCharacteristic(
+                peripheral: peripheral, characteristic: characteristic,
+                onOperationDone: {(operation) -> () in
+                    if (operation.state == .failed) {
+                        self.clearGattReference()
+                        self.connectionManager.onHandshakeFinished(
+                            error: .handshakeFailed)
+                    }
+            }))
+        }
+        // Request default intensity
+        if let characteristic = parameterRequestChar,
+            let peripheral = belt {
+            operationQueue.add(FSBleOperationWriteCharacteristic(
+                peripheral: peripheral, characteristic: characteristic,
+                value: Data([0x01,
+                             FSBeltParameter.defaultIntensity.rawValue]),
+                onOperationDone: {(operation) -> () in
+                    if (operation.state == .failed) {
+                        self.clearGattReference()
+                        self.connectionManager.onHandshakeFinished(
+                            error: .handshakeFailed)
+                    }
+            }))
+        }
+        // Request belt mode
+        if let characteristic = parameterRequestChar,
+            let peripheral = belt {
+            operationQueue.add(FSBleOperationWriteCharacteristic(
+                peripheral: peripheral, characteristic: characteristic,
+                value: Data([0x01, FSBeltParameter.mode.rawValue]),
+                onOperationDone: {(operation) -> () in
+                    if (operation.state == .failed) {
+                        self.clearGattReference()
+                        self.connectionManager.onHandshakeFinished(
+                            error: .handshakeFailed)
+                    }
+            }))
+        }
+        // Request heading offset
+        if let characteristic = parameterRequestChar,
+            let peripheral = belt {
+            operationQueue.add(FSBleOperationWriteCharacteristic(
+                peripheral: peripheral, characteristic: characteristic,
+                value: Data([0x01,
+                             FSBeltParameter.headingOffset.rawValue])))
+            // Note: Handshake does not fail when this request fails
+        }
+        // Note: Handshake finished in callback for read operations
     }
     
     // Callback for notification and read operations
@@ -1297,8 +1357,7 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
         // Condition to finish handshake
         if (connectionManager.state == .handshake &&
             mode != .unknown && defaultIntensity != -1) {
-            connectionManager.setState(newState: .connected,
-                                       cause: .handshakeFinished)
+            connectionManager.onHandshakeFinished(error: nil)
         }
         // Callback for operation queue
         operationQueue.peripheralDidUpdateValueFor(peripheral: peripheral,
@@ -1455,19 +1514,3 @@ public struct FSBeltOrientation {
      */
     public var beltCompassInaccurate: Bool
 }
-
-//TODO TBR
-///**
-// Values representing power supply status of the belt.
-// */
-//@objc public enum FSPowerStatus: UInt8 {
-//    /** The power source is unknown. */
-//    case unknown = 0x00
-//    /** The battery of the belt is used. */
-//    case onBattery = 0x01
-//    /** The battery is charging. */
-//    case charging = 0x02
-//    /** An external power supply is used without charging the battery. */
-//    case external = 0x03
-//}
-

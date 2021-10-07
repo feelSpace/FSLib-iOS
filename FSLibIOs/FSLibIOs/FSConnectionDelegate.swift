@@ -27,12 +27,12 @@ public protocol FSConnectionDelegate {
     func onBeltFound(device: CBPeripheral)
     
     /**
-     Indicates that the search procedure for finding a belt is finished.
+     Indicates that the scan procedure failed to start.
      
      - Parameters:
-        - cause: The cause of the termination.
+        - error: The scan error.
      */
-    func onBeltScanFinished(cause: FSScanTerminationCause)
+    func onScanFailed(error: FSConnectionError)
     
     /**
      Indicates that the connection state has changed.
@@ -40,30 +40,12 @@ public protocol FSConnectionDelegate {
      - Parameters:
         - previousState: The previous state.
         - newState: The new state.
-        - event: The cause of the state change.
+        - error: The error in case the state change is inexpected.
      */
     func onConnectionStateChanged(previousState: FSConnectionState,
                                  newState: FSConnectionState,
-                                 event: FSConnectionEvent)
+                                 error: FSConnectionError?)
     
-}
-
-/**
- Values representing the cause of termination of the scan procedure.
- */
-public enum FSScanTerminationCause {
-    /** The timeout duration has been reached. */
-    case timeout
-    /** The Bluetooth is not available. */
-    case btNotAvailable
-    /** The Bluetooth is powered-off. */
-    case btNotActive
-    /** When a belt is already connected or connecting. */
-    case alreadyConnected
-    /**
-     Scan has been canceled by either a call to `stopScan` or `connectBelt`. 
-     */
-    case canceled
 }
 
 /**
@@ -72,10 +54,12 @@ public enum FSScanTerminationCause {
  identical for the app.
  */
 @objc public enum FSConnectionState: Int {
-    /** The belt is not conected. */
+    /** No belt is conected. */
     case notConnected
+    /** Initializing BLE interface */
+    case initializing
     /** Scanning for a belt. */
-    case scanning // TODO: This has to be used instead of onBeltScanFinished
+    case scanning
     /** Connecting to the belt. */
     case connecting
     /** Discovery of the services and characteristics. */
@@ -84,41 +68,47 @@ public enum FSScanTerminationCause {
     case handshake
     /** The belt is connected and ready to receive commands. */
     case connected
+    /** An attempt to reconnect the belt is made */
+    case reconnecting
 }
 
-/**
- Values representing the causes of state changes.
- */
-public enum FSConnectionEvent {
-    /** The scan procedure has been started */
-    case scanStarted
-    /** The scan procedure timed out. */
-    case scanTimeout
-    /** The scan procedure failed. */
-    case scanFailed
-    /** The scan procedure has been canceled */
-    case scanCanceled
-    /** Connection started. */
-    case connectionStarted
-    /** Connection established but service not yet discovered. */
-    case connectionEstablished
-    /** Service discovery finished. */
-    case servicesDiscovered
-    /** Handshake finished. */
-    case handshakeFinished
-    /** Connection closed. */
-    case connectionClosed
-    /** Connection lost. */
-    case connectionLost
-    /** Connection failed. */
+public enum FSConnectionError: Error {
+    /** BT is not active. */
+    case btPoweredOff
+    /** The application is not autorized to use BT. */
+    case btUnauthorized
+    /** BT is not supported on this device. */
+    case btUnsupported
+    /** The state of the BT was not correctly been notified to the app. */
+    case btStateNotificationFailed
+    /** The state of the BT manager didn"t updated within the timeout time. */
+    case btStateUnknown
+    /** The BT manager is resetting. */
+    case btStateResetting
+    /** Timeout when establishing connection */
+    case connectionTimeout
+    /** Timeout when discovering services */
+    case serviceDiscoveryTimeout
+    /** Timeout during service discovery */
+    case handshakeTimeout
+    /** Timeout when reconnecting */
+    case reconnectionTimeout
+    /** Connection failed */
     case connectionFailed
-    /** Service discovery failed. */
+    /** Maximum number of connections reached */
+    case connectionLimitReached
+    /** The belt probably initiated the disconnection */
+    case peripheralDisconnected
+    /** Unexpected disconnetion, maybe out of range */
+    case unexpectedDisconnection
+    /** Disconnection probably due to pairing/bonding not performed */
+    case pairingFailed
+    /** Service discovery failed due to a permission problem on GATT profile */
+    case gattDiscoveryPermissionError
+    /** Service discovery failed for an unknown reason */
     case serviceDiscoveryFailed
-    /** Handshake failed. */
+    /** Handshake faile due to GATT permission problem */
+    case handshakePermissionError
+    /** Handshake failed for an unknown reason */
     case handshakeFailed
-    /** Reconnection started. */
-    case reconnectionStarted
-    /** Reconnection failed. */
-    case reconnectionFailed
 }
-
