@@ -18,7 +18,7 @@ protocol FSBleOperation {
      Starts the BLE operation.
      
      -Important:
-     In case of immediate failure, the `fail` method while be called.
+     In case of immediate failure, the `fail` method will be called.
      
      - Returns:
      `true` if the operation is successfully initialized, `false` on immediate

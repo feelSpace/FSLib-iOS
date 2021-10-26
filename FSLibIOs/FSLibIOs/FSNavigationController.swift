@@ -19,7 +19,7 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
     /** Belt connection */
     private var beltConnection: FSConnectionManager
     
-    /** Flag to connect automaticallz when a belt is found */
+    /** Flag to connect automatically when a belt is found */
     private var connectWhenFound: Bool = false
     
     /** Belt command interface */
@@ -297,7 +297,7 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
     @objc public func startNavigation(direction: Int, isMagneticBearing: Bool,
                                 signal: FSBeltVibrationSignal) -> Bool {
         // Check signal type
-        if (!isRepeated(signal)) {
+        if (!FSBeltVibrationSignal.isRepeated(signal)) {
             return false
         }
         // Set signal and change navigation state
@@ -342,7 +342,7 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
     @objc public func updateNavigationSignal(direction: Int, isMagneticBearing: Bool,
             signal: FSBeltVibrationSignal) -> Bool {
         // Check signal type
-        if (!isRepeated(signal)) {
+        if (!FSBeltVibrationSignal.isRepeated(signal)) {
             return false
         }
         // Check navigation state
@@ -832,7 +832,7 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
             // Not in app mode
             return
         }
-        if (!isRepeated(signal)) {
+        if (!FSBeltVibrationSignal.isRepeated(signal)) {
             // Stop the vibration
             _=beltController.stopVibration()
         } else {
