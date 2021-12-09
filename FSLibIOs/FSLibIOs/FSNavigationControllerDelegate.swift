@@ -75,54 +75,23 @@ import CoreBluetooth
     func onCompassAccuracySignalStateUpdated(enabled: Bool)
     
     /**
-     Called when the connection state has changed.
+     Indicates that a belt has been found.
      
      - Parameters:
-        - state: The new connection state.
+        - belt: The belt found.
+        - status: The status of the belt.
      */
-    func onBeltConnectionStateChanged(state: FSBeltConnectionState)
+    func onBeltFound(belt: CBPeripheral, status: FSBeltConnectionStatus)
     
     /**
-     Called when a connection attempt failed because BLE is not available on
-     the device.
-     */
-    func onBluetoothNotAvailable()
-    
-    /**
-     Called when a connection attempt failed because BLE is not powered on.
-     */
-    func onBluetoothPoweredOff()
-    
-    /**
-     Called when the connection with the belt has been unexpectedly lost.
-     */
-    func onBeltConnectionLost()
-    
-    /**
-     Called when the connection with a belt failed.
+     Indicates that the connection state has changed.
      
-     - Parameter checkPairing: If `true` the user should be informed to check if the belt as been
-     paired before a connection attempt.
+     - Parameters:
+        - state: The new state.
+        - error: The error or `.noError`.
      */
-    func onBeltConnectionFailed(checkPairing: Bool)
-    
-    /**
-     Called when no belt has been found to start the connection.
-     */
-    func onNoBeltFound()
-    
-    /**
-     Called when a belt has been found during the scan procedure.
-     This is only called when the scan procedure has been started using `searchBelt()`.
-     
-     - Parameter belt: The belt found.
-     */
-    func onBeltFound(belt: CBPeripheral)
-    
-    /**
-     Called when the scan procedure ends.
-     This is only called when the scan procedure has been started using `searchBelt()`.
-     */
-    func onBeltSearchFinished()
+    func onConnectionStateChanged(
+        state: FSBeltConnectionState,
+        error: FSBeltConnectionError)
     
 }

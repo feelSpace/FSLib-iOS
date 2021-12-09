@@ -41,7 +41,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
      Name prefix of a belt.
      This prefix is used to identify a belt.
      */
-    public static let BELT_NAME_PREFIX = "NaviGuertel"
+    public static let BELT_NAME_PREFIX = "naviGuertel"
     
     /**
      Unique instance of `FSConnectionManager` (singleton).
@@ -134,7 +134,8 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
             withServices: [FSConnectionManager.ADVERTISED_SERVICE_UUID])
         for periph in connectedPeriphs {
             if let name = periph.name,
-               name.hasPrefix(FSConnectionManager.BELT_NAME_PREFIX) {
+               name.lowercased().hasPrefix(
+                FSConnectionManager.BELT_NAME_PREFIX.lowercased()) {
                 connectedBelts.append(periph)
             }
         }
@@ -156,11 +157,23 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
                 withIdentifiers: [uuids[0]])
             if !knownDevices.isEmpty,
                let name = knownDevices[0].name,
-               name.hasPrefix(FSConnectionManager.BELT_NAME_PREFIX) {
+               name.lowercased().hasPrefix(
+                FSConnectionManager.BELT_NAME_PREFIX.lowercased()) {
                 return knownDevices[0]
             }
         }
         return nil
+    }
+    
+    /**
+     Returns `true` if the UUID corresponds to a belt that was successfully connected.
+     
+     - Returns:
+     `true` if the UUID corresponds to a belt that was successfully connected.
+     */
+    public func isPreviouslyConnectedBelt(uuid: UUID) -> Bool {
+        let uuids = getLastConnectedBeltUUIDs()
+        return uuids.contains(uuid)
     }
     
     /**
@@ -437,7 +450,8 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
      */
     public func connectBelt(
         _ device: CBPeripheral,
-        timeoutSec: Double = CONNECTION_HANDSHAKE_TIMEOUT_SEC){
+        timeoutSec: Double = CONNECTION_HANDSHAKE_TIMEOUT_SEC)
+    {
         
         let initialState = state
         state = .notConnected
@@ -532,6 +546,12 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
         
         // Connection
         btManager.connect(device, options: nil)
+        
+        // Notify state change
+        delegate?.onConnectionStateChanged(
+            previousState: initialState,
+            newState: state,
+            error: nil)
     }
     
     /**
@@ -773,6 +793,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
             previouslyConnected = getLastConnectedBeltUUIDs().contains(beltUUID)
         }
         // Clear connection
+        let beltSwitchedOff = commandManager.mode == .standby
         clearConnection()
         // Inform delegate with specific error
         if (!previouslyConnected &&
@@ -783,6 +804,12 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
                 previousState: initialState,
                 newState: state,
                 error: .pairingFailed)
+        } else if beltSwitchedOff {
+            // User initiated power off
+            delegate?.onConnectionStateChanged(
+                previousState: initialState,
+                newState: state,
+                error: .powerOff)
         } else if let btError = error as? CBError {
             if btError.code == .peripheralDisconnected {
                 delegate?.onConnectionStateChanged(

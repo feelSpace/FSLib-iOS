@@ -40,7 +40,7 @@ public protocol FSConnectionDelegate {
      - Parameters:
         - previousState: The previous state.
         - newState: The new state.
-        - error: The error in case the state change is inexpected.
+        - error: The error in case the state change is unexpected.
      */
     func onConnectionStateChanged(previousState: FSConnectionState,
                                  newState: FSConnectionState,
@@ -99,6 +99,8 @@ public enum FSConnectionError: Error {
     case connectionLimitReached
     /** The belt probably initiated the disconnection */
     case peripheralDisconnected
+    /** The belt has been switched-off */
+    case powerOff
     /** Unexpected disconnetion, maybe out of range */
     case unexpectedDisconnection
     /** Disconnection probably due to pairing/bonding not performed */
