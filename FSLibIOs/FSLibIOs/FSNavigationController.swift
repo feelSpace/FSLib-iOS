@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreBluetooth
+import os.log
 
 /**
  The navigation controller is an interface to connect and control a feelSpace
@@ -19,8 +20,10 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
     /** Belt connection */
     private var beltConnection: FSConnectionManager
     
-    /** Flag to connect automaticallz when a belt is found */
-    private var connectWhenFound: Bool = false
+    /** Identification of the current connection attempt. */
+    private var connectionAttemptBelt: CBPeripheral?
+    private var connectionAttemptCount: Int = 0
+    private var connectionAttemptStep: FSConnectionAttemptStep = .completed
     
     /** Belt command interface */
     private var beltController: FSCommandManager
@@ -62,24 +65,7 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
     /**
      Connection state with the belt.
      */
-    @objc public var connectionState: FSBeltConnectionState {
-        get {
-            switch beltConnection.state {
-            case .notConnected:
-                return .disconnected
-            case .scanning:
-                return .scanning
-            case .connecting:
-                return .connecting
-            case .discoveringServices:
-                return .discoveringServices
-            case .handshake:
-                return .handshake
-            case .connected:
-                return .connected
-            }
-        }
-    }
+    @objc public private(set) var connectionState: FSBeltConnectionState = .notConnected
     
     /**
      Default vibration intensity of the connected belt, in range [5-100].
@@ -218,6 +204,12 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
      */
     @objc public static let NAVIGATION_SIGNAL_CHANNEL: Int = 2
     
+    /** Logging interface. */
+    private let log = OSLog(
+        subsystem: Bundle.main.bundleIdentifier ?? "de.feelspace.FSLibIOs",
+        category: "network")
+    
+    
     //MARK: Public methods
     
     /**
@@ -229,30 +221,130 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
         super.init()
         beltConnection.delegate = self
         beltController.delegate = self
+        // Set connection state
+        switch beltConnection.state {
+        case .notConnected, .initializing:
+            connectionState = .notConnected
+        case .scanning:
+            connectionState = .searching
+        case .connecting, .discoveringServices, .handshake, .reconnecting:
+            connectionState = .connecting
+        case .connected:
+            connectionState = .connected
+        }
     }
     
     /**
      Searches and connects a belt.
      */
     @objc public func searchAndConnectBelt() {
-        disconnectBelt()
-        // Look for belt connected to other application
-        let connected = beltConnection.retrieveConnectedBelt()
-        if (connected.count > 0) {
-            // Start connection
-            beltConnection.connectBelt(connected[0])
-        } else {
-            // Start scan
-            connectWhenFound = true
-            beltConnection.scanForBelt()
-        }
+        connectionState = .notConnected
+        beltConnection.stopScan()
+        beltConnection.disconnectBelt()
+        connectionAttemptBelt = nil
+        connectionAttemptCount = 0
+        connectionAttemptStep  = .checkConnected
+        // Set state and inform delegate
+        connectionState = .searching
+        delegate?.onConnectionStateChanged(
+            state: connectionState, error: .noError)
+        // Start connection attempts
+        connectionAttempts()
     }
     
     /**
-     Searches for adverstising belts.
+     Retries to connect the belt used in the last connection attempt.
+     */
+    @objc public func retryBeltConnection() {
+        guard let lastBelt = connectionAttemptBelt else {
+            os_log("No belt to retry the connection.", type: .info)
+            return
+        }
+        connectionState = .notConnected
+        beltConnection.stopScan()
+        beltConnection.disconnectBelt()
+        connectionAttemptCount += 1
+        connectionAttemptStep = .completed // No more attempt if connection fails
+        // Set state and inform delegate
+        connectionState = .connecting
+        delegate?.onConnectionStateChanged(state: connectionState, error: .noError)
+        // Start connection
+        beltConnection.connectBelt(lastBelt)
+        
+    }
+    
+    /**
+     Makes a new attempt to search and connect a belt.
+     */
+    private func connectionAttempts() {
+        if connectionState != .searching &&
+            connectionState != .connecting {
+            os_log("Unexpected connection state to start connection attempt.", type: .debug)
+        }
+        if connectionAttemptStep == .checkConnected {
+            // 1. Check for connected belt
+            let connected = beltConnection.retrieveConnectedBelt()
+            if (connected.count > 0) {
+                connectionAttemptBelt = connected[0]
+                connectionAttemptCount = 1
+                os_log("Connection attempt with already connected belt", type: .info)
+                if connectionState != .connecting {
+                    connectionState = .connecting
+                    delegate?.onConnectionStateChanged(state: connectionState, error: .noError)
+                }
+                beltConnection.connectBelt(connectionAttemptBelt!)
+                return
+            } else {
+                connectionAttemptStep = .attemptLastConnected
+            }
+        }
+        if connectionAttemptStep == .attemptLastConnected {
+            // 2. Connection attempt with last connected belt
+            if let lastConnected = beltConnection.retrieveLastConnectedBelt() {
+                connectionAttemptBelt = lastConnected
+                connectionAttemptCount = 1
+                os_log("Connection attempt with last connected belt", type: .info)
+                if connectionState != .connecting {
+                    connectionState = .connecting
+                    delegate?.onConnectionStateChanged(state: connectionState, error: .noError)
+                }
+                beltConnection.connectBelt(connectionAttemptBelt!)
+                return
+            } else {
+                connectionAttemptStep = .scan
+            }
+        }
+        if connectionAttemptStep == .scan {
+            // 3. Scan for belt and connect to the first belt found
+            os_log("Scan for belt.", type: .info)
+            if connectionState != .searching {
+                connectionState = .searching
+                delegate?.onConnectionStateChanged(state: connectionState, error: .noError)
+            }
+            beltConnection.scanForBelt()
+            return
+        }
+        // Procedure completed
+        // connectionAttemptStep == .completed
+    }
+    
+    /**
+     Searches for belts.
      */
     @objc public func searchBelt() {
-        connectWhenFound = false
+        connectionState = .notConnected
+        connectionAttemptStep = .completed // No connection when belt found
+        beltConnection.stopScan()
+        beltConnection.disconnectBelt()
+        // Set state and inform delegate
+        connectionState = .searching
+        delegate?.onConnectionStateChanged(state: connectionState, error: .noError)
+        // Return belts that are already connected
+        let connectedBelts = beltConnection.retrieveConnectedBelt()
+        for belt in connectedBelts {
+            delegate?.onBeltFound(belt: belt, status: .connected)
+        }
+        // Scan for adversiting belts
         beltConnection.scanForBelt()
     }
     
@@ -263,7 +355,21 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
         - device: The belt to connect to.
      */
     @objc public func connectBelt(_ device: CBPeripheral) {
-        disconnectBelt()
+        connectionState = .notConnected
+        connectionAttemptStep = .completed // No additional connection attempt
+        beltConnection.stopScan()
+        beltConnection.disconnectBelt()
+        if let lastBelt = connectionAttemptBelt,
+           lastBelt.identifier == device.identifier {
+            connectionAttemptCount += 1
+        } else {
+            connectionAttemptBelt = device
+            connectionAttemptCount = 0
+        }
+        // Set state and inform delegate
+        connectionState = .connecting
+        delegate?.onConnectionStateChanged(state: connectionState, error: .noError)
+        // Connect belt
         beltConnection.connectBelt(device)
     }
     
@@ -271,8 +377,18 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
      Disconnects the belt or stops the scan and connection procedure.
      */
     @objc public func disconnectBelt() {
+        if connectionState == .notConnected {
+            return
+        }
+        connectionAttemptStep = .completed
+        // Set state
+        connectionState = .notConnected
+        // Stop scan and disconnect
         beltConnection.stopScan()
         beltConnection.disconnectBelt()
+        // Inform delegate after disconnection to avoid starting a new
+        // scan/connection before the effective disconnection
+        delegate?.onConnectionStateChanged(state: connectionState, error: .noError)
     }
     
     /**
@@ -297,7 +413,7 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
     @objc public func startNavigation(direction: Int, isMagneticBearing: Bool,
                                 signal: FSBeltVibrationSignal) -> Bool {
         // Check signal type
-        if (!isRepeated(signal)) {
+        if (!FSBeltVibrationSignal.isRepeated(signal)) {
             return false
         }
         // Set signal and change navigation state
@@ -342,7 +458,7 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
     @objc public func updateNavigationSignal(direction: Int, isMagneticBearing: Bool,
             signal: FSBeltVibrationSignal) -> Bool {
         // Check signal type
-        if (!isRepeated(signal)) {
+        if (!FSBeltVibrationSignal.isRepeated(signal)) {
             return false
         }
         // Check navigation state
@@ -567,80 +683,238 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
         }
     }
     
-    //MARK: Implementation of delegate methods
+    //MARK: Implementation of `FSConnectionDelegate` protocol
     
+    // A belt has been found during the scan
     public func onBeltFound(device: CBPeripheral) {
-        // Connect to the belt
-        if (beltConnection.state == .notConnected ||
-            beltConnection.state == .scanning) {
-            if (connectWhenFound) {
+        if connectionState == .searching {
+            if connectionAttemptStep == .scan {
+                // Next step is connection attempt
+                connectionAttemptStep = .completed
+                connectionState = .connecting
+                delegate?.onConnectionStateChanged(state: connectionState, error: .noError)
                 beltConnection.connectBelt(device)
             } else {
-                delegate?.onBeltFound(belt: device)
+                // Inform delegate of the belt found
+                let known = beltConnection.isPreviouslyConnectedBelt(
+                    uuid: device.identifier)
+                delegate?.onBeltFound(
+                    belt: device,
+                    status: known ? .knownAdvertising : .advertising)
             }
+        } else {
+            os_log("Unexpected state on belt-found callback.", type: .debug)
         }
     }
     
-    public func onBeltScanFinished(cause: FSScanTerminationCause) {
-        switch cause {
-        case .timeout:
-            if connectWhenFound {
-                // No belt found
-                delegate?.onNoBeltFound()
-            } else {
-                delegate?.onBeltSearchFinished()
-            }
-            
-        case .btNotAvailable:
-            // BT problem
-            delegate?.onBluetoothNotAvailable()
-            
-        case .btNotActive:
-            // BT powered off
-            delegate?.onBluetoothPoweredOff()
-            
-        case .alreadyConnected:
-            // Should not happen
-            break
-            
-        case .canceled:
-            // Normal termination
-            break
+    // The scan failed to start
+    public func onScanFailed(error: FSConnectionError) {
+        if connectionState != .searching {
+            os_log("Unexpected state on scan fail.", type: .debug)
         }
+        var retError: FSBeltConnectionError = .btStateError
+        switch error {
+        case .btPoweredOff:
+            retError = .btPoweredOff
+        case .btUnauthorized:
+            retError = .btUnauthorized
+        case .btUnsupported:
+            retError = .btUnsupported
+        case .btStateNotificationFailed, .btStateUnknown, .btStateResetting:
+            retError = .btStateError
+        case .connectionTimeout, .serviceDiscoveryTimeout, .handshakeTimeout,
+                .reconnectionTimeout, .connectionFailed,
+                .connectionLimitReached, .peripheralDisconnected,
+                .unexpectedDisconnection, .pairingFailed,
+                .gattDiscoveryPermissionError, .serviceDiscoveryFailed,
+                .handshakePermissionError, .handshakeFailed:
+            os_log("Unexpected scan error.", type: .debug)
+        case .powerOff:
+            retError = .beltPoweredOff
+        }
+        connectionAttemptStep = .completed // Stop connection procedure (if any)
+        connectionState = .notConnected
+        delegate?.onConnectionStateChanged(
+            state: .notConnected, error: retError)
     }
     
-    public func onConnectionStateChanged(previousState: FSConnectionState,
-            newState: FSConnectionState, event: FSConnectionEvent) {
-        isPauseModeForNavigation = false
+    // Connection state changed
+    public func onConnectionStateChanged(
+        previousState: FSConnectionState,
+        newState: FSConnectionState,
+        error: FSConnectionError?)
+    {
         switch newState {
         case .notConnected:
-            if (event == .connectionLost ||
-                event == .reconnectionFailed) {
-                delegate?.onBeltConnectionLost()
-            } else if (event == .connectionFailed ||
-                event == .handshakeFailed) {
-                delegate?.onBeltConnectionFailed(checkPairing: false)
-            } else if (event == .serviceDiscoveryFailed) {
-                // Maybe a pairing problem
-                delegate?.onBeltConnectionFailed(checkPairing: true)
+            if let err = error {
+                // Error, check for next connection step, except for BT error
+                if err == .btPoweredOff {
+                    connectionAttemptStep = .completed
+                    connectionState = .notConnected
+                    delegate?.onConnectionStateChanged(
+                        state: connectionState, error: .btPoweredOff)
+                    return
+                } else if err == .btUnauthorized {
+                    connectionAttemptStep = .completed
+                    connectionState = .notConnected
+                    delegate?.onConnectionStateChanged(
+                        state: connectionState, error: .btUnauthorized)
+                    return
+                } else if err == .btUnsupported {
+                    connectionAttemptStep = .completed
+                    connectionState = .notConnected
+                    delegate?.onConnectionStateChanged(
+                        state: connectionState, error: .btUnsupported)
+                    return
+                } else if err == .btStateNotificationFailed ||
+                            err == .btStateUnknown ||
+                            err == .btStateResetting {
+                    connectionAttemptStep = .completed
+                    connectionState = .notConnected
+                    delegate?.onConnectionStateChanged(
+                        state: connectionState, error: .btStateError)
+                    return
+                }
+                // Check for next connection step
+                switch connectionAttemptStep {
+                case .checkConnected:
+                    // State should be `.connecting`
+                    if connectionState != .connecting {
+                        os_log("Unexpected state on `.checkConnected` connection step.", type: .debug)
+                        connectionState = .connecting
+                        delegate?.onConnectionStateChanged(state: connectionState, error: .noError)
+                    }
+                    // Next step is check last connected
+                    connectionAttemptStep = .attemptLastConnected
+                    connectionAttempts()
+                case .attemptLastConnected:
+                    // State should be `.connecting`
+                    if connectionState != .connecting {
+                        os_log("Unexpected state on `.attemptLastConnected` connection step.", type: .debug)
+                        connectionState = .connecting
+                        delegate?.onConnectionStateChanged(state: connectionState, error: .noError)
+                    }
+                    // Next step is scan
+                    connectionAttemptStep = .scan
+                    connectionAttempts()
+                case .scan:
+                    // Scan failed
+                    // `onScanFailed` callback should have already been called
+                    if connectionState != .notConnected {
+                        os_log("Unexpected state on `.scan` connection step.", type: .debug)
+                        onScanFailed(error: err)
+                    }
+                case .completed:
+                    // Final/Single connection attempt failed
+                    if connectionState == .notConnected {
+                        os_log("Unexpected state on disconnection.", type: .debug)
+                    }
+                    // Inform delegate about the type of error
+                    var retError: FSBeltConnectionError = .unexpectedDisconnection
+                    switch err {
+                    case .btPoweredOff:
+                        retError = .btPoweredOff
+                    case .btUnauthorized:
+                        retError = .btUnauthorized
+                    case .btUnsupported:
+                        retError = .btUnsupported
+                    case .btStateNotificationFailed, .btStateUnknown, .btStateResetting:
+                        retError = .btStateError
+                    case .connectionTimeout, .serviceDiscoveryTimeout,
+                            .handshakeTimeout, .reconnectionTimeout:
+                        retError = .connectionTimeout
+                    case .connectionFailed, .serviceDiscoveryFailed,
+                            .handshakeFailed:
+                        // NOTE: On serviceDiscoveryFailed, maybe a pairing problem
+                        retError = .connectionFailed
+                    case .connectionLimitReached:
+                        retError = .connectionLimitReached
+                    case .peripheralDisconnected:
+                        retError = .beltDisconnection
+                    case .unexpectedDisconnection:
+                        retError = .unexpectedDisconnection
+                    case .pairingFailed, .gattDiscoveryPermissionError,
+                            .handshakePermissionError:
+                        retError = .pairingPermissionError
+                    case .powerOff:
+                        retError = .beltPoweredOff
+                    }
+                    connectionState = .notConnected
+                    delegate?.onConnectionStateChanged(
+                        state: connectionState, error: retError)
+                }
+            } else {
+                // Expected disconnection or no belt found
+                if connectionAttemptStep == .scan {
+                    // No belt found, end of the connection procedure
+                    connectionAttemptStep = .completed
+                    connectionState = .notConnected
+                    delegate?.onConnectionStateChanged(
+                        state: connectionState, error: .noBeltFound)
+                } else if connectionAttemptStep == .completed {
+                    // End of the search procedure
+                    connectionState = .notConnected
+                    delegate?.onConnectionStateChanged(
+                        state: connectionState, error: .noError)
+                } else {
+                    // Expected disconnection
+                    // State should already be `.notConnected`
+                    if connectionState != .notConnected {
+                        os_log("Unexpected state when disconnected.", type: .debug)
+                        // Set state and inform delegate
+                        connectionState = .notConnected
+                        delegate?.onConnectionStateChanged(
+                            state: connectionState, error: .noError)
+                    }
+                }
             }
-            delegate?.onBeltConnectionStateChanged(state: .disconnected)
+        case .initializing:
+            // Nothing to do
+            // The state should be searching or connecting
+            if connectionState != .searching &&
+                connectionState != .connecting {
+                os_log("Unexpected state when initializing BT.", type: .debug)
+            }
+            // No error expected
+            if let _ = error {
+                os_log("Unexpected error in `.initializing` state.", type: .debug)
+            }
         case .scanning:
-            delegate?.onBeltConnectionStateChanged(state: .scanning)
-        case .connecting:
-            delegate?.onBeltConnectionStateChanged(state: .connecting)
-        case .discoveringServices:
-            delegate?.onBeltConnectionStateChanged(state: .discoveringServices)
-        case .handshake:
-            delegate?.onBeltConnectionStateChanged(state: .handshake)
+            // Nothing to do
+            // The state should be searching
+            if connectionState != .searching {
+                os_log("Unexpected state when scanning.", type: .debug)
+                connectionState = .searching
+                delegate?.onConnectionStateChanged(
+                    state: connectionState, error: .noError)
+            }
+            // No error expected
+            if let _ = error {
+                os_log("Unexpected error in `.initializing` state.", type: .debug)
+            }
+        case .connecting, .discoveringServices, .handshake:
+            // Nothing to do
+            // The state should be connecting
+            if connectionState != .connecting {
+                os_log("Unexpected state when connecting.", type: .debug)
+                connectionState = .connecting
+                delegate?.onConnectionStateChanged(
+                    state: connectionState, error: .noError)
+            }
+            // No error expected
+            if let _ = error {
+                os_log("Unexpected error in `.connecting` state.", type: .debug)
+            }
         case .connected:
+            // Successful connection
+            os_log("Belt connection successful.", type: .info)
             // Register to orientation notifications
             if (!beltController.startOrientationNotifications()) {
-                print("Fail to register to orientation notifications!")
+                os_log("Fail to register to orientation notifications!", type: .debug)
             }
             // Request compass accuracy signal state
             if (!beltController.requestCompassAccuracySignalState()) {
-                print("Fail to request compass accuracy signal state!")
+                os_log("Fail to request compass accuracy signal state!", type: .debug)
             }
             // Start navigation signal if in navigating state
             if (navigationState == .navigating) {
@@ -650,14 +924,30 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
                 } else {
                     // Change belt mode to app mode
                     if (!beltController.changeBeltMode(.app)) {
-                        print("Fail to change belt mode!")
+                        os_log("Fail to change belt mode!", type: .debug)
                     }
                 }
             }
-            // Inform delegate of state change
-            delegate?.onBeltConnectionStateChanged(state: .connected)
+            // Set state and inform delegate
+            connectionState = .connected
+            connectionAttemptStep = .completed
+            delegate?.onConnectionStateChanged(
+                state: connectionState, error: .noError)
+            if let _ = error {
+                os_log("Unexpected error in `.connected` state.", type: .debug)
+            }
+        case .reconnecting:
+            if connectionState != .connected &&
+                connectionState != .connecting {
+                os_log("Unexpected state when reconnecting.", type: .debug)
+            }
+            connectionState = .connecting
+            delegate?.onConnectionStateChanged(
+                state: connectionState, error: .unexpectedDisconnection)
         }
     }
+    
+    // MARK: Implementation of `FSCommandDelegate` protocol
     
     public func onBeltModeChanged(_ newBeltMode: FSBeltMode) {
         isPauseModeForNavigation = false
@@ -832,7 +1122,7 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
             // Not in app mode
             return
         }
-        if (!isRepeated(signal)) {
+        if (!FSBeltVibrationSignal.isRepeated(signal)) {
             // Stop the vibration
             _=beltController.stopVibration()
         } else {
@@ -1026,4 +1316,87 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
      */
     case navigating;
     
+}
+
+/**
+ Enumeration of the connection states.
+ 
+ This is a simnplified view of the connection states listed in `FSConnectionState`, and is used only by the
+ navigation controller.
+ */
+@objc public enum FSBeltConnectionState: Int {
+    
+    /** No belt is connected */
+    case notConnected
+    
+    /** Searching for a belt */
+    case searching
+    
+    /** Connecting to a belt */
+    case connecting
+    
+    /** Connected to a belt */
+    case connected
+}
+
+/**
+ Enumeration of connection errors.
+ 
+ This is a simplified list of `FSConnectionError` only for the navigation controller.
+ */
+@objc public enum FSBeltConnectionError: Int {
+    
+    /** No error */
+    case noError
+    
+    /** BT is not active. */
+    case btPoweredOff
+    
+    /** The application is not autorized to use BT. */
+    case btUnauthorized
+    
+    /** BT is not supported on this device. */
+    case btUnsupported
+    
+    /** Unexpected error with the BT interface */
+    case btStateError
+    
+    /** Unexpected disconnetion, maybe out of range */
+    case unexpectedDisconnection
+    
+    /** No belt found during the connection procedure */
+    case noBeltFound
+    
+    /** Connection timeout */
+    case connectionTimeout
+    
+    /** Connection failed unexpectedly */
+    case connectionFailed
+    
+    /** Too many BT devices connected */
+    case connectionLimitReached
+    
+    /** The belt initiated the disconnection */
+    case beltDisconnection
+    
+    /** The belt has been switched-off */
+    case beltPoweredOff
+    
+    /** There is maybe a pairing problem */
+    case pairingPermissionError
+    
+}
+
+/**
+ Enumeration of the steps for searching and connecting a belt.
+ */
+private enum FSConnectionAttemptStep {
+    /** Check if a belt is already connected. */
+    case checkConnected
+    /** Try to reconnect the last connected belt. */
+    case attemptLastConnected
+    /** Scan and connect to the first found belt. */
+    case scan
+    /** Connection attempts procedure completed. */
+    case completed
 }

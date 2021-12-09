@@ -108,42 +108,43 @@ import Foundation
      */
     case batteryLevel;
     
-}
-
-/**
- Returns `true` if the vibration signal is repeated indefinitly or `false` if
- the signal is temporary.
- - Returns: `true` if the vibration signal is repeated indefinitly or `false` if
- the signal is temporary.
- - Parameters:
-    - signal: The vibration signal.
- */
-func isRepeated(_ signal: FSBeltVibrationSignal) -> Bool {
-    switch signal {
-    case .noVibration, .continuous, .navigation, .approachingDestination,
-         .turnOngoing, .nextWaypointLongDistance, .nextWaypointMediumDistance,
-         .nextWaypointShortDistance, .nextWaypointAreaReached,
-         .destinationReachedRepeated:
-        return true
-    default:
-        return false
+    
+    /**
+     Returns `true` if the vibration signal is repeated indefinitly or `false` if
+     the signal is temporary.
+     - Returns: `true` if the vibration signal is repeated indefinitly or `false` if
+     the signal is temporary.
+     - Parameters:
+        - signal: The vibration signal.
+     */
+    public static func isRepeated(_ signal: FSBeltVibrationSignal) -> Bool {
+        switch signal {
+        case .noVibration, .continuous, .navigation, .approachingDestination,
+             .turnOngoing, .nextWaypointLongDistance, .nextWaypointMediumDistance,
+             .nextWaypointShortDistance, .nextWaypointAreaReached,
+             .destinationReachedRepeated:
+            return true
+        default:
+            return false
+        }
     }
-}
 
-/**
- Returns `true` if the vibration signal is directional, i.e. it can be oriented
- in a direction.
- - Returns: `true` if the vibration signal is directional, i.e. it can be
- oriented in a direction.
- */
-func isDirectional(_ signal: FSBeltVibrationSignal) -> Bool {
-    switch signal {
-    case .continuous, .navigation, .approachingDestination,
-         .turnOngoing, .directionNotification, .nextWaypointLongDistance,
-         .nextWaypointMediumDistance, .nextWaypointShortDistance,
-         .nextWaypointAreaReached:
-        return true
-    default:
-        return false
+    /**
+     Returns `true` if the vibration signal is directional, i.e. it can be oriented
+     in a direction.
+     - Returns: `true` if the vibration signal is directional, i.e. it can be
+     oriented in a direction.
+     */
+    public static func isDirectional(_ signal: FSBeltVibrationSignal) -> Bool {
+        switch signal {
+        case .continuous, .navigation, .approachingDestination,
+             .turnOngoing, .directionNotification, .nextWaypointLongDistance,
+             .nextWaypointMediumDistance, .nextWaypointShortDistance,
+             .nextWaypointAreaReached:
+            return true
+        default:
+            return false
+        }
     }
+
 }

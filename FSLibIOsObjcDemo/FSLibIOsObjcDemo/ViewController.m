@@ -68,12 +68,12 @@
 
 - (void)updateConnectionPanel {
     switch (beltController.connectionState) {
-        case FSBeltConnectionStateDisconnected:
+        case FSBeltConnectionStateNotConnected:
             connectButton.enabled = YES;
             disconnectButton.enabled = NO;
             connectionStateLabel.text = @"Disconnected";
             break;
-        case FSBeltConnectionStateScanning:
+        case FSBeltConnectionStateSearching:
             connectButton.enabled = NO;
             disconnectButton.enabled = YES;
             connectionStateLabel.text = @"Scanning";
@@ -83,21 +83,21 @@
             disconnectButton.enabled = YES;
             connectionStateLabel.text = @"Connecting";
             break;
-        case FSBeltConnectionStateReconnecting:
-            connectButton.enabled = NO;
-            disconnectButton.enabled = YES;
-            connectionStateLabel.text = @"Reconnecting";
-            break;
-        case FSBeltConnectionStateDiscoveringServices:
-            connectButton.enabled = NO;
-            disconnectButton.enabled = YES;
-            connectionStateLabel.text = @"Discovering services";
-            break;
-        case FSBeltConnectionStateHandshake:
-            connectButton.enabled = NO;
-            disconnectButton.enabled = YES;
-            connectionStateLabel.text = @"Handshake";
-            break;
+//        case FSBeltConnectionStateReconnecting:
+//            connectButton.enabled = NO;
+//            disconnectButton.enabled = YES;
+//            connectionStateLabel.text = @"Reconnecting";
+//            break;
+//        case FSBeltConnectionStateDiscoveringServices:
+//            connectButton.enabled = NO;
+//            disconnectButton.enabled = YES;
+//            connectionStateLabel.text = @"Discovering services";
+//            break;
+//        case FSBeltConnectionStateHandshake:
+//            connectButton.enabled = NO;
+//            disconnectButton.enabled = YES;
+//            connectionStateLabel.text = @"Handshake";
+//            break;
         case FSBeltConnectionStateConnected:
             connectButton.enabled = NO;
             disconnectButton.enabled = YES;
@@ -259,13 +259,13 @@
 //MARK: UI Event handlers
 
 - (IBAction)onConnectButtonTap:(id)sender{
-    if (beltController.connectionState == FSBeltConnectionStateDisconnected) {
+    if (beltController.connectionState == FSBeltConnectionStateNotConnected) {
         [beltController searchAndConnectBelt];
     }
 }
 
 - (IBAction)onDisconnectButtonTap:(id)sender{
-    if (beltController.connectionState != FSBeltConnectionStateDisconnected) {
+    if (beltController.connectionState != FSBeltConnectionStateNotConnected) {
         [beltController disconnectBelt];
     }
 }
@@ -356,17 +356,17 @@
     [self updateBatteryPanel];
 }
 
-- (void)onBeltConnectionFailed {
-    [self showToast:@"Connection failed!"];
-}
-
-- (void)onBeltConnectionLost {
-    [self showToast:@"Connection lost!"];
-}
-
-- (void)onBeltConnectionStateChangedWithState:(enum FSBeltConnectionState)state {
-    [self updateUI];
-}
+//- (void)onBeltConnectionFailed {
+//    [self showToast:@"Connection failed!"];
+//}
+//
+//- (void)onBeltConnectionLost {
+//    [self showToast:@"Connection lost!"];
+//}
+//
+//- (void)onBeltConnectionStateChangedWithState:(enum FSBeltConnectionState)state {
+//    [self updateUI];
+//}
 
 - (void)onBeltDefaultVibrationIntensityChangedWithIntensity:(NSInteger)intensity {
     [self updateDefaultIntensityPanel];
@@ -380,14 +380,14 @@
     [self updateOrientationPanel];
 }
 
-- (void)onBluetoothNotAvailable {
-    [self showToast:@"No Bluetooth available!"];
-}
-
-- (void)onBluetoothPoweredOff {
-    [self showToast:@"Please turn on Bluetooth!"];
-}
-
+//- (void)onBluetoothNotAvailable {
+//    [self showToast:@"No Bluetooth available!"];
+//}
+//
+//- (void)onBluetoothPoweredOff {
+//    [self showToast:@"Please turn on Bluetooth!"];
+//}
+//
 - (void)onCompassAccuracySignalStateUpdatedWithEnabled:(BOOL)enabled {
     [self updateOrientationPanel];
 }
@@ -395,9 +395,63 @@
 - (void)onNavigationStateChangeWithState:(enum FSNavigationState)state {
     [self updateUI];
 }
+//
+//- (void)onNoBeltFound {
+//    [self showToast:@"No belt found!"];
+//}
 
-- (void)onNoBeltFound {
-    [self showToast:@"No belt found!"];
+
+- (void)onBeltFoundWithBelt:(CBPeripheral * _Nonnull)belt status:(enum FSBeltConnectionStatus)status {
+    // Nothing to do
 }
+
+
+- (void)onConnectionStateChangedWithState:(enum FSBeltConnectionState)state error:(enum FSBeltConnectionError)error {
+    [self updateUI];
+    switch (error) {
+        
+        case FSBeltConnectionErrorNoError:
+            // Nothing to do
+            break;
+        case FSBeltConnectionErrorBtPoweredOff:
+            [self showToast:@"BT powered off!"];
+            break;
+        case FSBeltConnectionErrorBtUnauthorized:
+            [self showToast:@"BT unauthorized!"];
+            break;
+        case FSBeltConnectionErrorBtUnsupported:
+            [self showToast:@"BT unsupported!"];
+            break;
+        case FSBeltConnectionErrorBtStateError:
+            [self showToast:@"BT not ready!"];
+            break;
+        case FSBeltConnectionErrorUnexpectedDisconnection:
+            [self showToast:@"Unexpected disconnection!"];
+            break;
+        case FSBeltConnectionErrorNoBeltFound:
+            [self showToast:@"No belt found!"];
+            break;
+        case FSBeltConnectionErrorConnectionTimeout:
+            [self showToast:@"Connection timeout!"];
+            break;
+        case FSBeltConnectionErrorConnectionFailed:
+            [self showToast:@"Connection failed!"];
+            break;
+        case FSBeltConnectionErrorConnectionLimitReached:
+            [self showToast:@"Too many BT devices!"];
+            break;
+        case FSBeltConnectionErrorBeltDisconnection:
+            [self showToast:@"Belt disconnected!"];
+            break;
+        case FSBeltConnectionErrorBeltPoweredOff:
+            [self showToast:@"Belt powered off."];
+            break;
+        case FSBeltConnectionErrorPairingPermissionError:
+            [self showToast:@"Pairing error!"];
+            break;
+    }
+    
+}
+
 
 @end
