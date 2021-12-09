@@ -103,22 +103,6 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
             searchButton.isEnabled = false
             disconnectButton.isEnabled = true
             connectionStateLabel.text = "Connecting"
-            // TODO: TBR
-//        case .reconnecting:
-//            connectButton.isEnabled = false
-//            searchButton.isEnabled = false
-//            disconnectButton.isEnabled = true
-//            connectionStateLabel.text = "Reconnecting"
-//        case .discoveringServices:
-//            connectButton.isEnabled = false
-//            searchButton.isEnabled = false
-//            disconnectButton.isEnabled = true
-//            connectionStateLabel.text = "Discovering services"
-//        case .handshake:
-//            connectButton.isEnabled = false
-//            searchButton.isEnabled = false
-//            disconnectButton.isEnabled = true
-//            connectionStateLabel.text = "Handshake"
         case .connected:
             connectButton.isEnabled = false
             searchButton.isEnabled = false
@@ -294,47 +278,6 @@ class ViewController: UIViewController, FSNavigationControllerDelegate {
     
     func onCompassAccuracySignalStateUpdated(enabled: Bool) {
         updateOrientationPanel()
-    }
-    // TODO: TBR
-//
-//    func onBeltConnectionStateChanged(state: FSBeltConnectionState) {
-//        updateUI()
-//        NotificationCenter.default.post(
-//            name: .beltConnectionStateChanged, object: nil)
-//    }
-//
-//    func onBluetoothNotAvailable() {
-//        showToast(message: "No Bluetooth available!")
-//    }
-//
-//    func onBluetoothPoweredOff() {
-//        showToast(message: "Please turn on Bluetooth!")
-//    }
-//
-//    func onBeltConnectionLost() {
-//        showToast(message: "Connection lost!")
-//    }
-//
-//    func onBeltConnectionFailed(checkPairing: Bool) {
-//        if (checkPairing) {
-//            showToast(message: "Please check pairing!")
-//        } else {
-//            showToast(message: "Connection failed!")
-//        }
-//    }
-//
-//    func onNoBeltFound() {
-//        showToast(message: "No belt found!")
-//    }
-//
-//    func onBeltSearchFinished() {
-//        // Nothing to do
-//    }
-    
-    func onBeltFound(belt: CBPeripheral) {
-        beltList.append(belt)
-        NotificationCenter.default.post(
-            name: .beltFound, object: nil)
     }
     
     func onBeltFound(belt: CBPeripheral, status: FSBeltConnectionStatus) {
