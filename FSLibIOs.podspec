@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
 
   spec.name         = "FSLibIOs"
-  spec.version      = "2.2.1"
+  spec.version      = "2.2.2"
   spec.summary      = "An iOS library to control the feelSpace naviBelt from your application."
 
   spec.description  = <<-DESC
@@ -16,7 +16,8 @@ Connect and control a feelSpace naviBelt (a tactile belt with vibration motors) 
 
   spec.platform     = :ios, "12.0"
 
-  spec.source       = { :git => "https://github.com/feelSpace/FSLib-iOS.git", :tag => spec.version }
+  # spec.source       = { :git => "https://github.com/feelSpace/FSLib-iOS.git", :tag => spec.version }
+  spec.source       = { :git => "git@github.com:feelSpace/FSLib-iOS.git", :tag => spec.version }
 
   spec.source_files  = "FSLibIOs/FSLibIOs", "FSLibIOs/FSLibIOs/**/*.{swift,h}"
   spec.exclude_files = "FSLibIOs/FSLibIOsTests", "FSLibIOs/FSLibIOsTests/**/*.{swift,h}"
