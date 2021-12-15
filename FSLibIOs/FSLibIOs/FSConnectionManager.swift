@@ -241,33 +241,24 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
         switch btManager.state {
         case .poweredOff:
             // Abort
-            delegate?.onScanFailed(error: .btPoweredOff)
-            if initialState != state {
-                delegate?.onConnectionStateChanged(
-                    previousState: initialState,
-                    newState: state,
-                    error: .btPoweredOff)
-            }
+            delegate?.onConnectionStateChanged(
+                previousState: initialState,
+                newState: state,
+                error: .btPoweredOff)
             return
         case .unauthorized:
             // Abort
-            delegate?.onScanFailed(error: .btUnauthorized)
-            if initialState != state {
-                delegate?.onConnectionStateChanged(
-                    previousState: initialState,
-                    newState: state,
-                    error: .btUnauthorized)
-            }
+            delegate?.onConnectionStateChanged(
+                previousState: initialState,
+                newState: state,
+                error: .btUnauthorized)
             return
         case .unsupported:
             // Abort
-            delegate?.onScanFailed(error: .btUnsupported)
-            if initialState != state {
-                delegate?.onConnectionStateChanged(
-                    previousState: initialState,
-                    newState: state,
-                    error: .btUnsupported)
-            }
+            delegate?.onConnectionStateChanged(
+                previousState: initialState,
+                newState: state,
+                error: .btUnsupported)
             return
         case .unknown, .resetting:
             // Wait for manager state update (with timer)
@@ -367,7 +358,6 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
         }
         btWakeupTimer = nil
         state = .notConnected
-        let scanFailedNotif = pendingScan
         pendingScan = false
         pendingConnection = false
         var btManagerError: FSConnectionError = .btStateNotificationFailed
@@ -386,9 +376,6 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
             break
         @unknown default:
             break
-        }
-        if scanFailedNotif {
-            delegate?.onScanFailed(error: btManagerError)
         }
         delegate?.onConnectionStateChanged(
             previousState: .initializing,

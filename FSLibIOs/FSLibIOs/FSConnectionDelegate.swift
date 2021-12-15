@@ -27,15 +27,7 @@ public protocol FSConnectionDelegate {
     func onBeltFound(device: CBPeripheral)
     
     /**
-     Indicates that the scan procedure failed to start.
-     
-     - Parameters:
-        - error: The scan error.
-     */
-    func onScanFailed(error: FSConnectionError)
-    
-    /**
-     Indicates that the connection state has changed.
+     Indicates that the connection state has changed or an error occurs.
      
      - Parameters:
         - previousState: The previous state.

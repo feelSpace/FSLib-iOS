@@ -799,11 +799,30 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
                     connectionAttempts()
                 case .scan:
                     // Scan failed
-                    // `onScanFailed` callback should have already been called
-                    if connectionState != .notConnected {
-                        os_log("Unexpected state on `.scan` connection step.", type: .debug)
-                        onScanFailed(error: err)
+                    var retError: FSBeltConnectionError = .btStateError
+                    switch err {
+                    case .btPoweredOff:
+                        retError = .btPoweredOff
+                    case .btUnauthorized:
+                        retError = .btUnauthorized
+                    case .btUnsupported:
+                        retError = .btUnsupported
+                    case .btStateNotificationFailed, .btStateUnknown, .btStateResetting:
+                        retError = .btStateError
+                    case .connectionTimeout, .serviceDiscoveryTimeout, .handshakeTimeout,
+                            .reconnectionTimeout, .connectionFailed,
+                            .connectionLimitReached, .peripheralDisconnected,
+                            .unexpectedDisconnection, .pairingFailed,
+                            .gattDiscoveryPermissionError, .serviceDiscoveryFailed,
+                            .handshakePermissionError, .handshakeFailed:
+                        os_log("Unexpected scan error.", type: .debug)
+                    case .powerOff:
+                        retError = .beltPoweredOff
                     }
+                    connectionAttemptStep = .completed // Stop connection procedure (if any)
+                    connectionState = .notConnected
+                    delegate?.onConnectionStateChanged(
+                        state: .notConnected, error: retError)
                 case .completed:
                     // Final/Single connection attempt failed
                     if connectionState == .notConnected {
