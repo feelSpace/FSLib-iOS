@@ -34,8 +34,9 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
      Service UUID advertised by a belt.
      This service UUID is used to identify a belt.
      */
-    public static let ADVERTISED_SERVICE_UUID =
-        CBUUID(string: "65333333-A115-11E2-9E9A-0800200CA100")
+    public static let ADVERTISED_SERVICES_UUIDS =
+        [CBUUID(string: "65333333-A115-11E2-9E9A-0800200CA100"),
+         CBUUID(string: "0000FE51-0000-1000-8000-00805F9B34FB")]
     
     /**
      Name prefix of a belt.
@@ -74,7 +75,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
     private var btManager: CBCentralManager!
     
     // Command manager
-    // Note: Use of computed property with private attribute because of 
+    // Note: Use of computed property with private attribute because of
     // initialization.
     private var privateCommandManager: FSCommandManager!
     
@@ -131,7 +132,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
     public func retrieveConnectedBelt() -> [CBPeripheral] {
         var connectedBelts: [CBPeripheral] = []
         let connectedPeriphs = btManager.retrieveConnectedPeripherals(
-            withServices: [FSConnectionManager.ADVERTISED_SERVICE_UUID])
+            withServices: FSConnectionManager.ADVERTISED_SERVICES_UUIDS)
         for periph in connectedPeriphs {
             if let name = periph.name,
                name.lowercased().hasPrefix(
@@ -320,7 +321,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
         
         // Start scan
         btManager.scanForPeripherals(withServices:
-            [FSConnectionManager.ADVERTISED_SERVICE_UUID], options:
+            FSConnectionManager.ADVERTISED_SERVICES_UUIDS, options:
             [CBCentralManagerScanOptionAllowDuplicatesKey: false])
         
         // Notify state change

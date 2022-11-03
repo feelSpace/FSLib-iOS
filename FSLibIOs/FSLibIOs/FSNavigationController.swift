@@ -311,10 +311,10 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
                 beltConnection.connectBelt(connectionAttemptBelt!)
                 return
             } else {
-                connectionAttemptStep = .scan
+                connectionAttemptStep = .scanAndConnect
             }
         }
-        if connectionAttemptStep == .scan {
+        if connectionAttemptStep == .scanAndConnect {
             // 3. Scan for belt and connect to the first belt found
             os_log("Scan for belt.", type: .info)
             if connectionState != .searching {
@@ -688,9 +688,8 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
     // A belt has been found during the scan
     public func onBeltFound(device: CBPeripheral) {
         if connectionState == .searching {
-            if connectionAttemptStep == .scan {
+            if connectionAttemptStep == .scanAndConnect {
                 // Next step is connection attempt
-                connectionAttemptStep = .completed
                 connectionState = .connecting
                 delegate?.onConnectionStateChanged(state: connectionState, error: .noError)
                 beltConnection.connectBelt(device)
@@ -795,10 +794,10 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
                         delegate?.onConnectionStateChanged(state: connectionState, error: .noError)
                     }
                     // Next step is scan
-                    connectionAttemptStep = .scan
+                    connectionAttemptStep = .scanAndConnect
                     connectionAttempts()
-                case .scan:
-                    // Scan failed
+                case .scanAndConnect:
+                    // Scan or connection failed
                     var retError: FSBeltConnectionError = .btStateError
                     switch err {
                     case .btPoweredOff:
@@ -824,7 +823,7 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
                     delegate?.onConnectionStateChanged(
                         state: .notConnected, error: retError)
                 case .completed:
-                    // Final/Single connection attempt failed
+                    // Connection failed or lost
                     if connectionState == .notConnected {
                         os_log("Unexpected state on disconnection.", type: .debug)
                     }
@@ -864,7 +863,7 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
                 }
             } else {
                 // Expected disconnection or no belt found
-                if connectionAttemptStep == .scan {
+                if connectionAttemptStep == .scanAndConnect {
                     // No belt found, end of the connection procedure
                     connectionAttemptStep = .completed
                     connectionState = .notConnected
@@ -1415,7 +1414,7 @@ private enum FSConnectionAttemptStep {
     /** Try to reconnect the last connected belt. */
     case attemptLastConnected
     /** Scan and connect to the first found belt. */
-    case scan
+    case scanAndConnect
     /** Connection attempts procedure completed. */
     case completed
 }
