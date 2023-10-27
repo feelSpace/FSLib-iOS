@@ -184,7 +184,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
      
      - Returns: The list of UUIDs of the previously connected belts.
      */
-    internal func getLastConnectedBeltUUIDs() -> [UUID] {
+    public func getLastConnectedBeltUUIDs() -> [UUID] {
         var uuids: [UUID] = []
         if let lastUUIDStrings = UserDefaults.standard.stringArray(
             forKey: FSConnectionManager.lastConnectedBeltsKey) {
