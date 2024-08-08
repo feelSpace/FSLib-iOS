@@ -61,8 +61,12 @@ class FSBleOperationQueue: NSObject {
      Adds a BLE operation into the queue.
      If the queue is empty, the operation is immediately started.
      */
-    public func add(_ operation: FSBleOperation) {
-        bleOperationQueue.append(operation)
+    public func add(_ operation: FSBleOperation, isHighPriority: Bool = false) {
+        if isHighPriority {
+            bleOperationQueue.insert(operation, at: 0)
+        } else {
+            bleOperationQueue.append(operation)
+        }
         checkAndStartBleOperation()
     }
     

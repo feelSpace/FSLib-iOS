@@ -886,7 +886,7 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
         if let characteristic = keepAliveChar, let peripheral = belt {
             operationQueue.add(FSBleOperationWriteCharacteristic(
                 peripheral: peripheral, characteristic: characteristic,
-                value: Data([0x00])))
+                value: Data([0x00])), isHighPriority: true)
         }
     }
     
