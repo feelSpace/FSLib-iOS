@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
 
   spec.name         = "FSLibIOs"
-  spec.version      = "2.2.5"
+  spec.version      = "2.2.6"
   spec.summary      = "An iOS library to control the feelSpace naviBelt from your application."
 
   spec.description  = <<-DESC
