@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreBluetooth
+import OSLog
 
 /**
  A queue for BLE operations (e.g. write and read characteristic).
@@ -35,6 +36,10 @@ class FSBleOperationQueue: NSObject {
      Clears all BLE operations including the running one.
      */
     public func clear() {
+        if FSConnectionManager.logBleEvents {
+            os_log("Clear BLE operations.",
+                   log: FSConnectionManager.log, type: .debug)
+        }
         // Stop timeout timer
         if let timer = runningBleOperationTimeoutTimer {
             runningBleOperationTimeoutTimer = nil
@@ -63,8 +68,15 @@ class FSBleOperationQueue: NSObject {
      */
     public func add(_ operation: FSBleOperation, isHighPriority: Bool = false) {
         if isHighPriority {
+            if FSConnectionManager.logBleEvents {
+                os_log("Insert BLE operation, %@.",
+                       log: FSConnectionManager.log,
+                       type: .debug, 
+                       operation.description)
+            }
             bleOperationQueue.insert(operation, at: 0)
         } else {
+            if FSConnectionManager.logBleEvents { os_log("Append BLE operation, %@.", log: FSConnectionManager.log, type: .debug, operation.description) }
             bleOperationQueue.append(operation)
         }
         checkAndStartBleOperation()
@@ -106,6 +118,12 @@ class FSBleOperationQueue: NSObject {
         // Next operation if no running operation
         while (runningBleOperation == nil && !bleOperationQueue.isEmpty) {
             let operationToStart = bleOperationQueue.remove(at: 0)
+            if FSConnectionManager.logBleEvents {
+                os_log("Start BLE operation, %@.",
+                       log: FSConnectionManager.log,
+                       type: .debug,
+                       operationToStart.description)
+            }
             if (operationToStart.start()) {
                 runningBleOperation = operationToStart
                 runningBleOperationTimeoutTimer =
@@ -117,6 +135,12 @@ class FSBleOperationQueue: NSObject {
                         userInfo: nil,
                         repeats: false)
             } else {
+                if FSConnectionManager.logBleEvents {
+                    os_log("Start BLE operation failed, %@.",
+                           log: FSConnectionManager.log,
+                           type: .debug,
+                           operationToStart.description)
+                }
                 failedOperations.append(operationToStart)
             }
         }
@@ -136,6 +160,12 @@ class FSBleOperationQueue: NSObject {
      */
     @objc internal func bleOperationTimeout() {
         if let operation = runningBleOperation {
+            if FSConnectionManager.logBleEvents {
+                os_log("BLE operation timeout, %@.",
+                       log: FSConnectionManager.log,
+                       type: .debug,
+                       operation.description)
+            }
             runningBleOperation = nil
             runningBleOperationTimeoutTimer = nil
             checkAndStartBleOperation()
@@ -174,8 +204,20 @@ class FSBleOperationQueue: NSObject {
                 error: error)) {
                 nextOperation()
                 if error == nil {
+                    if FSConnectionManager.logBleEvents {
+                        os_log("BLE operation ACK, %@.",
+                               log: FSConnectionManager.log,
+                               type: .debug,
+                               operation.description)
+                    }
                     operation.success()
                 } else {
+                    if FSConnectionManager.logBleEvents {
+                        os_log("BLE operation failed, %@.",
+                               log: FSConnectionManager.log,
+                               type: .debug,
+                               operation.description)
+                    }
                     operation.fail()
                 }
             }
@@ -194,6 +236,13 @@ class FSBleOperationQueue: NSObject {
     public func peripheralDidUpdateValueFor(peripheral: CBPeripheral,
                                            characteristic: CBCharacteristic,
                                            error: Error?) {
+        if FSConnectionManager.logBleEvents {
+            os_log("GATT notif, %@, %@.",
+                   log: FSConnectionManager.log,
+                   type: .debug,
+                   characteristic.uuid.uuidString,
+                   characteristic.value?.toHexString() ?? "nil")
+        }
         if let operation = runningBleOperation {
             if (operation.matchDidUpdateValueFor(
                 peripheral: peripheral,
@@ -201,8 +250,20 @@ class FSBleOperationQueue: NSObject {
                 error: error)) {
                 nextOperation()
                 if error == nil {
+                    if FSConnectionManager.logBleEvents {
+                        os_log("BLE operation ACK, %@.",
+                               log: FSConnectionManager.log,
+                               type: .debug,
+                               operation.description)
+                    }
                     operation.success()
                 } else {
+                    if FSConnectionManager.logBleEvents {
+                        os_log("BLE operation failed, %@.",
+                               log: FSConnectionManager.log,
+                               type: .debug,
+                               operation.description)
+                    }
                     operation.fail()
                 }
             }
@@ -228,8 +289,20 @@ class FSBleOperationQueue: NSObject {
                 error: error)) {
                 nextOperation()
                 if error == nil {
+                    if FSConnectionManager.logBleEvents {
+                        os_log("BLE operation ACK, %@.",
+                               log: FSConnectionManager.log,
+                               type: .debug,
+                               operation.description)
+                    }
                     operation.success()
                 } else {
+                    if FSConnectionManager.logBleEvents {
+                        os_log("BLE operation failed, %@.",
+                               log: FSConnectionManager.log,
+                               type: .debug,
+                               operation.description)
+                    }
                     operation.fail()
                 }
             }

@@ -14,6 +14,9 @@ import CoreBluetooth
  */
 class FSBleOperationReadCharacteristic: FSBleOperation {
     
+    // Description
+    var description: String
+    
     //MARK: Private properties
     
     // The GATT peripheral reference
@@ -52,6 +55,7 @@ class FSBleOperationReadCharacteristic: FSBleOperation {
         self.peripheral = peripheral
         self.characteristic = characteristic
         self.callback = onOperationDone
+        self.description = "GATT read, \(characteristic.uuid.uuidString)"
     }
     
     /** Starts the BLE operation. */

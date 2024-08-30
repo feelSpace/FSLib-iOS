@@ -14,6 +14,9 @@ import CoreBluetooth
  */
 class FSBleOperationSetNotifyValue: FSBleOperation {
     
+    // Description
+    var description: String
+    
     //MARK: Private properties
     
     // The GATT peripheral reference
@@ -50,6 +53,7 @@ class FSBleOperationSetNotifyValue: FSBleOperation {
         self.characteristic = characteristic
         self.notify = notify
         self.callback = onOperationDone
+        self.description = "GATT set notif, \(characteristic.uuid.uuidString), \(notify)"
     }
     
     /** Starts the BLE operation. */

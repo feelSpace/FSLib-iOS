@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreBluetooth
+import OSLog
 
 /**
  Manages the connection with the belt.
@@ -69,6 +70,13 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
         return privateCommandManager
     }
     
+    /**
+     Flag for logging BLE events.
+     
+     This must be used only for debug and problem diagnostic.
+     */
+    public static var logBleEvents = false
+    
     //MARK: Private properties
     
     // Central manager
@@ -108,6 +116,9 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
     
     // Connection timer
     private var connectionTimer: Timer?
+    
+    // Logger
+    internal static let log = OSLog(subsystem: "de.feelspace.fslibios", category: "BLE")
     
     //MARK: Methods
     

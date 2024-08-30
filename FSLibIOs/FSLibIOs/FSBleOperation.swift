@@ -15,6 +15,11 @@ import CoreBluetooth
 protocol FSBleOperation {
     
     /**
+     Description of the operation.
+     */
+    var description: String { get }
+    
+    /**
      Starts the BLE operation.
      
      -Important:
@@ -109,4 +114,12 @@ enum FSBleOperationState {
     case cancelled
     /** The operation has failed (timeout or other failure) */
     case failed
+}
+
+extension Data {
+    func toHexString() -> String {
+        return self.map {
+            String(format: " %02hhX", $0)
+        }.joined()
+    }
 }

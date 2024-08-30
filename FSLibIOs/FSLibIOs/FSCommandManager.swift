@@ -1313,6 +1313,11 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
             print("Error GATT notification/read characteristic:",
                   err.localizedDescription)
         }
+        
+        // Callback for operation queue
+        operationQueue.peripheralDidUpdateValueFor(peripheral: peripheral,
+                characteristic: characteristic, error: error)
+        
         // Check connection state
         if (connectionManager.state == .notConnected) {
             // Ignore notification when not connected
@@ -1359,9 +1364,6 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
             mode != .unknown && defaultIntensity != -1) {
             connectionManager.onHandshakeFinished(error: nil)
         }
-        // Callback for operation queue
-        operationQueue.peripheralDidUpdateValueFor(peripheral: peripheral,
-                characteristic: characteristic, error: error)
     }
     
 }
