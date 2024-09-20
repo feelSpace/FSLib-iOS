@@ -32,6 +32,11 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
     public static let CONNECTION_HANDSHAKE_TIMEOUT_SEC: Double = 20.0
     
     /**
+     Connection timeout to be used when the belt is already paired.
+     */
+    public static let CONNECTION_HANDSHAKE_SHORT_TIMEOUT_SEC: Double = 7.0
+    
+    /**
      Service UUID advertised by a belt.
      This service UUID is used to identify a belt.
      */
@@ -650,6 +655,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
     
     // BT Manager initialized or state changed
     final public func centralManagerDidUpdateState(_ central: CBCentralManager){
+        print("FSConnectionManager: centralManagerDidUpdateState")
         
         // Check for pending scan
         if (pendingScan) {
@@ -702,6 +708,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
                                      didDiscover peripheral: CBPeripheral,
                                      advertisementData: [String : Any],
                                      rssi RSSI: NSNumber) {
+        print("FSConnectionManager: centralManager.didDiscover")
         // Check device name
         if let name = peripheral.name {
             if !name.lowercased().contains(
@@ -721,6 +728,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
     // Connection established
     final public func centralManager(_ central: CBCentralManager,
                                      didConnect peripheral: CBPeripheral) {
+        print("FSConnectionManager: centralManager.didConnect")
         // Set state
         let initialState = state
         state = .discoveringServices
@@ -739,6 +747,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
     final public func centralManager(_ central: CBCentralManager,
                                      didFailToConnect peripheral: CBPeripheral,
                                      error: Error?) {
+        print("FSConnectionManager: centralManager.didFailToConnect")
         if (state == .notConnected ||
                 state == .initializing ||
                 state == .scanning) {
@@ -777,6 +786,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
         _ central: CBCentralManager,
         didDisconnectPeripheral peripheral: CBPeripheral,
         error: Error?) {
+            print("FSConnectionManager: centralManager.didDisconnectPeripheral")
         if (state == .notConnected ||
                 state == .initializing ||
                 state == .scanning) {

@@ -308,7 +308,9 @@ public class FSNavigationController: NSObject, FSConnectionDelegate,
                     connectionState = .connecting
                     delegate?.onConnectionStateChanged(state: connectionState, error: .noError)
                 }
-                beltConnection.connectBelt(connectionAttemptBelt!)
+                beltConnection.connectBelt(
+                    connectionAttemptBelt!,
+                    timeoutSec: FSConnectionManager.CONNECTION_HANDSHAKE_SHORT_TIMEOUT_SEC)
                 return
             } else {
                 connectionAttemptStep = .scanAndConnect
