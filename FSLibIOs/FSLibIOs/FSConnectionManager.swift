@@ -855,6 +855,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
      */
     internal func onServiceDiscoveryFinished(
         error: FSConnectionError?) {
+            print("FSConnectionManager: onServiceDiscoveryFinished")
         if (state == .notConnected ||
             state == .initializing ||
             state == .scanning) {
@@ -863,6 +864,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
         }
         let initialState = state
         if let e = error {
+            print("FSConnectionManager: Service discovery failed")
             // Service discovery failed
             state = .notConnected
             clearConnection()
@@ -871,6 +873,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
                 newState: state,
                 error: e)
         } else {
+            print("FSConnectionManager: Service discovery succeed")
             // Service discovery succeed
             state = .handshake
             delegate?.onConnectionStateChanged(
@@ -893,6 +896,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
      */
     internal func onHandshakeFinished(
         error: FSConnectionError?) {
+            print("FSConnectionManager: onHandshakeFinished")
         if (state == .notConnected ||
             state == .initializing ||
             state == .scanning) {
@@ -904,6 +908,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
         connectionTimer?.invalidate()
         connectionTimer = nil
         if let e = error {
+            print("FSConnectionManager: Handshake failed")
             // Handshake failed
             state = .notConnected
             clearConnection()
@@ -912,6 +917,7 @@ public class FSConnectionManager: NSObject, CBCentralManagerDelegate {
                 newState: state,
                 error: e)
         } else {
+            print("FSConnectionManager: Handshake succeed")
             // Handshake succeed
             // Set state
             state = .connected

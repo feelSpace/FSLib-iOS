@@ -1240,6 +1240,7 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
     }
     
     internal func startHandshake() {
+        print("FSCommandManager: startHandshake")
         // Read firmware version
         if let characteristic = firmwareInfoChar, let peripheral = belt {
             operationQueue.add(FSBleOperationReadCharacteristic(
@@ -1250,7 +1251,9 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
                         self.connectionManager.onHandshakeFinished(
                             error: .handshakeFailed)
                     }
-            }))
+                },
+                timeout: FSBleOperationQueue.BLE_OPERATION_FIRST_TIMEOUT_SEC)
+            )
         }
         // Read battery status
         if let characteristic = batteryStatusChar, let peripheral = belt {

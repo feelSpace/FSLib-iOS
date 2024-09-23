@@ -28,7 +28,8 @@ class FSBleOperationQueue: NSObject {
     
     // Timeout timer for the running BLE operation
     private var runningBleOperationTimeoutTimer: Timer?
-    private static let BLE_OPERATION_TIMEOUT_SEC = 0.25
+    private static let BLE_OPERATION_DEFAULT_TIMEOUT_SEC = 0.25
+    internal static let BLE_OPERATION_FIRST_TIMEOUT_SEC = 1.0
     
     //MARK: Methods
     
@@ -36,6 +37,7 @@ class FSBleOperationQueue: NSObject {
      Clears all BLE operations including the running one.
      */
     public func clear() {
+        print("FSBleOperationQueue: clear")
         if FSConnectionManager.logBleEvents {
             os_log("Clear BLE operations.",
                    log: FSConnectionManager.log, type: .debug)
@@ -128,8 +130,7 @@ class FSBleOperationQueue: NSObject {
                 runningBleOperation = operationToStart
                 runningBleOperationTimeoutTimer =
                     Timer.scheduledTimer(
-                        timeInterval: TimeInterval(
-                            FSBleOperationQueue.BLE_OPERATION_TIMEOUT_SEC),
+                        timeInterval: TimeInterval(operationToStart.timeout),
                         target: self,
                         selector: #selector(bleOperationTimeout),
                         userInfo: nil,
@@ -160,6 +161,7 @@ class FSBleOperationQueue: NSObject {
      */
     @objc internal func bleOperationTimeout() {
         if let operation = runningBleOperation {
+            print("FSBleOperationQueue: bleOperationTimeout")
             if FSConnectionManager.logBleEvents {
                 os_log("BLE operation timeout, %@.",
                        log: FSConnectionManager.log,

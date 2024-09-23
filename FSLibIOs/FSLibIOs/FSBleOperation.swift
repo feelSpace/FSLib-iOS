@@ -20,6 +20,11 @@ protocol FSBleOperation {
     var description: String { get }
     
     /**
+     Operation timeout period in seconds.
+     */
+    var timeout: Double { get }
+    
+    /**
      Starts the BLE operation.
      
      -Important:

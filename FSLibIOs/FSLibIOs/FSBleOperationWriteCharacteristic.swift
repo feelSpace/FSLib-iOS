@@ -17,6 +17,9 @@ class FSBleOperationWriteCharacteristic: FSBleOperation {
     // Description
     var description: String
     
+    // Timeout
+    var timeout: Double
+    
     //MARK: Private properties
     
     // The GATT peripheral reference
@@ -47,12 +50,15 @@ class FSBleOperationWriteCharacteristic: FSBleOperation {
          characteristic: CBCharacteristic,
          value: Data,
          onOperationDone: @escaping ((_ operation:
-        FSBleOperationWriteCharacteristic)->()) = {_ in }) {
+        FSBleOperationWriteCharacteristic)->()) = {_ in },
+         timeout: Double = FSBleOperationQueue.BLE_OPERATION_FIRST_TIMEOUT_SEC
+    ) {
         self.peripheral = peripheral
         self.characteristic = characteristic
         self.value = value
         self.callback = onOperationDone
         self.description = "GATT write, \(characteristic.uuid.uuidString), \(value.toHexString())"
+        self.timeout = timeout
     }
     
     /** Starts the BLE operation. */

@@ -17,6 +17,9 @@ class FSBleOperationSetNotifyValue: FSBleOperation {
     // Description
     var description: String
     
+    // Timeout
+    var timeout: Double
+    
     //MARK: Private properties
     
     // The GATT peripheral reference
@@ -48,12 +51,15 @@ class FSBleOperationSetNotifyValue: FSBleOperation {
          characteristic: CBCharacteristic,
          notify: Bool,
          onOperationDone: @escaping ((_ operation:
-        FSBleOperationSetNotifyValue)->()) = {_ in }) {
+        FSBleOperationSetNotifyValue)->()) = {_ in },
+         timeout: Double = FSBleOperationQueue.BLE_OPERATION_FIRST_TIMEOUT_SEC
+    ) {
         self.peripheral = peripheral
         self.characteristic = characteristic
         self.notify = notify
         self.callback = onOperationDone
         self.description = "GATT set notif, \(characteristic.uuid.uuidString), \(notify)"
+        self.timeout = timeout
     }
     
     /** Starts the BLE operation. */
