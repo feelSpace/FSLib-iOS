@@ -28,7 +28,7 @@ class FSBleOperationQueue: NSObject {
     
     // Timeout timer for the running BLE operation
     private var runningBleOperationTimeoutTimer: Timer?
-    private static let BLE_OPERATION_DEFAULT_TIMEOUT_SEC = 0.25
+    internal static let BLE_OPERATION_DEFAULT_TIMEOUT_SEC = 0.25
     internal static let BLE_OPERATION_FIRST_TIMEOUT_SEC = 1.0
     
     //MARK: Methods

@@ -92,6 +92,13 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
     public private(set) var firmwareVersion: Int = -1;
     
     /**
+     Firmware variant.
+     
+     This value is only for development purpose and informs about the software or hardware variant.
+     */
+    public private(set) var firmwareVariant: Int = -1;
+    
+    /**
      The battery status of the belt.
      */
     public private(set) var beltBatteryStatus: FSBatteryStatus =
@@ -718,6 +725,7 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
         defaultIntensity = -1
         // Reset firmware version
         firmwareVersion = -1
+        firmwareVariant = -1
         // Reset battery status
         beltBatteryStatus.powerStatus = .unknown
         beltBatteryStatus.batteryLevel = -1.0
@@ -947,7 +955,7 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
         // Retrieve and update belt heading value
         let raw_h = Data([rawNotification[1], rawNotification[2]])
         let beltMagHeading = Int(raw_h.withUnsafeBytes { $0.load(as: Int16.self) })
-        print("FSCommandManager: Belt heading update \(beltMagHeading).")
+//        print("FSCommandManager: Belt heading update \(beltMagHeading).")
         let beltCompassInaccurate = (rawNotification[15] != 0)
         beltOrientation = FSBeltOrientation(
             beltMagHeading: beltMagHeading,
@@ -979,7 +987,56 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
         }
     }
     
-    // *** CBPeripheralDelegate ***
+    // Checks and applies patch for firmware v4 (variant 4).
+    internal func checkForFirmwarePatch() {
+        // Firmware 4 has a bug on front range for app
+        // Value must be set to 225 (if > 255)
+        if firmwareVersion == 4 && firmwareVariant == 4 {
+            print("Check for firmware 4 patch.")
+            if let writeCharacteristic = parameterRequestChar,
+               let notifiedCharacteristic = parameterNotificationChar,
+                let peripheral = belt {
+                operationQueue.add(FSBleOperationRequest(
+                    peripheral: peripheral,
+                    writeCharacteristic: writeCharacteristic,
+                    writeValue: Data([0x10, 0x01, 0x0A]),
+                    notifiedCharacteristic: notifiedCharacteristic,
+                    notifiedPattern: [0x10, 0x0A, nil, nil, nil, nil, nil, nil, nil],
+                    onOperationDone: {(operation) -> () in
+                        if operation.state == .successful,
+                           let notifiedValue = operation.notifiedValue,
+                           notifiedValue.count >= 9 {
+                            if notifiedValue[7] == 0x00 {
+                                print("Patch for firmware 4 already applied.")
+                            } else {
+                                print("Apply patch for firmware 4.")
+                                if let characteristic = self.parameterRequestChar,
+                                   let peripheral = self.belt {
+                                    self.operationQueue.add(FSBleOperationWriteCharacteristic(
+                                        peripheral: peripheral,
+                                        characteristic: characteristic,
+                                        value: Data([0x11, 0x0A, 0x02, 0xE1, 0x00, 0xA0, 0x00, 0xE1, 0x00, 0x01]),
+                                        onOperationDone: { operation in
+                                            if operation.state == .successful {
+                                                print("Patch for firmware 4 applied.")
+                                            } else {
+                                                print("Failed to apply patch for firmware 4. Write request failed!")
+                                            }
+                                        }
+                                    ))
+                                }
+                            }
+                        } else {
+                            print("Unable to check for firmware 4 patch. Failed to get notification!")
+                        }
+                    }
+                ))
+            }
+        }
+    }
+    
+    
+    // MARK: *** CBPeripheralDelegate ***
     
     // TODO: Service discovery and handshake have to be refactored by using Operations
     // TODO: Perform notification registration in handshake procedure
@@ -1356,6 +1413,9 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
             FSCommandManager.FIRMWARE_INFO_CHAR_UUID) {
             // Retrieve firmware version
             firmwareVersion = Int(characteristic.value![0])
+            if let value = characteristic.value, value.count >= 3 {
+                firmwareVariant = Int(value[2])
+            }
         } else if (characteristic.uuid ==
             FSCommandManager.ORIENTATION_DATA_NOTIFICATION_CHAR_UUID) {
             // Update and notify belt orientation
@@ -1365,6 +1425,7 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
         if (connectionManager.state == .handshake &&
             mode != .unknown && defaultIntensity != -1) {
             connectionManager.onHandshakeFinished(error: nil)
+            checkForFirmwarePatch()
         }
     }
     
