@@ -834,8 +834,8 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
                     (UInt16(batteryStatusPacket[1])));
             batteryLevel /= 256.0;
             var batteryTteTtf: Double = (Double) (
-                (UInt16(batteryStatusPacket[2]) << 8) +
-                    (UInt16(batteryStatusPacket[1])));
+                (UInt16(batteryStatusPacket[4]) << 8) +
+                    (UInt16(batteryStatusPacket[3])));
             batteryTteTtf *= 5.625;
             if (status != beltBatteryStatus.powerStatus ||
                 batteryLevel != beltBatteryStatus.batteryLevel ||
@@ -945,10 +945,9 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
             return
         }
         // Retrieve and update belt heading value
-        let beltMagHeading = (Int) (
-            (UInt16(rawNotification[2]) << 8) +
-                (UInt16(rawNotification[1]))
-        );
+        let raw_h = Data([rawNotification[1], rawNotification[2]])
+        let beltMagHeading = Int(raw_h.withUnsafeBytes { $0.load(as: Int16.self) })
+        print("FSCommandManager: Belt heading update \(beltMagHeading).")
         let beltCompassInaccurate = (rawNotification[15] != 0)
         beltOrientation = FSBeltOrientation(
             beltMagHeading: beltMagHeading,
