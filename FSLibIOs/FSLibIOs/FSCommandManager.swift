@@ -148,6 +148,13 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
      */
     public private(set) var beltCompassAccuracySignalEnabled: Bool? = nil
     
+    /**
+     Label of firmware patch if any.
+     
+     This value is an empty string if no patch is active.
+     */
+    public private(set) var firmwarePatch: String = "";
+    
     //MARK: Private properties
     
     // Connection manager
@@ -726,6 +733,7 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
         // Reset firmware version
         firmwareVersion = -1
         firmwareVariant = -1
+        firmwarePatch = ""
         // Reset battery status
         beltBatteryStatus.powerStatus = .unknown
         beltBatteryStatus.batteryLevel = -1.0
@@ -1008,6 +1016,7 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
                            notifiedValue.count >= 9 {
                             if notifiedValue[7] == 0x00 {
                                 print("Patch for firmware 4 already applied.")
+                                self.firmwarePatch = "patch 1 confirmed"
                             } else {
                                 print("Apply patch for firmware 4.")
                                 if let characteristic = self.parameterRequestChar,
@@ -1019,6 +1028,7 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
                                         onOperationDone: { operation in
                                             if operation.state == .successful {
                                                 print("Patch for firmware 4 applied.")
+                                                self.firmwarePatch = "patch 1"
                                             } else {
                                                 print("Failed to apply patch for firmware 4. Write request failed!")
                                             }
