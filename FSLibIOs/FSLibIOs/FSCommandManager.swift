@@ -1033,14 +1033,14 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
                                                 print("Failed to apply patch for firmware 4. Write request failed!")
                                             }
                                         }
-                                    ))
+                                    ), isHighPriority: true)
                                 }
                             }
                         } else {
                             print("Unable to check for firmware 4 patch. Failed to get notification!")
                         }
                     }
-                ))
+                ), isHighPriority: true)
             }
         }
     }
@@ -1426,6 +1426,7 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
             if let value = characteristic.value, value.count >= 3 {
                 firmwareVariant = Int(value[2])
             }
+            checkForFirmwarePatch()
         } else if (characteristic.uuid ==
             FSCommandManager.ORIENTATION_DATA_NOTIFICATION_CHAR_UUID) {
             // Update and notify belt orientation
@@ -1435,7 +1436,6 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
         if (connectionManager.state == .handshake &&
             mode != .unknown && defaultIntensity != -1) {
             connectionManager.onHandshakeFinished(error: nil)
-            checkForFirmwarePatch()
         }
     }
     
