@@ -158,10 +158,10 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
     //MARK: Private properties
     
     // Connection manager
-    private var connectionManager: FSConnectionManager!
+    internal var connectionManager: FSConnectionManager!
     
     // Belt
-    private var belt: CBPeripheral? = nil
+    internal var belt: CBPeripheral? = nil
     
     // Belt control service
     private var beltControlService: CBService?
@@ -179,8 +179,8 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
     
     // Debug service
     private var beltDebugService: CBService?
-    private var beltDebugInputChar: CBCharacteristic?
-    private var beltDebugOutputChar: CBCharacteristic?
+    internal var beltDebugInputChar: CBCharacteristic?
+    internal var beltDebugOutputChar: CBCharacteristic?
     
     // Active notifications
     private var keepAliveCharRegistered: Bool = false
@@ -190,7 +190,7 @@ public class FSCommandManager: NSObject, CBPeripheralDelegate {
     private var batteryStatusCharRegistered: Bool = false
     
     // BLE operation queue
-    private var operationQueue: FSBleOperationQueue = FSBleOperationQueue()
+    internal var operationQueue: FSBleOperationQueue = FSBleOperationQueue()
     
     // Date of the last notification send to the delegate
     private var orientationLastDelegateNotif: Double = 0

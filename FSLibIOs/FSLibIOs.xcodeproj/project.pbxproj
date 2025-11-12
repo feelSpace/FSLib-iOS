@@ -25,6 +25,7 @@
 		63E3575A1ED1DEFF00627CD5 /* FSCommandDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E357591ED1DEFF00627CD5 /* FSCommandDelegate.swift */; };
 		63E3575C1ED1EC7600627CD5 /* FSConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E3575B1ED1EC7600627CD5 /* FSConnectionManager.swift */; };
 		63E3575E1ED20DDE00627CD5 /* FSCommandManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E3575D1ED20DDE00627CD5 /* FSCommandManager.swift */; };
+		63EEC4602EC47F5D0041DBC4 /* FSBeltErrorLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63EEC45F2EC47F5D0041DBC4 /* FSBeltErrorLog.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +60,7 @@
 		63E357591ED1DEFF00627CD5 /* FSCommandDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FSCommandDelegate.swift; sourceTree = "<group>"; };
 		63E3575B1ED1EC7600627CD5 /* FSConnectionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FSConnectionManager.swift; sourceTree = "<group>"; };
 		63E3575D1ED20DDE00627CD5 /* FSCommandManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FSCommandManager.swift; sourceTree = "<group>"; };
+		63EEC45F2EC47F5D0041DBC4 /* FSBeltErrorLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FSBeltErrorLog.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,6 +121,7 @@
 				6313073A234F648700B485A2 /* FSNavigationController.swift */,
 				63233F262355FC3C00FAD4A2 /* FSNavigationControllerDelegate.swift */,
 				63DCD39F272A9D2B00D7D907 /* FSBeltConnectionStatus.swift */,
+				63EEC45F2EC47F5D0041DBC4 /* FSBeltErrorLog.swift */,
 			);
 			path = FSLibIOs;
 			sourceTree = "<group>";
@@ -254,6 +257,7 @@
 				6313073B234F648700B485A2 /* FSNavigationController.swift in Sources */,
 				630D15812E69D64D001CFD8A /* FSBleOperationRequest.swift in Sources */,
 				63DBE99E1F6148640079F61E /* FSBleOperationWriteCharacteristic.swift in Sources */,
+				63EEC4602EC47F5D0041DBC4 /* FSBeltErrorLog.swift in Sources */,
 				63130739234F3F6100B485A2 /* FSBeltVibrationSignal.swift in Sources */,
 				63E357581ED1DEDB00627CD5 /* FSConnectionDelegate.swift in Sources */,
 				63233F272355FC3C00FAD4A2 /* FSNavigationControllerDelegate.swift in Sources */,
